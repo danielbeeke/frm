@@ -1,0 +1,1 @@
+export const loadFieldDefinition = async (turtleShaclShape: string) => {}

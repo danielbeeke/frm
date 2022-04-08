@@ -1,0 +1,27 @@
+{
+  "name": "frm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Daniel Beeke",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "@ldflex/comunica": "^5.0.0",
+    "jsonld-context-parser": "^2.1.5",
+    "ldflex": "^2.15.0",
+    "n3": "^1.16.0",
+    "rdf-validate-shacl": "^0.4.3"
+  }
+}
