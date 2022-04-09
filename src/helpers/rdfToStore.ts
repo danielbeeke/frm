@@ -1,6 +1,6 @@
 import { Prefixes, Parser, Quad, Store } from 'n3'
 
-export const textToStore = async (text: string): Promise<{ store: Store, prefixes: Prefixes }> => {
+export const rdfToStore = async (text: string): Promise<{ store: Store, prefixes: Prefixes }> => {
   const parser = new Parser()
   const store = new Store()
 

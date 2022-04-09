@@ -1,7 +1,8 @@
 import { ShapeDefinition } from '../../src/core/ShapeDefinition'
 import PersonShacl from '../../src/shapes/schema.person.shacl.ttl'
+import defaultConfig from '../../src/defaultConfig'
 
-const shapeDefinition = new ShapeDefinition(PersonShacl, 'schema:PersonShape')
+const shapeDefinition = new ShapeDefinition(defaultConfig, PersonShacl, 'schema:PersonShape')
 
 describe('ShapeDefinition', () => {
 

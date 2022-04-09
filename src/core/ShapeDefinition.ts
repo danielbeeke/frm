@@ -5,21 +5,24 @@ import ShaclShaclShape from '../shapes/shacl.shacl.ttl'
 import { PathFactory } from 'ldflex'
 import ComunicaEngine from '@ldflex/comunica'
 import { ContextParser } from 'jsonld-context-parser'
-import { textToStore } from '../helpers/textToStore'
+import { rdfToStore } from '../helpers/rdfToStore'
+import { Settings } from '../types/Settings'
 
 export class ShapeDefinition {
 
   private loading: Promise<any>
   private shape: LDflexPath
   private context: any
+  private settings: Settings
 
-  constructor (turtleShaclShape: string, subjectUri: string) {
+  constructor (settings: Settings, turtleShaclShape: string, subjectUri: string) {
+    this.settings = settings
     this.loading = this.init(turtleShaclShape, subjectUri);
   }
 
   async init (turtleShaclShape: string, subjectUri: string) {
-    const { store: shapes } = await textToStore(ShaclShaclShape)
-    const { store: data, prefixes } = await textToStore(turtleShaclShape)
+    const { store: shapes } = await rdfToStore(ShaclShaclShape)
+    const { store: data, prefixes } = await rdfToStore(turtleShaclShape)
     const validator = new SHACLValidator(shapes)
     const report = await validator.validate(data)
     if (!await report.conforms) throw new Error('Given SHACL does not validate.')
@@ -31,6 +34,14 @@ export class ShapeDefinition {
     const expandedSubject = await this.context.expandTerm(subjectUri)
     const subject = new NamedNode(expandedSubject)
     this.shape = path.create({ subject })
+
+    await this.enhanceShape()
+  }
+
+  async enhanceShape () {
+    for await (const shaclProperty of this.shape['sh:property']) {
+
+    }    
   }
 
   async get (predicate: string) {
