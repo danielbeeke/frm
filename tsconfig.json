@@ -1,0 +1,27 @@
+{
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "module": "ESNext",
+    "lib": ["dom", "ESNext"],
+    "importHelpers": false,
+    "declaration": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "target": "ESNext",
+    "noImplicitAny": false,
+    "allowJs": true,
+    "checkJs": false,
+    "removeComments": true
+  }
+}

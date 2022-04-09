@@ -7,7 +7,7 @@ This AttributeTransformer is loaded onto the backbone in the following way:
 
 ```
 class RequiredAttributeTransformer implements AttributeTransformerInterface { ... }
-const backbone = {
+const config = {
   ...
   attributeTransformers: {
     required: new RequiredAttributeTransformer()
@@ -19,7 +19,7 @@ const backbone = {
 All AttributeTransformers are called when rendering a field. The AttributeTransformers can be added such as:
 
 ```
-const transformedAttributes = backbone.attributeTransformers.map(t => t.transform(form, field))
+const transformedAttributes = config.attributeTransformers.map(t => t.transform(form, field))
 
 return html`
   <input ...transformedAttributes />

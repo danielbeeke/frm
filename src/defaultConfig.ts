@@ -1,4 +1,4 @@
-import { RequiredAttributeTransformer } from './attributeTransformers/RequiredAttributeTransformer'
+import { RequiredAttributeTransformer } from './AttributeTransformers/RequiredAttributeTransformer'
 import { WidgetsMatcher } from './core/WidgetsMatcher'
 
 export default {

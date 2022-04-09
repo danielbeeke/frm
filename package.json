@@ -7,7 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "jest"
+    "generate-js-shapes": "node scripts/generate-shapes.mjs",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "author": "Daniel Beeke",
   "license": "ISC",
@@ -18,6 +20,7 @@
     "typescript": "^4.6.3"
   },
   "dependencies": {
+    "@comunica/query-sparql": "^2.1.0",
     "@ldflex/comunica": "^5.0.0",
     "jsonld-context-parser": "^2.1.5",
     "ldflex": "^2.15.0",

@@ -1,3 +1,6 @@
+// See /shapes in the root of the project for the source files.
+
+export default `
 @prefix schema: <http://schema.org/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
@@ -26,3 +29,4 @@ schema:examplePerson
   schema:sameAs <https://www.facebook.com/>, <https://www.linkedin.com/>, <http://twitter.com/>, <http://instagram.com/>, <https://plus.google.com/> ;
   schema:telephone "(123) 456-6789"^^xsd:string ;
   schema:url <http://www.example.com> .
+`
