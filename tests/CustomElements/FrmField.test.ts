@@ -10,8 +10,10 @@ describe('<frm-field />', () => {
       shape="/shapes/ttl/schema.person.shacl.ttl"
       shapeSubject="schema:PersonShape"
       predicate="schema:givenName" />`
-    
-    console.log(document.body.innerHTML)
+
+    setTimeout(() => {
+      console.log(document.body.innerHTML)
+    }, 5000)
   })
 
 })

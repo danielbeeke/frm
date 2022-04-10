@@ -7,6 +7,7 @@ import ComunicaEngine from '@ldflex/comunica'
 import { ContextParser } from 'jsonld-context-parser'
 import { rdfToStore } from '../helpers/rdfToStore'
 import { Settings } from '../types/Settings'
+import basePrefixes from '../helpers/basePrefixes'
 
 export class ShapeDefinition {
 
@@ -25,8 +26,7 @@ export class ShapeDefinition {
   async init (turtleShaclShape: string, subjectUri: string) {
     const { store: shapes } = await rdfToStore(ShaclShaclShape)
     const { store: data, prefixes } = await rdfToStore(turtleShaclShape)
-
-    const context = { '@context': prefixes }
+    const context = { '@context': {...JSON.parse(JSON.stringify(prefixes)), ...basePrefixes} }
     const contextParser = new ContextParser();
     this.settings.context = await contextParser.parse(context)
 

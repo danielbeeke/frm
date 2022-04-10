@@ -7,23 +7,28 @@ import { lastPart } from '../helpers/lastPart'
 export class WidgetsMatcher implements WidgetsMatcherInterface {
 
   async match (settings: Settings, shape: LDflexPath) {
+    // Ensure all the properties on the Widget classes are expanded.
+    for (const widgetTypeClass of Object.values(settings.widgets))
+      for (const arrayToExpand of ['supportedDataTypes', 'supportedProperties', 'requiredProperties'])
+        widgetTypeClass[arrayToExpand] = widgetTypeClass[arrayToExpand].map(item => settings.context.expandTerm(item))
+
+    // Make sure every shacl property has a frm:widget.
     for await (const predicatePath of shape['sh:property']) {
-      const predicate = await predicatePath['sh:path'].value
-      const widget = await this.scorePredicate(settings, predicate, predicatePath)
-      predicatePath['frm:widget'].set(widget)
+      if (!await predicatePath['frm:widget'].value) {
+        const predicate = await predicatePath['sh:path'].value
+        const widget = await this.scorePredicate(settings, predicate, predicatePath)
+
+        // TODO the following breaks
+        await predicatePath['frm:widget'].set(widget)
+      }
     }
   }
 
   async scorePredicate (settings: Settings, predicate: string, predicatePath: LDflexPath) {
     const widgetsScore: WidgetsScore = {}
 
-    for (const [widgetType, widgetTypeClass] of Object.entries(settings.widgets)) {
-      // Ensure all the properties on the Widget classes are expanded.
-      for (const arrayToExpand of ['supportedDataTypes', 'supportedProperties', 'requiredProperties'])
-        widgetTypeClass[arrayToExpand] = widgetTypeClass[arrayToExpand].map(item => settings.context.expandTerm(item))
-      
-        widgetsScore[widgetType] = await this.scoreWidgetPredicate(settings, predicate, predicatePath, widgetTypeClass, widgetType)
-    }
+    for (const [widgetType, widgetTypeClass] of Object.entries(settings.widgets))
+      widgetsScore[widgetType] = await this.scoreWidgetPredicate(settings, predicate, predicatePath, widgetTypeClass, widgetType)
 
     const sortedWidgets = Object.values(widgetsScore).sort((a, b) => b.total - a.total)
     const chosenWidget = sortedWidgets[0].total > 0 ? sortedWidgets[0].widget : 'unknown'
@@ -49,16 +54,16 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
       total: 0
     }
 
-    this.sumFormula(scoreWidgetPredicate)
-
+    this.totalFormula(scoreWidgetPredicate)
     return scoreWidgetPredicate
   }
 
   /**
-   * Sum formula.
+   * Total formula.
+   * If you want to edit the formula just extend WidgetsMatcher and put that class in the options.
    */
-  sumFormula (scoreWidgetPredicate: WidgetScore) {
-    const { commonName, datatype, properties, required} = scoreWidgetPredicate
+   totalFormula (scoreWidgetPredicate: WidgetScore) {
+    const { commonName, datatype, properties, required } = scoreWidgetPredicate
     if (required < 0) scoreWidgetPredicate.total = -1
     else scoreWidgetPredicate.total = datatype + (commonName * 2) + properties + required
   }

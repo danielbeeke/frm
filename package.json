@@ -14,6 +14,7 @@
   "author": "Daniel Beeke",
   "license": "MIT",
   "devDependencies": {
+    "@happy-dom/jest-environment": "^2.55.0",
     "@types/jest": "^27.4.1",
     "@types/rdf-validate-shacl": "^0.4.0",
     "jest": "^27.5.1",

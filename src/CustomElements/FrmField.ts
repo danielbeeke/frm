@@ -22,6 +22,8 @@ export const init = (settings: Settings) => {
       const shapeText = await this.resolveAttribute('shape')
       this.shape = new ShapeDefinition(this.settings, shapeText, shapeSubject)
       this.definition = await this.shape.get(this.predicate)
+
+      // console.log('widget', await this.definition['frm:widget'])
     }
   
     async resolveAttribute (attribute: string, required: boolean = false) {
