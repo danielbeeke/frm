@@ -20,6 +20,7 @@ schema:PersonShape
     ] ;
     sh:property [
         sh:path schema:birthDate ;
+        sh:datatype xsd:date ;
         sh:lessThan schema:deathDate ;
         sh:maxCount 1 ;
     ] ;

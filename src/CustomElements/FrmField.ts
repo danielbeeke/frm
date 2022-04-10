@@ -12,6 +12,7 @@ export const init = (settings: Settings) => {
   
     async connectedCallback () {
       this.settings = settings
+      
       this.predicate = this.getAttribute('predicate') ?? ''
       if (!this.predicate) throw new Error('Missing predicate')
   

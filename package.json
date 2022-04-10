@@ -12,12 +12,11 @@
     "test:watch": "jest --watch"
   },
   "author": "Daniel Beeke",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
-    "@happy-dom/jest-environment": "^2.55.0",
     "@types/jest": "^27.4.1",
+    "@types/rdf-validate-shacl": "^0.4.0",
     "jest": "^27.5.1",
-    "jsdom": "^19.0.0",
     "ts-jest": "^27.1.4",
     "typescript": "^4.6.3"
   },

@@ -1,7 +1,5 @@
-import { init } from '../../src'
+import '../../src'
 import { fetch } from '../test-utils/fetchMock'
-
-init()
 
 /** @ts-ignore */
 window.fetch = fetch
