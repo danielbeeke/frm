@@ -24,9 +24,11 @@
   "dependencies": {
     "@comunica/query-sparql": "^2.1.0",
     "@ldflex/comunica": "^5.0.0",
+    "htm": "^3.1.0",
     "jsonld-context-parser": "^2.1.5",
     "ldflex": "^2.15.0",
     "n3": "^1.16.0",
+    "preact": "^10.7.1",
     "rdf-validate-shacl": "^0.4.3"
   }
 }

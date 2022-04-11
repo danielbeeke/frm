@@ -1,3 +1,1 @@
-export const lastPart = (text) => {
-  return text.split(/\:|\/|\,|\#/).pop()
-}
+export const lastPart = (text) => text.split(/\:|\/|\,|\#/).pop()

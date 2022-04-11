@@ -20,8 +20,12 @@ export class ShapeDefinition {
   constructor (settings: Settings, turtleShaclShape: string, subjectUri: string) {
     this.settings = settings
 
+    // You have to init this class with 'await' in front of it.
     /** @ts-ignore */
     return this.init(turtleShaclShape, subjectUri).then(() => {
+
+      // When this class is loaded we trigger the widgetsMatcher.
+      // After this is all loaded our shacl definitions all have a frm:widget.
       return this.settings.widgetsMatcher.match(this.settings, this).then(() => this)
     })
   }

@@ -1,4 +1,3 @@
-import { LDflexPath } from '../types/LDflexPath'
 import { Settings } from '../types/Settings'
 import { ShapeDefinition } from './ShapeDefinition'
 

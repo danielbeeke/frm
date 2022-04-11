@@ -7,6 +7,9 @@ import { ShapeDefinition } from './ShapeDefinition'
 
 export class WidgetsMatcher implements WidgetsMatcherInterface {
 
+  /**
+   * This class matches a widget for every SHACL property.
+   */
   async match (settings: Settings, shapeDefinition: ShapeDefinition) {
     // Ensure all the properties on the Widget classes are expanded.
     for (const widgetTypeClass of Object.values(settings.widgets))
@@ -25,6 +28,9 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
     }
   }
 
+  /**
+   * Returns the best widget for a predicate.
+   */
   async getWidgetName (settings: Settings, predicate: string, predicatePath: LDflexPath) {
     const widgetsScore: WidgetsScore = {}
 
@@ -35,6 +41,9 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
     return sortedWidgets[0].total > 0 ? sortedWidgets[0].widget : 'unknown'
   }
 
+  /**
+   * Returns a scoring object for one widget for one predicate.
+   */
   async predicateWidgetScore (settings: Settings, predicate: string, predicatePath: LDflexPath, widgetTypeClass: any, widget: string): Promise<WidgetScore> {
     const properties: Array<string> = []
     for await (const propertyPath of predicatePath.properties)

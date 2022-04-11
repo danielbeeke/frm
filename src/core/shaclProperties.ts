@@ -1,3 +1,6 @@
+/**
+ * @see https://www.w3.org/TR/shacl/
+ */
 export const ValueTypeConstraints = ['sh:class', 'sh:datatype', 'sh:nodeKind']
 export const CardinalityConstraints = ['sh:minCount', 'sh:maxCount']
 export const ValueRangeConstraints = ['sh:minExclusive', 'sh:maxExclusive', 'sh:minInclusive', 'sh:maxInclusive']
