@@ -1,9 +1,12 @@
+import { JsonLdContextNormalized } from 'jsonld-context-parser'
+
 // Core
 import { WidgetsMatcher } from './core/WidgetsMatcher'
 import blacklistedProperties from './core/blacklistedProperties'
 
 // AtributeTransformers
 import { RequiredAttributeTransformer } from './AttributeTransformers/RequiredAttributeTransformer'
+import { GenericAttributeTransformer } from './AttributeTransformers/GenericAttributeTransformer'
 
 // Widgets
 import { StringWidget } from './Widgets/StringWidget'
@@ -13,11 +16,13 @@ import { DropdownWidget } from './Widgets/DropdownWidget'
 import { DateWidget } from './Widgets/DateWidget'
 
 export default {
-  config: null,
+  context: new JsonLdContextNormalized({}),
   blacklistedProperties,
   widgetsMatcher: new WidgetsMatcher(),
   attributeTransformers: {
-    required: new RequiredAttributeTransformer()
+    required: new RequiredAttributeTransformer(),
+    rows: new GenericAttributeTransformer('html:rows'),
+    minLength: new GenericAttributeTransformer('sh:minLength')
   },
   widgets: {
     'string': StringWidget,

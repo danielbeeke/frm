@@ -11,13 +11,19 @@ import basePrefixes from '../helpers/basePrefixes'
 
 export class ShapeDefinition {
 
-  private loading: Promise<any>
-  private shape: LDflexPath
+  public loading: Promise<any>
+  public shape: LDflexPath
   private settings: Settings
+  private store: Store
+  private rawContext
 
   constructor (settings: Settings, turtleShaclShape: string, subjectUri: string) {
     this.settings = settings
-    this.loading = this.init(turtleShaclShape, subjectUri);
+
+    /** @ts-ignore */
+    return this.init(turtleShaclShape, subjectUri).then(() => {
+      return this.settings.widgetsMatcher.match(this.settings, this).then(() => this)
+    })
   }
 
   /**
@@ -26,23 +32,23 @@ export class ShapeDefinition {
   async init (turtleShaclShape: string, subjectUri: string) {
     const { store: shapes } = await rdfToStore(ShaclShaclShape)
     const { store: data, prefixes } = await rdfToStore(turtleShaclShape)
-    const context = { '@context': {...JSON.parse(JSON.stringify(prefixes)), ...basePrefixes} }
+    this.store = data
+
+    this.rawContext = { '@context': {...JSON.parse(JSON.stringify(prefixes)), ...basePrefixes} }
     const contextParser = new ContextParser();
-    this.settings.context = await contextParser.parse(context)
+    this.settings.context = await contextParser.parse(this.rawContext)
 
     this.validateShape(shapes, data)
-    this.shape = await this.createLDflexPath(context, data, subjectUri)
-
-    await this.settings.widgetsMatcher.match(this.settings, this.shape)
+    this.shape = await this.createLDflexPath(this.rawContext, data, subjectUri)
   }
 
   /**
    * Creates a LDflex path with a N3 store as source.
    */
-  async createLDflexPath (context: { '@context': Prefixes }, data, subjectUri) {
+  createLDflexPath (context: { '@context': Prefixes }, data, subjectUri) {
     const queryEngine = new ComunicaEngine([data])
     const path = new PathFactory({ context, queryEngine })
-    const expandedSubject = await this.settings.context.expandTerm(subjectUri)
+    const expandedSubject = this.settings.context.expandTerm(subjectUri)
     if (!expandedSubject) throw new Error(`Failed to expand the term: ${subjectUri}`)
     const subject = new NamedNode(expandedSubject)
     return path.create({ subject })
@@ -61,14 +67,9 @@ export class ShapeDefinition {
   /**
    * Returns a LDflexPath for one predicate.
    */
-  async get (predicate: string) {
-    await this.loading
+  get (predicate: string) {
     const expandedPredicate = this.settings.context.expandTerm(predicate)
-    const shaclProperties = this.shape['sh:property']
-
-    for await (const shaclProperty of shaclProperties) {
-      if (await shaclProperty['sh:path'].value === expandedPredicate) 
-        return shaclProperty
-    }
+    const path = this.createLDflexPath({ '@context': this.rawContext }, this.store, expandedPredicate)
+    return path['^sh:path']
   }
 }

@@ -1,8 +1,9 @@
 import { LDflexPath } from '../types/LDflexPath'
 import { Settings } from '../types/Settings'
+import { ShapeDefinition } from './ShapeDefinition'
 
 export interface WidgetsMatcherInterface {
 
-  match(settings: Settings, shape: LDflexPath): Promise<void>
+  match(settings: Settings, ShapeDefinition: ShapeDefinition): Promise<void>
 
 }

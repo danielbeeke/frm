@@ -20,10 +20,9 @@ export const init = (settings: Settings) => {
       if (!shapeSubject) throw new Error('Missing shape subject')
   
       const shapeText = await this.resolveAttribute('shape')
-      this.shape = new ShapeDefinition(this.settings, shapeText, shapeSubject)
-      this.definition = await this.shape.get(this.predicate)
-
-      // console.log('widget', await this.definition['frm:widget'])
+      this.shape = await new ShapeDefinition(this.settings, shapeText, shapeSubject)
+      this.definition = this.shape.get(this.predicate)
+      this.setAttribute('widget', await this.definition['frm:widget'].value)
     }
   
     async resolveAttribute (attribute: string, required: boolean = false) {
