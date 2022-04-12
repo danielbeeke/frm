@@ -14,7 +14,8 @@ schema:PersonShape
     sh:property [
         sh:path schema:givenName ;
         sh:datatype xsd:string ;
-        sh:name "given name" ;
+        sh:name "given name"@en ;
+        sh:name "Gegeven name"@nl ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
     ] ;

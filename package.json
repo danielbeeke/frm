@@ -9,7 +9,8 @@
   "scripts": {
     "generate-js-shapes": "node scripts/generate-shapes.mjs",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "demo": "parcel demo/index.html"
   },
   "author": "Daniel Beeke",
   "license": "MIT",
@@ -17,18 +18,28 @@
     "@happy-dom/jest-environment": "^2.55.0",
     "@types/jest": "^27.4.1",
     "@types/rdf-validate-shacl": "^0.4.0",
+    "buffer": "^6.0.3",
     "jest": "^27.5.1",
+    "parcel": "^2.4.1",
+    "parcel-reporter-static-files-copy": "^1.3.4",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
     "ts-jest": "^27.1.4",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+    "util": "^0.12.4"
   },
   "dependencies": {
     "@comunica/query-sparql": "^2.1.0",
+    "@ldflex/async-iteration-handlers": "^1.1.1",
     "@ldflex/comunica": "^5.0.0",
-    "htm": "^3.1.0",
     "jsonld-context-parser": "^2.1.5",
     "ldflex": "^2.15.0",
     "n3": "^1.16.0",
-    "preact": "^10.7.1",
-    "rdf-validate-shacl": "^0.4.3"
+    "rdf-validate-shacl": "^0.4.3",
+    "uhtml": "^2.8.1"
+  },
+  "staticFiles": {
+    "staticPath": "src/shapes",
+    "staticOutPath": "shapes"
   }
 }

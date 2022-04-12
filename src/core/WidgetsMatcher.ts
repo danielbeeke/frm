@@ -1,9 +1,9 @@
-import { LDflexPath } from '../types/LDflexPath'
 import { Settings } from '../types/Settings'
 import { WidgetsMatcherInterface } from './WidgetsMatcherInterface'
 import { WidgetsScore, WidgetScore } from '../types/WidgetScores'
 import { lastPart } from '../helpers/lastPart'
 import { ShapeDefinition } from './ShapeDefinition'
+import { Literal } from 'n3'
 
 export class WidgetsMatcher implements WidgetsMatcherInterface {
 
@@ -16,14 +16,14 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
       for (const arrayToExpand of ['supportedDataTypes', 'supportedProperties', 'requiredProperties'])
         widgetTypeClass[arrayToExpand] = widgetTypeClass[arrayToExpand].map(item => settings.context.expandTerm(item))
 
-    // Make sure every shacl property has a frm:widget.
-    for await (const shallowPredicatePath of shapeDefinition.shape['sh:property']) {
-      const predicate = await shallowPredicatePath['sh:path'].value
-      const predicatePath = shapeDefinition.get(predicate)
+    let fields = await shapeDefinition.getPredicatesWithProperties()
 
-      if (!await predicatePath['frm:widget'].value) {
-        const widgetName = await this.getWidgetName(settings, predicate, predicatePath)
-        await predicatePath['frm:widget'].set(widgetName)
+    // Make sure every shacl property has a frm:widget.
+    for (const [predicate, properties] of Object.entries(fields)) {
+      if (!properties['frm:widget']) {
+        const widgetName = this.getWidgetName(settings, predicate, properties)
+
+        properties['frm:widget'] = [new Literal(widgetName)]
       }
     }
   }
@@ -31,11 +31,11 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
   /**
    * Returns the best widget for a predicate.
    */
-  async getWidgetName (settings: Settings, predicate: string, predicatePath: LDflexPath) {
+  getWidgetName (settings: Settings, predicate: string, predicateProperties) {
     const widgetsScore: WidgetsScore = {}
 
     for (const [widgetType, widgetTypeClass] of Object.entries(settings.widgets))
-      widgetsScore[widgetType] = await this.predicateWidgetScore(settings, predicate, predicatePath, widgetTypeClass, widgetType)
+      widgetsScore[widgetType] = this.predicateWidgetScore(predicate, widgetTypeClass, widgetType, predicateProperties)
 
     const sortedWidgets = Object.values(widgetsScore).sort((a, b) => b.total - a.total)
     return sortedWidgets[0].total > 0 ? sortedWidgets[0].widget : 'unknown'
@@ -44,15 +44,10 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
   /**
    * Returns a scoring object for one widget for one predicate.
    */
-  async predicateWidgetScore (settings: Settings, predicate: string, predicatePath: LDflexPath, widgetTypeClass: any, widget: string): Promise<WidgetScore> {
-    const properties: Array<string> = []
-    for await (const propertyPath of predicatePath.properties)
-      if (await predicatePath[propertyPath]) properties.push(settings.context.expandTerm(`${propertyPath}`)!)
+  predicateWidgetScore (predicate: string, widgetTypeClass: any, widget: string, predicateProperties): WidgetScore {
+    const properties = Object.keys(predicateProperties)
+    const datatypes: Array<string> = predicateProperties['sh:datatype'] ?? []
 
-    const datatypes: Array<string> = []
-      for await (const propertyPath of predicatePath['sh:datatype'])
-        datatypes.push(settings.context.expandTerm(propertyPath.value)!)
-      
     const predicateWidgetScore = {
       commonName: widgetTypeClass.commonNamesCallback(lastPart(predicate), widgetTypeClass.commonNames),
       datatype: widgetTypeClass.supportedDataTypesCallback(datatypes, widgetTypeClass.supportedDataTypes),
