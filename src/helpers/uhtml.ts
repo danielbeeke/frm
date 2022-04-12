@@ -8,10 +8,13 @@ import {render as $render, html as $html, svg as $svg} from 'uhtml';
 const {isArray} = Array;
 
 const sync = (values, i) => {
-  const resolved = [];
-  for (const {length} = values; i < length; i++)
-    /** @ts-ignore */
-    resolved.push(isArray(values[i]) ? sync(values[i], 0) : values[i]);
+  const resolved: Array<any> = [];
+
+  for (const {length} = values; i < length; i++) {
+    const itemToResolve = isArray(values[i]) ? sync(values[i], 0) : values[i]
+    // console.log(itemToResolve)
+    resolved.push(itemToResolve);
+  }
   return Promise.all(resolved);
 };
 
@@ -24,14 +27,17 @@ const sync = (values, i) => {
  */
 const asyncTag = tag => {
   function invoke(template, values) {
-    const resolvedValues = values.map(value => value?.proxy ? value.toString() : value)
-
     /** @ts-ignore */
-    return tag.apply(this, [template].concat(resolvedValues));
+    return tag.apply(this, [template].concat(values));
   }
   return function (template) {
+    const args = [...arguments]
+    for (let [index, argument] of args.entries()) {
+      args[index] = argument?.proxy ? argument.toString() : argument
+    }
+
     /** @ts-ignore */
-    return sync(arguments, 1).then(invoke.bind(this, template));
+    return sync(args, 1).then(invoke.bind(this, template));
   };
 };
 

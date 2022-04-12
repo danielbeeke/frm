@@ -41,7 +41,7 @@ export const init = (settings: Settings) => {
       const shapeText = await resolveAttribute(this, 'shape')
       this.shape = await new ShapeDefinition(this.settings, shapeText, this.shapeSubject)
       this.definition = this.shape.get(this.predicate)
-      const widgetName = await this.definition['frm:widget'][0].id
+      const widgetName = await this.definition['frm:widget'].id
       this.setAttribute('widget', widgetName)
 
       this.widget = new this.settings.widgets[widgetName](this, this.definition, this.data)
