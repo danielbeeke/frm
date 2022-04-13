@@ -6,10 +6,12 @@ import { WidgetBase } from '../Widgets/WidgetBase'
 import { rdfToLDflex } from '../helpers/rdfToLDflex'
 
 export const init = (settings: Settings) => {
+  const { css } = settings
+
   class FrmField extends HTMLElement {
 
     private predicate: string
-    private shapeSubject: string
+    private shapesubject: string
     private shape: ShapeDefinition
     private definition: LDflexPath
     private data: LDflexPath
@@ -26,20 +28,22 @@ export const init = (settings: Settings) => {
      * When loading is done renders the widget.
      */
     async connectedCallback () {
-      this.classList.add('loading-metadata')
+      this.classList.add(css.loading)
       
-      this.predicate = this.getAttribute('predicate')!
+      if (!this.predicate)
+        this.predicate = this.getAttribute('predicate')!
       if (!this.predicate) throw new Error('Missing predicate')
   
-      this.shapeSubject = this.getAttribute('shapesubject')!
-      if (!this.shapeSubject) throw new Error('Missing shape subject')
+      if (!this.shapesubject)
+        this.shapesubject = this.getAttribute('shapesubject')!
+      if (!this.shapesubject) throw new Error('Missing shape subject')
   
       this.data = await rdfToLDflex('', '')
 
       // The shape may have been given by the <frm-form>
       if (!this.shape) {
         const shapeText = await resolveAttribute(this, 'shape')
-        this.shape = await new ShapeDefinition(this.settings, shapeText, this.shapeSubject)  
+        this.shape = await new ShapeDefinition(this.settings, shapeText, this.shapesubject)  
       }
 
       this.definition = await this.shape.get(this.predicate)
@@ -47,14 +51,10 @@ export const init = (settings: Settings) => {
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
-      this.widget = new this.settings.widgets[widgetName](this, this.definition, this.data)
+      this.widget = new this.settings.widgets[widgetName](this.settings, this, this.definition, this.data)
 
-      this.removeAttribute('predicate')
-      this.removeAttribute('shape')
-      this.removeAttribute('shapesubject')
-      this.classList.remove('loading-metadata')
-
-      this.widget.render()
+      await this.widget.render()
+      this.classList.remove(css.loading)
     }
   
   }

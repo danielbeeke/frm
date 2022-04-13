@@ -1,8 +1,15 @@
 import { JsonLdContextNormalized } from 'jsonld-context-parser'
+import basePrefixes from './helpers/basePrefixes'
 
 // Core
 import { WidgetsMatcher } from './core/WidgetsMatcher'
 import blacklistedProperties from './core/blacklistedProperties'
+import { DefinitionEnhancer } from './core/DefinitionEnhancer'
+import { bootstrap } from './style/cssClasses'
+
+// Translations
+import english from './translations/english'
+import { Translator } from './core/Translator'
 
 // AtributeTransformers
 import { RequiredAttributeTransformer } from './AttributeTransformers/RequiredAttributeTransformer'
@@ -17,7 +24,12 @@ import { DropdownWidget } from './Widgets/DropdownWidget'
 import { DateWidget } from './Widgets/DateWidget'
 
 export default {
-  context: new JsonLdContextNormalized({}),
+  context: new JsonLdContextNormalized({
+    '@language': 'en',
+    ...basePrefixes
+  }),
+  proxy: 'http://localhost:1234/cors/',
+  definitionEnhancer: new DefinitionEnhancer(),
   blacklistedProperties,
   widgetsMatcher: new WidgetsMatcher(),
   attributeTransformers: {
@@ -33,4 +45,8 @@ export default {
     'dropdown': DropdownWidget,
     'date': DateWidget
   },
+  css: bootstrap,
+  translator: new Translator({
+    'en-US': english
+  })
 }

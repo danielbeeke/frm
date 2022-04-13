@@ -1,13 +1,13 @@
 import { LDflexPath } from '../types/LDflexPath'
-import { NamedNode, Prefixes, Store } from 'n3'
+import { NamedNode, Store } from 'n3'
 import { PathFactory, defaultHandlers } from 'ldflex'
 import defaultIterationHandlers from '@ldflex/async-iteration-handlers'
 import ComunicaEngine from '@ldflex/comunica'
-import { ContextParser } from 'jsonld-context-parser'
 import { rdfToStore } from '../helpers/rdfToStore'
 import { Settings } from '../types/Settings'
-import basePrefixes from '../helpers/basePrefixes'
+import { JsonLdContextNormalized } from 'jsonld-context-parser'
 import { validateShaclString } from '../helpers/validateShaclString'
+import { ProxyHandlerStatic } from '@comunica/actor-http-proxy'
 
 export class ShapeDefinition {
 
@@ -15,7 +15,6 @@ export class ShapeDefinition {
   public store: Store
   public shape: LDflexPath
   private settings: Settings
-  private rawContext
   private subjectUri: string
 
   constructor (settings: Settings, turtleShaclShape: string, subjectUri: string) {
@@ -24,7 +23,9 @@ export class ShapeDefinition {
 
     // You have to init this class with 'await' in front of it.
     /** @ts-ignore */
-    return this.init(turtleShaclShape, subjectUri).then(() => {
+    return this.init(turtleShaclShape, subjectUri).then(async () => {
+      // Fetch ontology data.
+      await this.settings.definitionEnhancer.enhance(this.settings, this)
 
       // When this class is loaded we trigger the widgetsMatcher.
       // After this is all loaded our shacl definitions all have a frm:widget.
@@ -37,12 +38,12 @@ export class ShapeDefinition {
    */
   async init (turtleShaclShape: string) {
     const { store: data, prefixes } = await rdfToStore(turtleShaclShape)
-    this.store = data
 
-    this.rawContext = { '@context': {...JSON.parse(JSON.stringify(prefixes)), ...basePrefixes} }
-    const contextParser = new ContextParser();
-    this.settings.context = await contextParser.parse(this.rawContext)
-    this.shape = await this.createLDflexPath(this.rawContext, data, this.subjectUri)
+    const mergedContext = Object.assign(this.settings.context.getContextRaw(), prefixes)
+    this.settings.context = new JsonLdContextNormalized(mergedContext) 
+
+    this.store = data
+    this.shape = await this.createLDflexPath(data, this.subjectUri)
 
     // We want SHACL shape validation but also performance
     setTimeout(() => validateShaclString(turtleShaclShape), 1000)
@@ -51,9 +52,11 @@ export class ShapeDefinition {
   /**
    * Creates a LDflex path with a N3 store as source.
    */
-  createLDflexPath (context: { '@context': Prefixes }, data, subjectUri) {
-    const queryEngine = new ComunicaEngine([data])
-    const path = new PathFactory({ context, queryEngine, handlers: {
+  createLDflexPath (data, subjectUri) {
+    const queryEngine = new ComunicaEngine([data], {
+      options: { httpProxyHandler: new ProxyHandlerStatic(this.settings.proxy) }
+    })
+    const path = new PathFactory({ context: this.settings.context.getContextRaw(), queryEngine, handlers: {
       ...defaultHandlers,
       ...defaultIterationHandlers
     }})
@@ -68,7 +71,7 @@ export class ShapeDefinition {
    */
    get (predicate: string) {
     const expandedPredicate = this.settings.context.expandTerm(predicate)
-    const path = this.createLDflexPath({ '@context': this.rawContext }, this.store, expandedPredicate)
+    const path = this.createLDflexPath(this.store, expandedPredicate)
     return path['^sh:path']
   }
 
