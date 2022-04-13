@@ -25,6 +25,7 @@ export default {
     minLength: new GenericAttributeTransformer('sh:minLength')
   },
   widgets: {
+    'unknown': StringWidget,
     'string': StringWidget,
     'plain-text': PlainTextWidget,
     'geo': GeoWidget,

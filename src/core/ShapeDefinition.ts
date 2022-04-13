@@ -1,15 +1,13 @@
 import { LDflexPath } from '../types/LDflexPath'
-import SHACLValidator from 'rdf-validate-shacl'
 import { NamedNode, Prefixes, Store } from 'n3'
-import ShaclShaclShape from '../shapes/shacl.shacl.ttl'
-import { PathFactory } from 'ldflex'
+import { PathFactory, defaultHandlers } from 'ldflex'
+import defaultIterationHandlers from '@ldflex/async-iteration-handlers'
 import ComunicaEngine from '@ldflex/comunica'
 import { ContextParser } from 'jsonld-context-parser'
 import { rdfToStore } from '../helpers/rdfToStore'
 import { Settings } from '../types/Settings'
 import basePrefixes from '../helpers/basePrefixes'
-import { RdfObjectProxy } from 'rdf-object-proxy';
-import { RdfObjectLoader } from 'rdf-object';
+import { validateShaclString } from '../helpers/validateShaclString'
 
 export class ShapeDefinition {
 
@@ -38,17 +36,16 @@ export class ShapeDefinition {
    * Inits this shape definition, delegates enhancing it to the widgetsMatcher.
    */
   async init (turtleShaclShape: string) {
-    const { store: shapes } = await rdfToStore(ShaclShaclShape)
     const { store: data, prefixes } = await rdfToStore(turtleShaclShape)
     this.store = data
 
     this.rawContext = { '@context': {...JSON.parse(JSON.stringify(prefixes)), ...basePrefixes} }
     const contextParser = new ContextParser();
     this.settings.context = await contextParser.parse(this.rawContext)
-    await this.createShape()
+    this.shape = await this.createLDflexPath(this.rawContext, data, this.subjectUri)
 
     // We want SHACL shape validation but also performance
-    setTimeout(() => this.validateShape(shapes, data, turtleShaclShape), 1000)
+    setTimeout(() => validateShaclString(turtleShaclShape), 1000)
   }
 
   /**
@@ -56,7 +53,10 @@ export class ShapeDefinition {
    */
   createLDflexPath (context: { '@context': Prefixes }, data, subjectUri) {
     const queryEngine = new ComunicaEngine([data])
-    const path = new PathFactory({ context, queryEngine })
+    const path = new PathFactory({ context, queryEngine, handlers: {
+      ...defaultHandlers,
+      ...defaultIterationHandlers
+    }})
     const expandedSubject = this.settings.context.expandTerm(subjectUri)
     if (!expandedSubject) throw new Error(`Failed to expand the term: ${subjectUri}`)
     const subject = new NamedNode(expandedSubject)
@@ -64,34 +64,12 @@ export class ShapeDefinition {
   }
 
   /**
-   * Validates the shacl shape so we know we have atleast valid shacl.
-   */
-  async validateShape (shapes: Store, data: Store, turtleShaclShape: string) {
-    const validator = new SHACLValidator(shapes)
-    const report = await validator.validate(data)
-    if (!await report.conforms)
-      throw new Error('Given SHACL does not validate. There is an error in the following: \n\n' + turtleShaclShape)
-  }
-
-  /**
    * Returns a LDflexPath for one predicate.
    */
-  get (predicate: string) {
-    const predicateExpanded = this.settings.context.expandTerm(predicate)!
-    for (const predicatePath of this.shape['sh:property']) { 
-      if (predicatePath['sh:path'].value === predicateExpanded) return predicatePath
-    }
+   get (predicate: string) {
+    const expandedPredicate = this.settings.context.expandTerm(predicate)
+    const path = this.createLDflexPath({ '@context': this.rawContext }, this.store, expandedPredicate)
+    return path['^sh:path']
   }
 
-  async createShape () {
-    if (!this.shape) {
-      const expandedShapeSubject = this.settings.context.expandTerm(this.subjectUri)!
-      const loader = new RdfObjectLoader({ context: this.rawContext })
-      await loader.importArray(this.store.getQuads(null, null, null, null))
-      const resource = loader.resources[expandedShapeSubject]
-      this.shape = RdfObjectProxy(resource)
-    }
-    
-    return this.shape
-  }
 }

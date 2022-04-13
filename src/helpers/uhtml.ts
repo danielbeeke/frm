@@ -33,7 +33,7 @@ const asyncTag = tag => {
   return function (template) {
     const args = [...arguments]
     for (let [index, argument] of args.entries()) {
-      args[index] = argument?.proxy ? argument.toString() : argument
+      args[index] = argument?.proxy && typeof argument?.toString === 'string' ? argument.toString() : argument
     }
 
     /** @ts-ignore */

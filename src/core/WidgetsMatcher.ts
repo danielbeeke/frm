@@ -18,12 +18,14 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
         widgetTypeClass[arrayToExpand] = widgetTypeClass[arrayToExpand].map(item => settings.context.expandTerm(item))
 
     // Make sure every shacl property has a frm:widget.
-    for await (const predicatePath of shapeDefinition.shape['sh:property']) {
-      const predicate = predicatePath['sh:path'].value
+    for await (const shallowPredicatePath of shapeDefinition.shape['sh:property']) {
+      const predicate = await shallowPredicatePath['sh:path'].value
+      const predicatePath = shapeDefinition.get(predicate)
 
-      if (!predicatePath['frm:widget'].valueOf()) {
+      if (!await predicatePath['frm:widget'].value) {
         const widgetName = await this.getWidgetName(settings, predicate, predicatePath)
-        predicatePath['frm:widget'] = new Literal(widgetName)
+        console.log(widgetName)
+        await predicatePath['frm:widget'].set(widgetName)
       }
     }
   }
@@ -35,7 +37,7 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
     const widgetsScore: WidgetsScore = {}
 
     for (const [widgetType, widgetTypeClass] of Object.entries(settings.widgets))
-      widgetsScore[widgetType] = this.predicateWidgetScore(settings, predicate, predicatePath, widgetTypeClass, widgetType)
+      widgetsScore[widgetType] = await this.predicateWidgetScore(settings, predicate, predicatePath, widgetTypeClass, widgetType)
 
     const sortedWidgets = Object.values(widgetsScore).sort((a, b) => b.total - a.total)
     return sortedWidgets[0].total > 0 ? sortedWidgets[0].widget : 'unknown'
@@ -44,14 +46,14 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
   /**
    * Returns a scoring object for one widget for one predicate.
    */
-  predicateWidgetScore (settings: Settings, predicate: string, predicatePath: LDflexPath, widgetTypeClass: any, widget: string): WidgetScore {
+  async predicateWidgetScore (settings: Settings, predicate: string, predicatePath: LDflexPath, widgetTypeClass: any, widget: string): Promise<WidgetScore> {
     const properties: Array<string> = []
 
     for (const propertyPath of Object.keys(predicatePath.properties))
       properties.push(settings.context.expandTerm(`${propertyPath}`)!)
 
     const datatypes: Array<string> = []
-      for (const propertyPath of predicatePath['sh:datatype'])
+      for await (const propertyPath of predicatePath['sh:datatype'])
         datatypes.push(settings.context.expandTerm(propertyPath.value)!)
       
     const predicateWidgetScore = {

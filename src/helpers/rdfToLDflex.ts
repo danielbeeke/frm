@@ -1,8 +1,8 @@
 import { rdfToStore } from './rdfToStore'
 import ComunicaEngine from '@ldflex/comunica'
-import { PathFactory, defaultHandlers } from 'ldflex'
 import { NamedNode } from 'n3'
 import basePrefixes from './basePrefixes'
+import { PathFactory, defaultHandlers } from 'ldflex'
 import defaultIterationHandlers from '@ldflex/async-iteration-handlers'
 
 export const rdfToLDflex = async (turtleShaclText, subjectUri: string) => {
