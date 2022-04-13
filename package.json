@@ -35,8 +35,6 @@
     "jsonld-context-parser": "^2.1.5",
     "ldflex": "^2.15.0",
     "n3": "^1.16.0",
-    "rdf-object": "^1.13.1",
-    "rdf-object-proxy": "^1.0.0",
     "rdf-validate-shacl": "^0.4.3",
     "uhtml": "^2.8.1"
   },

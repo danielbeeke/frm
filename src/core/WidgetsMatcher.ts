@@ -4,7 +4,6 @@ import { WidgetsMatcherInterface } from './WidgetsMatcherInterface'
 import { WidgetsScore, WidgetScore } from '../types/WidgetScores'
 import { lastPart } from '../helpers/lastPart'
 import { ShapeDefinition } from './ShapeDefinition'
-import { Literal } from 'n3'
 
 export class WidgetsMatcher implements WidgetsMatcherInterface {
 
@@ -24,7 +23,6 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
 
       if (!await predicatePath['frm:widget'].value) {
         const widgetName = await this.getWidgetName(settings, predicate, predicatePath)
-        console.log(widgetName)
         await predicatePath['frm:widget'].set(widgetName)
       }
     }
@@ -49,7 +47,7 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
   async predicateWidgetScore (settings: Settings, predicate: string, predicatePath: LDflexPath, widgetTypeClass: any, widget: string): Promise<WidgetScore> {
     const properties: Array<string> = []
 
-    for (const propertyPath of Object.keys(predicatePath.properties))
+    for await (const propertyPath of predicatePath.properties)
       properties.push(settings.context.expandTerm(`${propertyPath}`)!)
 
     const datatypes: Array<string> = []

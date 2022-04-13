@@ -9,7 +9,6 @@ export const init = (settings: Settings) => {
     private shapeSubject: string
     private definition: ShapeDefinition
     private settings: Settings
-    private shapeAttribute: string
     
     constructor () {
       super()
@@ -25,7 +24,6 @@ export const init = (settings: Settings) => {
       this.shapeSubject = this.getAttribute('shapeSubject')!
       if (!this.shapeSubject) throw new Error('Missing shape subject')
 
-      this.shapeAttribute = this.getAttribute('shape')!
       const shapeText = await resolveAttribute(this, 'shape')
       this.definition = await new ShapeDefinition(this.settings, shapeText, this.shapeSubject)
 
@@ -40,7 +38,7 @@ export const init = (settings: Settings) => {
       return html`
         ${await this.definition.shape['sh:property'].map(async predicatePath => {
           const predicate = await predicatePath['sh:path'].value
-          return html`<frm-field shape=${this.shapeAttribute} shapesubject=${this.shapeSubject} predicate=${predicate} />`
+          return html`<frm-field .shape=${this.definition} shapesubject=${this.shapeSubject} predicate=${predicate} />`
         })}
       `
     }

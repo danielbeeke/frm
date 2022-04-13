@@ -36,10 +36,14 @@ export const init = (settings: Settings) => {
   
       this.data = await rdfToLDflex('', '')
 
-      const shapeText = await resolveAttribute(this, 'shape')
-      this.shape = await new ShapeDefinition(this.settings, shapeText, this.shapeSubject)
+      // The shape may have been given by the <frm-form>
+      if (!this.shape) {
+        const shapeText = await resolveAttribute(this, 'shape')
+        this.shape = await new ShapeDefinition(this.settings, shapeText, this.shapeSubject)  
+      }
+
       this.definition = await this.shape.get(this.predicate)
-      const widgetName = await this.definition['frm:widget'].id
+      const widgetName = await this.definition['frm:widget'].value
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)

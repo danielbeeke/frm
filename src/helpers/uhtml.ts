@@ -27,17 +27,15 @@ const sync = (values, i) => {
  */
 const asyncTag = tag => {
   function invoke(template, values) {
+    const unproxiedValues = values.map(item => {
+      return item?.proxy ? item.toString() : item
+    }).filter(Boolean)
     /** @ts-ignore */
-    return tag.apply(this, [template].concat(values));
+    return tag.apply(this, [template].concat(unproxiedValues));
   }
   return function (template) {
-    const args = [...arguments]
-    for (let [index, argument] of args.entries()) {
-      args[index] = argument?.proxy && typeof argument?.toString === 'string' ? argument.toString() : argument
-    }
-
     /** @ts-ignore */
-    return sync(args, 1).then(invoke.bind(this, template));
+    return sync(arguments, 1).then(invoke.bind(this, template));
   };
 };
 

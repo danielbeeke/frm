@@ -9,6 +9,7 @@ import { RequiredAttributeTransformer } from './AttributeTransformers/RequiredAt
 import { GenericAttributeTransformer } from './AttributeTransformers/GenericAttributeTransformer'
 
 // Widgets
+import { UnknownWidget } from './Widgets/UnknownWidget'
 import { StringWidget } from './Widgets/StringWidget'
 import { PlainTextWidget } from './Widgets/PlainTextWidget'
 import { GeoWidget } from './Widgets/GeoWidget'
@@ -25,7 +26,7 @@ export default {
     minLength: new GenericAttributeTransformer('sh:minLength')
   },
   widgets: {
-    'unknown': StringWidget,
+    'unknown': UnknownWidget,
     'string': StringWidget,
     'plain-text': PlainTextWidget,
     'geo': GeoWidget,

@@ -31,7 +31,7 @@ export abstract class WidgetBase {
    * Templates
    */
 
-  label () {
+  async label () {
     return html`<label>${this.definition.name}</label>`
   }
 
