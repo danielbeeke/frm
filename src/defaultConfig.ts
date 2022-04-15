@@ -1,3 +1,5 @@
+import { Settings } from './types/Settings'
+
 import { JsonLdContextNormalized } from 'jsonld-context-parser'
 import basePrefixes from './helpers/basePrefixes'
 
@@ -5,7 +7,6 @@ import basePrefixes from './helpers/basePrefixes'
 import { WidgetsMatcher } from './core/WidgetsMatcher'
 import blacklistedProperties from './core/blacklistedProperties'
 import { DefinitionEnhancer } from './core/DefinitionEnhancer'
-import { bootstrap } from './style/cssClasses'
 
 // Translations
 import english from './translations/english'
@@ -22,6 +23,8 @@ import { PlainTextWidget } from './Widgets/PlainTextWidget'
 import { GeoWidget } from './Widgets/GeoWidget'
 import { DropdownWidget } from './Widgets/DropdownWidget'
 import { DateWidget } from './Widgets/DateWidget'
+import { GeocodingAddressWidget } from './Widgets/GeocodingAddressWidget'
+import { NodeWidget } from './Widgets/NodeWidget'
 
 export default {
   context: new JsonLdContextNormalized({
@@ -43,10 +46,12 @@ export default {
     'plain-text': PlainTextWidget,
     'geo': GeoWidget,
     'dropdown': DropdownWidget,
-    'date': DateWidget
+    'date': DateWidget,
+    'geocoding-address': GeocodingAddressWidget,
+    'node': NodeWidget
   },
-  css: bootstrap,
+  keys: {},
   translator: new Translator({
     'en-US': english
   })
-}
+} as Settings

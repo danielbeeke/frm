@@ -19,7 +19,7 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
     // Make sure every shacl property has a frm:widget.
     for await (const shallowPredicatePath of shapeDefinition.shape['sh:property']) {
       const predicate = await shallowPredicatePath['sh:path'].value
-      const predicatePath = shapeDefinition.get(predicate)
+      const predicatePath = shapeDefinition.getShaclProperty(predicate)
 
       if (!await predicatePath['frm:widget'].value) {
         const widgetName = await this.getWidgetName(settings, predicate, predicatePath)
@@ -53,7 +53,7 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
     const datatypes: Array<string> = []
       for await (const propertyPath of predicatePath['sh:datatype'])
         datatypes.push(settings.context.expandTerm(propertyPath.value)!)
-      
+
     const predicateWidgetScore = {
       commonName: widgetTypeClass.commonNamesCallback(lastPart(predicate), widgetTypeClass.commonNames),
       datatype: widgetTypeClass.supportedDataTypesCallback(datatypes, widgetTypeClass.supportedDataTypes),

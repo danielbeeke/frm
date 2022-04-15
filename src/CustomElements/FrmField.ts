@@ -6,8 +6,6 @@ import { WidgetBase } from '../Widgets/WidgetBase'
 import { rdfToLDflex } from '../helpers/rdfToLDflex'
 
 export const init = (settings: Settings) => {
-  const { css } = settings
-
   class FrmField extends HTMLElement {
 
     private predicate: string
@@ -28,7 +26,7 @@ export const init = (settings: Settings) => {
      * When loading is done renders the widget.
      */
     async connectedCallback () {
-      this.classList.add(css.loading)
+      this.classList.add('loading')
       
       if (!this.predicate)
         this.predicate = this.getAttribute('predicate')!
@@ -38,7 +36,7 @@ export const init = (settings: Settings) => {
         this.shapesubject = this.getAttribute('shapesubject')!
       if (!this.shapesubject) throw new Error('Missing shape subject')
   
-      this.data = await rdfToLDflex('', '')
+      this.data = await rdfToLDflex('', this.predicate)
 
       // The shape may have been given by the <frm-form>
       if (!this.shape) {
@@ -46,15 +44,15 @@ export const init = (settings: Settings) => {
         this.shape = await new ShapeDefinition(this.settings, shapeText, this.shapesubject)  
       }
 
-      this.definition = await this.shape.get(this.predicate)
+      this.definition = await this.shape.getShaclProperty(this.predicate)
       const widgetName = await this.definition['frm:widget'].value
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
-      this.widget = new this.settings.widgets[widgetName](this.settings, this, this.definition, this.data)
+      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.definition, this.data)
 
       await this.widget.render()
-      this.classList.remove(css.loading)
+      this.classList.remove('loading')
     }
   
   }

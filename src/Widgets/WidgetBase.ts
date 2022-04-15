@@ -6,9 +6,9 @@ import { Settings } from '../types/Settings'
 import { lastPart as lastPartOriginal } from '../helpers/lastPart'
 import { flexify } from '../helpers/LDflexToString'
 import { icon } from '../helpers/icon'
+import { attributesDiff } from '../helpers/attributesDiff'
 const lastPart = flexify(lastPartOriginal)
 
-let css, t
 export abstract class WidgetBase {
   
   static supportedDataTypes: Array<string> = []
@@ -23,56 +23,73 @@ export abstract class WidgetBase {
   static commonNames: Array<string> = []
   static commonNamesCallback = (name, commonNames) => commonNames.some(commonName => name.toLowerCase().includes(commonName.toLowerCase())) ? 1 : 0
 
-  private host: HTMLElement
-  private definition: LDflexPath
-  private data: LDflexPath
-  private settings: Settings
+  public host: HTMLElement
+  public definition: LDflexPath
+  public data: LDflexPath
+  public settings: Settings
+  public t: (key: string, tokens: {[key: string]: any}) => Promise<string | undefined>
 
   private expandedDescription: boolean = false
+
+  public inputAttributes = {
+    class: 'input',
+    type: 'text'
+  }
 
   constructor (settings: Settings, host: HTMLElement, definition: ShapeDefinition, data: LDflexPath) {
     this.settings = settings
     this.host = host
     this.definition = definition
     this.data = data
+    this.t = settings.translator.t.bind(settings.translator)
 
-    t = settings.translator.t.bind(settings.translator)
-    css = settings.css
+    /** @ts-ignore */
+    return this.init().then(() =>this)
+  }
+
+  public async init () {}
+
+  async attributes () {
+    const attributeObjects: Array<{}> = []
+    for (const transformer of Object.values(this.settings.attributeTransformers)) {
+      const attributeObject = await transformer.transform(this.data, this.definition)
+      attributeObjects.push(attributeObject)
+    }
+
+    return attributesDiff(Object.assign({}, this.inputAttributes, ...attributeObjects))
   }
 
   /**
    * Templates
    */
-
-  async label () {
-    return html`<h5 class=${css.fieldLabel}>
+  fieldLabel () {
+    return html`<h5 class="label">
       ${this.definition['sh:name|rdfs:label']}
 
-      <button onclick=${() => { 
-        this.expandedDescription = !this.expandedDescription; this.render() 
-      }} type="button" class=${css.buttonSubtleSmall}>
-        ${icon('info')}
-      </button>
+      ${this.button({
+        inner: icon('info'),
+        action: () => { this.expandedDescription = !this.expandedDescription; this.render() },
+      })}
     </h5>`
   }
 
-  description () {
+  fieldDescription () {
     return html`
-    <div class=${css.fieldDescription}>
-      <h6 class=${css.fieldDescriptionLabel}>${t('field-description-label', { predicate: lastPart(this.definition['sh:path']) })}</h6>
+    <div class="description">
+      <h6 class="title">${this.t('field-description-label', { predicate: lastPart(this.definition['sh:path']) })}</h6>
       ${this.definition['sh:comment|rdfs:comment']}
     </div>
     `
   }
 
-  async items () {
+  items () {
     return html`
-      <div class=${css.items}>
+      <div class="items">
         ${this.data.map(value => html`
-          <div class=${css.item}>
-            <div class="input-group mb-3">
+          <div class="item">
+            <div class="input-group">
               ${this.item(value)}
-              ${this.removeButton()}
+              ${this.itemRemoveButton()}
             </div>
           </div>
         `)}
@@ -80,18 +97,38 @@ export abstract class WidgetBase {
     `
   }
 
-  removeButton () {
-    return html`<button class="btn btn-outline-danger" type="button">${icon('x')}</button>`
+  /**
+   * Please use this method to render buttons, 
+   * it will help others to adjust Frm to use bootstrap or other a css framework.
+   */
+  button ({ inner, action, cssClasses }: { 
+    inner: any, action: Function, cssClasses?: Array<string> 
+  }) {
+    if (!cssClasses) cssClasses = ['button', 'primary']
+    return html`<button type="button" onclick=${action} class=${cssClasses.join(' ')}>
+      ${inner}
+    </button>`
+  }
+
+  /**
+   * The button to remove one item
+   */
+  itemRemoveButton () {
+    return this.button({
+      inner: icon('x'),
+      action: () => {},
+      cssClasses: ['button', 'danger']
+    })
   }
 
   async item (value: LDflexPath) {
-    return html`<input class=${css.input} type="text" />`
+    return html`<input ref=${this.attributes()} />`
   }
 
-  async render () {
-    render(this.host, html`
-      ${this.label()}
-      ${this.expandedDescription ? this.description() : html``}
+  render () {
+    return render(this.host, html`
+      ${this.fieldLabel()}
+      ${this.expandedDescription ? this.fieldDescription() : html``}
       ${this.items()}
     `)
   }

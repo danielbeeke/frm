@@ -16,7 +16,9 @@ export class GenericAttributeTransformer extends AttributeTransformerBase {
    */
   async transform (data: LDflexPath, fieldDefinition: LDflexPath) {
     const value = await fieldDefinition[this.predicate].value
-    return value ? `${lastPart(this.predicate)}="${value}"` : ''
+    const returnValue = {}
+    if (value) returnValue[lastPart(this.predicate)] = value
+    return returnValue
   } 
 
 }

@@ -69,7 +69,7 @@ export class ShapeDefinition {
   /**
    * Returns a LDflexPath for one predicate.
    */
-   get (predicate: string) {
+   getShaclProperty (predicate: string) {
     const expandedPredicate = this.settings.context.expandTerm(predicate)
     const path = this.createLDflexPath(this.store, expandedPredicate)
     return path['^sh:path']

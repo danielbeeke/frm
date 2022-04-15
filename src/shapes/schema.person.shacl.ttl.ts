@@ -42,6 +42,14 @@ schema:AddressShape
         sh:datatype xsd:string ;
     ] ;
     sh:property [
+        sh:path schema:addressRegion ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path schema:addressLocality ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
         sh:path schema:postalCode ;
         sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] ) ;
         sh:minInclusive 10000 ;

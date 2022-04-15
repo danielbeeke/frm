@@ -44,6 +44,7 @@
     "ldflex": "^2.15.0",
     "n3": "^1.16.0",
     "rdf-validate-shacl": "^0.4.3",
+    "uhandlers": "^0.6.1",
     "uhtml": "^2.8.1"
   },
   "staticFiles": {

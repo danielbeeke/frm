@@ -12,7 +12,7 @@ export class DefinitionEnhancer implements DefinitionEnhancerInterface {
     // Make sure every shacl property has a frm:widget.
     for await (const shallowPredicatePath of shapeDefinition.shape['sh:property']) {
       const predicate = await shallowPredicatePath['sh:path'].value
-      const predicatePath = shapeDefinition.get(predicate)
+      const predicatePath = shapeDefinition.getShaclProperty(predicate)
 
       const bindingsStream = await comunica.queryBindings(`SELECT * { ?s ?p ?o }`, {
         httpProxyHandler: new ProxyHandlerStatic(settings.proxy),

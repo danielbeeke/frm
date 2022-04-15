@@ -4,14 +4,13 @@ import { resolveAttribute } from '../helpers/resolveAttribute'
 import { html, render } from '../helpers/uhtml'
 
 export const init = (settings: Settings) => {
-  const { css } = settings
-
-  class FrmForm extends HTMLElement {
+  class FrmForm extends HTMLFormElement {
 
     private shapeSubject: string
     private definition: ShapeDefinition
     private settings: Settings
-    
+    private shapeText: string
+
     constructor () {
       super()
       this.settings = settings
@@ -21,42 +20,38 @@ export const init = (settings: Settings) => {
      * Loads the shape definition.
      */
     async connectedCallback () {
-      this.classList.add(css.loading)
-      css.form.split(' ').forEach(cssClass => this.classList.add(cssClass))
+      this.classList.add('loading')
        
       this.shapeSubject = this.getAttribute('shapeSubject')!
       if (!this.shapeSubject) throw new Error('Missing shape subject')
 
-      const shapeText = await resolveAttribute(this, 'shape')
-      this.definition = await new ShapeDefinition(this.settings, shapeText, this.shapeSubject)
+      this.shapeText = await resolveAttribute(this, 'shape')
+      this.definition = await new ShapeDefinition(this.settings, this.shapeText, this.shapeSubject)
 
-      this.classList.remove(css.loading)
+      this.classList.remove('loading')
 
       this.render()
     }
 
-    async template () {
+    async template (definition, shapeSubject) {
       return html`
-        <form>
-        ${await this.definition.shape['sh:property'].map(async predicatePath => {
+        ${await definition.shape['sh:property'].map(async predicatePath => {
           const predicate = await predicatePath['sh:path'].value
           return html`<frm-field 
-            class=${css.field}
-            .shape=${this.definition} 
-            .shapesubject=${this.shapeSubject} 
+            .shape=${definition} 
+            .shapesubject=${shapeSubject} 
             .predicate=${predicate} 
             ?debug=${this.hasAttribute('debug')} 
           />`
         })}
-        </form>
       `
     }
 
     render () {
-      render(this, this.template())
+      render(this, this.template(this.definition, this.shapeSubject))
     }
 
   }
   
-  customElements.define('frm-form', FrmForm)
+  customElements.define('frm-form', FrmForm, { extends: 'form' })
 }

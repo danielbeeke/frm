@@ -1,6 +1,6 @@
 import info from 'bundle-text:bootstrap-icons/icons/info.svg'
 import x from 'bundle-text:bootstrap-icons/icons/x.svg'
-import { html } from 'uhtml'
+import { Hole } from 'uhtml'
 
 const iconMap = {
   info,
@@ -8,5 +8,6 @@ const iconMap = {
 }
 
 export const icon = (name: keyof typeof iconMap) => {
-  return html`<div ref=${element => element.innerHTML = iconMap[name]}></div>`
+
+  return new Hole('html', [iconMap[name].replace('class="', 'class="icon ')] as unknown as TemplateStringsArray, [])
 }
