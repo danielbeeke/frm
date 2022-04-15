@@ -17,7 +17,7 @@ export class NodeWidget extends WidgetBase {
   }
 
   async items() {
-    const debug = this.host.closest('frm-form')!.hasAttribute('debug')
+    const debug = this.host.closest('frm-form')?.hasAttribute('debug')
 
     return html`
     <div class="items">
@@ -30,6 +30,7 @@ export class NodeWidget extends WidgetBase {
             .shapesubject=${this.nodeShape} 
             .predicate=${predicate} 
             ?debug=${debug} 
+            .value=${() => this.value[predicate]}
           />
         </div>`
       })}

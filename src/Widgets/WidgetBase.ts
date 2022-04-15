@@ -25,7 +25,7 @@ export abstract class WidgetBase {
 
   public host: HTMLElement
   public definition: LDflexPath
-  public data: LDflexPath
+  public value: LDflexPath
   public settings: Settings
   public t: (key: string, tokens: {[key: string]: any}) => Promise<string | undefined>
 
@@ -36,11 +36,11 @@ export abstract class WidgetBase {
     type: 'text'
   }
 
-  constructor (settings: Settings, host: HTMLElement, definition: ShapeDefinition, data: LDflexPath) {
+  constructor (settings: Settings, host: HTMLElement, definition: ShapeDefinition, value: LDflexPath) {
     this.settings = settings
     this.host = host
     this.definition = definition
-    this.data = data
+    this.value = value()
     this.t = settings.translator.t.bind(settings.translator)
 
     /** @ts-ignore */
@@ -52,7 +52,7 @@ export abstract class WidgetBase {
   async attributes () {
     const attributeObjects: Array<{}> = []
     for (const transformer of Object.values(this.settings.attributeTransformers)) {
-      const attributeObject = await transformer.transform(this.data, this.definition)
+      const attributeObject = await transformer.transform(this.value, this.definition)
       attributeObjects.push(attributeObject)
     }
 
@@ -62,7 +62,7 @@ export abstract class WidgetBase {
   /**
    * Templates
    */
-  fieldLabel () {
+  label () {
     return html`<h5 class="label">
       ${this.definition['sh:name|rdfs:label']}
 
@@ -73,7 +73,7 @@ export abstract class WidgetBase {
     </h5>`
   }
 
-  fieldDescription () {
+  description () {
     return html`
     <div class="description">
       <h6 class="title">${this.t('field-description-label', { predicate: lastPart(this.definition['sh:path']) })}</h6>
@@ -85,7 +85,7 @@ export abstract class WidgetBase {
   items () {
     return html`
       <div class="items">
-        ${this.data.map(value => html`
+        ${this.value.map(value => html`
           <div class="item">
             <div class="input-group">
               ${this.item(value)}
@@ -98,7 +98,7 @@ export abstract class WidgetBase {
   }
 
   /**
-   * Please use this method to render buttons, 
+   * Use this method to render buttons, 
    * it will help others to adjust Frm to use bootstrap or other a css framework.
    */
   button ({ inner, action, cssClasses }: { 
@@ -122,13 +122,15 @@ export abstract class WidgetBase {
   }
 
   async item (value: LDflexPath) {
-    return html`<input ref=${this.attributes()} />`
+    console.log(await value.value)
+
+    return html`<input ref=${this.attributes()} value=${value} />`
   }
 
   render () {
     return render(this.host, html`
-      ${this.fieldLabel()}
-      ${this.expandedDescription ? this.fieldDescription() : html``}
+      ${this.label()}
+      ${this.expandedDescription ? this.description() : html``}
       ${this.items()}
     `)
   }

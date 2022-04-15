@@ -12,7 +12,7 @@ export const init = (settings: Settings) => {
     private shapesubject: string
     private shape: ShapeDefinition
     private definition: LDflexPath
-    private data: LDflexPath
+    private value: LDflexPath
     private settings: Settings
     private widget: WidgetBase
     
@@ -27,7 +27,7 @@ export const init = (settings: Settings) => {
      */
     async connectedCallback () {
       this.classList.add('loading')
-      
+
       if (!this.predicate)
         this.predicate = this.getAttribute('predicate')!
       if (!this.predicate) throw new Error('Missing predicate')
@@ -36,8 +36,6 @@ export const init = (settings: Settings) => {
         this.shapesubject = this.getAttribute('shapesubject')!
       if (!this.shapesubject) throw new Error('Missing shape subject')
   
-      this.data = await rdfToLDflex('', this.predicate)
-
       // The shape may have been given by the <frm-form>
       if (!this.shape) {
         const shapeText = await resolveAttribute(this, 'shape')
@@ -49,12 +47,11 @@ export const init = (settings: Settings) => {
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
-      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.definition, this.data)
+      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.definition, this.value)
 
       await this.widget.render()
       this.classList.remove('loading')
     }
-  
   }
   
   customElements.define('frm-field', FrmField)
