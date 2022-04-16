@@ -7,6 +7,7 @@ import { lastPart as lastPartOriginal } from '../helpers/lastPart'
 import { flexify } from '../helpers/LDflexToString'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
+import { DataFactory } from 'n3'
 const lastPart = flexify(lastPartOriginal)
 
 export abstract class WidgetBase {
@@ -71,13 +72,16 @@ export abstract class WidgetBase {
    async onChange (event: InputEvent, value: LDflexPath = null) {
     const textualValue = (event.target as HTMLInputElement).value
     const oldValue = await value?.value
+    const dataType = await this.definition['sh:datatype'].value ? DataFactory.namedNode(await this.definition['sh:datatype'].value) : null
+    const isStringLiteral = dataType?.value === 'http://www.w3.org/2001/XMLSchema#string'
+    const newValue = !isStringLiteral && dataType ? DataFactory.literal(textualValue, dataType) : DataFactory.literal(textualValue)
 
     if (!oldValue && textualValue) {
       this.showEmptyItem = false
-      await this.values.add(textualValue)
+      await this.values.add(newValue)
     }
     else if (oldValue && textualValue) {
-      await this.values.replace(oldValue, textualValue)
+      await this.values.replace(oldValue, newValue)
     }
 
     await this.render()
