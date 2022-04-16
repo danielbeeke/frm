@@ -27,6 +27,7 @@ export abstract class WidgetBase {
   static commonNames: Array<string> = []
   static commonNamesCallback = (name, commonNames) => commonNames
     .some(commonName => name.toLowerCase().includes(commonName.toLowerCase())) ? 1 : 0
+
   /**
    * End of properties that are used by the widgetsMatcher
    */
@@ -87,6 +88,21 @@ export abstract class WidgetBase {
     await this.render()
   }
 
+  async addItem () {
+    this.showEmptyItem = true
+    await this.render()
+  }
+
+  async removeItem (value: LDflexPath) {
+    if (!value) {
+      this.showEmptyItem = false
+    }
+    else {
+      await this.values.delete(value)
+    }
+    await this.render()
+  }
+
   /**
    * Templates
    */
@@ -124,6 +140,7 @@ export abstract class WidgetBase {
       </div>
     `)
 
+    // uhtml does not understand what to cache here, so we break the cache on purpose.
     return html.for({})`
       <div class="items">
         ${this.values.map(callback)}
@@ -148,10 +165,7 @@ export abstract class WidgetBase {
    removeButton (value: LDflexPath) {
     return this.button({
       inner: icon('x'),
-      callback: async () => {
-        await this.values.delete(value)
-        await this.render()
-      },
+      callback: () => this.removeItem(value),
       cssClasses: ['button', 'danger']
     })
   }
@@ -162,10 +176,7 @@ export abstract class WidgetBase {
    addButton () {
     return this.button({
       inner: icon('plus'),
-      callback: () => {
-        this.showEmptyItem = true
-        this.render()
-      },
+      callback: () => this.addItem(),
       cssClasses: ['button', 'primary']
     })
   }

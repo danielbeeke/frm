@@ -53,7 +53,6 @@ export const init = (settings: Settings) => {
             .shape=${definition} 
             .shapesubject=${shapeSubject} 
             .predicate=${predicate} 
-            ?debug=${this.hasAttribute('debug')} 
             .values=${() => this.data[predicate]}
           />`
         })}
