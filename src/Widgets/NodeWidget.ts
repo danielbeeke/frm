@@ -30,7 +30,7 @@ export class NodeWidget extends WidgetBase {
             .shapesubject=${this.nodeShape} 
             .predicate=${predicate} 
             ?debug=${debug} 
-            .value=${() => this.value[predicate]}
+            .values=${() => this.values[predicate]}
           />
         </div>`
       })}

@@ -20,7 +20,7 @@ export class Translator extends EventTarget {
     this.current = defaultLanguage
   }
 
-  async t (key, tokens) {
+  async t (key, tokens = {}) {
     for (const [tokenName, tokenValue] of Object.entries(tokens)) {
       const resolved: any = await tokenValue
       tokens[tokenName] = resolved?.proxy ? resolved.toString() : resolved

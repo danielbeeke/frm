@@ -3,7 +3,6 @@ import { ShapeDefinition } from '../core/ShapeDefinition'
 import { Settings } from '../types/Settings'
 import { resolveAttribute } from '../helpers/resolveAttribute'
 import { WidgetBase } from '../Widgets/WidgetBase'
-import { rdfToLDflex } from '../helpers/rdfToLDflex'
 
 export const init = (settings: Settings) => {
   class FrmField extends HTMLElement {
@@ -12,7 +11,7 @@ export const init = (settings: Settings) => {
     private shapesubject: string
     private shape: ShapeDefinition
     private definition: LDflexPath
-    private value: LDflexPath
+    private values: LDflexPath
     private settings: Settings
     private widget: WidgetBase
     
@@ -47,7 +46,7 @@ export const init = (settings: Settings) => {
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
-      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.definition, this.value)
+      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.definition, this.values)
 
       await this.widget.render()
       this.classList.remove('loading')

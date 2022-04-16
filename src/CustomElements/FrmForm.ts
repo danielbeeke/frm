@@ -54,7 +54,7 @@ export const init = (settings: Settings) => {
             .shapesubject=${shapeSubject} 
             .predicate=${predicate} 
             ?debug=${this.hasAttribute('debug')} 
-            .value=${() => this.data[predicate]}
+            .values=${() => this.data[predicate]}
           />`
         })}
       `

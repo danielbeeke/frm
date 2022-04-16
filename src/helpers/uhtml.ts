@@ -1,45 +1,44 @@
+/**
+ * This file is a combination of uhtml index.js and the async.js.
+ * We needed to unpack LDflex proxies before they were rendered.
+ * There might be a cleaner way to achieve this. Maybe via a LDflex handler.
+ */
+import asyncTag from 'async-tag';
+import {render, Hole} from 'uhtml/esm/async';
 import umap from 'umap';
-import {render as $render, html as $html, svg as $svg} from 'uhtml';
+import {createCache, unroll} from 'uhtml/esm/rabbit.js';
 
-/**
- * This code makes uhtml async resolve LDflex paths. It calls the toString on line 27.
- */
+const processValues = (values) => {
+  for (const [index, value] of values.entries())
+    if (value?.proxy) values[index] = value?.value
+}
 
-const {isArray} = Array;
+const {create, defineProperties} = Object;
 
-const sync = (values, i) => {
-  const resolved: Array<any> = [];
-
-  for (const {length} = values; i < length; i++) {
-    const itemToResolve = isArray(values[i]) ? sync(values[i], 0) : values[i]
-    // console.log(itemToResolve)
-    resolved.push(itemToResolve);
+const originalTag = type => {
+  const keyed = umap(new WeakMap);
+  const fixed = cache => (template, ...values) => {
+    processValues(values)
+    return unroll(cache, { type, template, values})
   }
-  return Promise.all(resolved);
+  return defineProperties(
+    (template, ...values) => {
+      processValues(values)
+      return new Hole(type, template, values)
+    },
+    {
+      for: {
+        value(ref, id) {
+          const memo = keyed.get(ref) || keyed.set(ref, create(null));
+          return memo[id] || (memo[id] = fixed(createCache()));
+        }
+      },
+      node: {
+        value: (template, ...values) => unroll(createCache(), {type, template, values}).valueOf()
+      }
+    }
+  );
 };
-
-/**
- * Returns a template literal tag abe to resolve, recursively, any possible
- * asynchronous interpolation.
- * @param {function} tag a template literal tag.
- * @returns {function} a template literal tag that resolves interpolations
- *                     before passing these to the initial template literal.
- */
-const asyncTag = tag => {
-  function invoke(template, values) {
-    const unproxiedValues = values.map(item => {
-      return item?.proxy ? item.toString() : item
-    }).filter(Boolean)
-    /** @ts-ignore */
-    return tag.apply(this, [template].concat(unproxiedValues));
-  }
-  return function (template) {
-    /** @ts-ignore */
-    return sync(arguments, 1).then(invoke.bind(this, template));
-  };
-};
-
-const {defineProperties} = Object;
 
 const tag = original => {
   const wrap = umap(new WeakMap);
@@ -59,11 +58,7 @@ const tag = original => {
   );
 };
 
-export const html: any = tag($html);
-export const svg = tag($svg);
+const html = tag(originalTag('html'))
+const svg = tag(originalTag('svg'))
 
-export const render = (where, what) => {
-  const hole = typeof what === 'function' ? what() : what;
-  return Promise.resolve(hole).then(what => $render(where, what));
-};
-
+export { html, svg, Hole, render }
