@@ -1,4 +1,5 @@
 import { Settings } from './types/Settings'
+import { DataFactory } from 'n3'
 
 import { JsonLdContextNormalized } from 'jsonld-context-parser'
 import basePrefixes from './helpers/basePrefixes'
@@ -50,6 +51,7 @@ export default {
     'geocoding-address': GeocodingAddressWidget,
     'node': NodeWidget
   },
+  dataFactory: DataFactory,
   keys: {},
   translator: new Translator({
     'en-US': english

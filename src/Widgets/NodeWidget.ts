@@ -2,7 +2,6 @@ import { html } from '../helpers/uhtml'
 import { WidgetBase } from './WidgetBase'
 import { ShapeDefinition } from '../core/ShapeDefinition'
 import { LDflexPath } from '../types/LDflexPath'
-import { DataFactory } from 'n3'
 
 export class NodeWidget extends WidgetBase {
 
@@ -21,7 +20,8 @@ export class NodeWidget extends WidgetBase {
   }
 
   async addItem(): Promise<void> {
-    await this.values.add(DataFactory.blankNode())
+    const node = this.settings.dataFactory.blankNode()
+    await this.values.add(node)
     await this.render()
   }
 
@@ -31,6 +31,7 @@ export class NodeWidget extends WidgetBase {
       return html`
         ${await this.nodeShapeDefinition.shape['sh:property'].map(async predicatePath => {
           const predicate = await predicatePath['sh:path'].value
+
           return html`
           <div class="item">
             <frm-field
@@ -46,8 +47,7 @@ export class NodeWidget extends WidgetBase {
       `
     })
 
-    // uhtml does not understand what to cache here, so we break the cache on purpose.
-    return html.for({})`
+    return html`
       <div class="items">
         ${this.values.map(callback)}
       </div>

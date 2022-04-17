@@ -42,6 +42,7 @@ export const init = (settings: Settings) => {
       }
 
       this.definition = await this.shape.getShaclProperty(this.predicate)
+
       const widgetName = await this.definition['frm:widget'].value
       this.setAttribute('widget', widgetName)
 

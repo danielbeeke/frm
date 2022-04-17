@@ -7,7 +7,7 @@ import { lastPart as lastPartOriginal } from '../helpers/lastPart'
 import { flexify } from '../helpers/LDflexToString'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
-import { DataFactory } from 'n3'
+
 const lastPart = flexify(lastPartOriginal)
 
 export abstract class WidgetBase {
@@ -36,6 +36,7 @@ export abstract class WidgetBase {
   public host: HTMLElement
   public definition: LDflexPath
   public values: LDflexPath
+  public valuesFetcher: () => LDflexPath
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
 
   public inputAttributes = {
@@ -50,6 +51,7 @@ export abstract class WidgetBase {
     this.settings = settings
     this.host = host
     this.definition = definition
+    this.valuesFetcher = values
     this.values = values()
     this.t = settings.translator.t.bind(settings.translator)
 
@@ -63,7 +65,6 @@ export abstract class WidgetBase {
     const attributeObjects: Array<{}> = []
     for (const transformer of Object.values(this.settings.attributeTransformers))
       attributeObjects.push(await transformer.transform(this.values, this.definition))
-
     return attributesDiff(Object.assign({}, this.inputAttributes, ...attributeObjects))
   }
 
@@ -73,9 +74,9 @@ export abstract class WidgetBase {
    async onChange (event: InputEvent, value: LDflexPath = null) {
     const textualValue = (event.target as HTMLInputElement).value
     const oldValue = await value?.value
-    const dataType = await this.definition['sh:datatype'].value ? DataFactory.namedNode(await this.definition['sh:datatype'].value) : null
+    const dataType = await this.definition['sh:datatype'].value ? this.settings.dataFactory.namedNode(await this.definition['sh:datatype'].value) : null
     const isStringLiteral = dataType?.value === 'http://www.w3.org/2001/XMLSchema#string'
-    const newValue = !isStringLiteral && dataType ? DataFactory.literal(textualValue, dataType) : DataFactory.literal(textualValue)
+    const newValue = !isStringLiteral && dataType ? this.settings.dataFactory.literal(textualValue, dataType) : this.settings.dataFactory.literal(textualValue)
 
     if (!oldValue && textualValue) {
       this.showEmptyItem = false
