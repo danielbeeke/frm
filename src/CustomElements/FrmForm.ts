@@ -37,7 +37,7 @@ export const init = (settings: Settings) => {
       this.dataSubject = this.settings.context.expandTerm(this.dataSubject)!
 
       this.dataText = await resolveAttribute(this, 'data')
-      this.data = await rdfToLDflex(this.dataText, this.dataSubject, true)
+      this.data = await rdfToLDflex(this.dataText, this.dataSubject)
 
       this.classList.remove('loading')
 
