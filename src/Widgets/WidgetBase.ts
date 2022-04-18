@@ -68,6 +68,24 @@ export abstract class WidgetBase {
     return attributesDiff(Object.assign({}, this.inputAttributes, ...attributeObjects))
   }
 
+  async preRender () {
+    const valueCount = (await this.values.toArray()).length
+    this.showEmptyItem = valueCount === 0
+  }
+
+  /**
+   * Getters
+   */
+  get allowMultiple () {
+    return (async () => {
+      const valueCount = (await this.values.toArray()).length
+      let maxCount = await this.definition['sh:maxCount'].value
+      if (maxCount === 'INF') maxCount = Infinity
+
+      return valueCount < maxCount
+    })()
+  }
+
   /**
    * Callbacks
    */
@@ -214,12 +232,14 @@ export abstract class WidgetBase {
     `
   }
 
-  render () {
+  async render () {
+    await this.preRender()
+
     return render(this.host, html`
       ${this.label()}
       ${this.showDescription ? this.description() : html``}
       ${this.items()}
-      ${this.addButton()}
+      ${(await this.allowMultiple) && !this.showEmptyItem ? this.addButton() : null}
     `)
   }
 

@@ -1,6 +1,6 @@
 import { rdfToStore } from './rdfToStore'
 import ComunicaEngine from '@ldflex/comunica'
-import { NamedNode, Writer } from 'n3'
+import { NamedNode } from 'n3'
 import basePrefixes from './basePrefixes'
 import { PathFactory, defaultHandlers } from 'ldflex'
 import defaultIterationHandlers from '@ldflex/async-iteration-handlers'

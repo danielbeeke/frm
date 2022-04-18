@@ -22,14 +22,19 @@ export class DropdownWidget extends WidgetBase {
   }
 
   async item (value: LDflexPath) {
+    const itemOptions = {...this.options}
+
+    // We allowed invalid values to be displayed. 
+    // They will not pass validation when saving.
+    const resolvedValue = await value?.value
+    if (resolvedValue && !this.options[resolvedValue])
+      itemOptions[resolvedValue] = resolvedValue
+      
     return this.dropdown({
       placeholder: await this.definition['html:placeholder']?.value ?? this.t('select-a-value'),
-      options: this.options,
+      options: itemOptions,
       selectedValue: await value?.value,
-      callback: async (event: InputEvent) => {
-        await this.onChange(event, value)
-        await this.render()
-      }
+      callback: async (event: InputEvent) => this.onChange(event, value)
     })
   }
 

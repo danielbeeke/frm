@@ -50,5 +50,12 @@ export class DefinitionEnhancer implements DefinitionEnhancerInterface {
       if (inTypes.length > 1) throw new Error('Multiple datatypes given for dropdown. Not implemented yet')
       await predicatePath.set({ 'sh:datatype': new NamedNode(inTypes[0]) })
     }
+
+    /**
+     * maxCount is infinity if not given.
+     */
+    if (!await predicatePath['sh:maxCount'].value)
+      await predicatePath.set({ 'sh:maxCount': Infinity })
+
   }
 }

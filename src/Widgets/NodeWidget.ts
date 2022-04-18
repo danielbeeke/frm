@@ -29,21 +29,21 @@ export class NodeWidget extends WidgetBase {
     const callback = (async (value: LDflexPath | null = null) => {
 
       return html`
-        ${await this.nodeShapeDefinition.shape['sh:property'].map(async predicatePath => {
-          const predicate = await predicatePath['sh:path'].value
+        <div class="item">
+          ${await this.nodeShapeDefinition.shape['sh:property'].map(async predicatePath => {
+            const predicate = await predicatePath['sh:path'].value
 
-          return html`
-          <div class="item">
-            <frm-field
-              .shape=${this.nodeShapeDefinition}
-              .shapesubject=${this.nodeShape}
-              .predicate=${predicate}
-              .values=${() => value[predicate]}
-            />
-
-            ${this.removeButton(value[predicate])}
-          </div>`
-        })}
+            return html`
+              <frm-field
+                .shape=${this.nodeShapeDefinition}
+                .shapesubject=${this.nodeShape}
+                .predicate=${predicate}
+                .values=${() => value[predicate]}
+              />
+            `
+          })}
+          ${this.removeButton(value)}
+        </div>
       `
     })
 

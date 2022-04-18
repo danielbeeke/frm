@@ -10,7 +10,5 @@ const iconMap = {
   plus,
 }
 
-export const icon = (name: keyof typeof iconMap) => {
-
-  return new Hole('html', [iconMap[name].replace('class="', 'class="icon ')] as unknown as TemplateStringsArray, [])
-}
+export const icon = (name: keyof typeof iconMap) => 
+  new Hole('html', [iconMap[name].replace('class="', 'class="icon ')] as unknown as TemplateStringsArray, [])
