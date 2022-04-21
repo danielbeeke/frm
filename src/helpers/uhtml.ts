@@ -6,7 +6,7 @@
 import asyncTag from 'async-tag';
 import {render, Hole} from 'uhtml/esm/async';
 import umap from 'umap';
-import {createCache, unroll} from 'uhtml/esm/rabbit.js';
+import {createCache, unroll} from 'uhtml/esm/rabbit';
 
 const processValues = (values) => {
   for (const [index, value] of values.entries())

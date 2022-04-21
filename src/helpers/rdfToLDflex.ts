@@ -7,13 +7,18 @@ import defaultIterationHandlers from '@ldflex/async-iteration-handlers'
 
 export const rdfToLDflex = async (turtleShaclText, subjectUri: string) => {
   const { store, prefixes } = await rdfToStore(turtleShaclText)
-
   const queryEngine = new ComunicaEngine([store])
-  const context = { '@context': {...JSON.parse(JSON.stringify(prefixes)), ...basePrefixes} }
+  const context = { '@context': {...JSON.parse(JSON.stringify(prefixes)), ...basePrefixes}}
   const path = new PathFactory({ context, queryEngine, handlers: {
     ...defaultHandlers,
-    ...defaultIterationHandlers
+    ...defaultIterationHandlers,
+    term: (pathData) => pathData.subject
   } })
   const subject = new NamedNode(subjectUri)
-  return path.create({ subject })
+
+  return {
+    path: path.create({ subject }),
+    store,
+    engine: queryEngine
+  }
 }

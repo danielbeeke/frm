@@ -8,6 +8,7 @@ import { Settings } from '../types/Settings'
 import { JsonLdContextNormalized } from 'jsonld-context-parser'
 import { validateShaclString } from '../helpers/validateShaclString'
 import { ProxyHandlerStatic } from '@comunica/actor-http-proxy'
+import { KeysRdfResolveQuadPattern } from '@comunica/context-entries'
 
 export class ShapeDefinition {
 
@@ -52,9 +53,11 @@ export class ShapeDefinition {
   /**
    * Creates a LDflex path with a N3 store as source.
    */
-  createLDflexPath (data, subjectUri) {
-    const queryEngine = new ComunicaEngine([data], {
-      options: { httpProxyHandler: new ProxyHandlerStatic(this.settings.proxy) }
+  createLDflexPath (store, subjectUri) {
+    const queryEngine = new ComunicaEngine([store], {
+      options: { 
+        httpProxyHandler: new ProxyHandlerStatic(this.settings.proxy),
+      }
     })
     const path = new PathFactory({ context: this.settings.context.getContextRaw(), queryEngine, handlers: {
       ...defaultHandlers,

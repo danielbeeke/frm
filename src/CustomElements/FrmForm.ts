@@ -4,6 +4,8 @@ import { resolveAttribute } from '../helpers/resolveAttribute'
 import { html, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import { rdfToLDflex } from '../helpers/rdfToLDflex'
+import { Store } from 'n3'
+import ComunicaEngine from '@ldflex/comunica'
 
 export const init = (settings: Settings) => {
   class FrmForm extends HTMLFormElement {
@@ -15,6 +17,8 @@ export const init = (settings: Settings) => {
     private dataText: string
     private data: LDflexPath
     private dataSubject: string
+    private store: Store
+    private engine: ComunicaEngine
 
     constructor () {
       super()
@@ -37,7 +41,10 @@ export const init = (settings: Settings) => {
       this.dataSubject = this.settings.context.expandTerm(this.dataSubject)!
 
       this.dataText = await resolveAttribute(this, 'data')
-      this.data = await rdfToLDflex(this.dataText, this.dataSubject)
+      const { path, store, engine } = await rdfToLDflex(this.dataText, this.dataSubject)
+      this.data = path
+      this.store = store
+      this.engine = engine
 
       this.classList.remove('loading')
 
@@ -53,7 +60,7 @@ export const init = (settings: Settings) => {
             .shape=${definition} 
             .shapesubject=${shapeSubject} 
             .predicate=${predicate} 
-            .values=${() => this.data[predicate]}
+            .values=${async () => () => this.data[predicate]}
           />`
         })}
       `

@@ -7,6 +7,7 @@ import { lastPart as lastPartOriginal } from '../helpers/lastPart'
 import { flexify } from '../helpers/LDflexToString'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
+import { FieldInstances } from '../core/FieldInstances'
 
 const lastPart = flexify(lastPartOriginal)
 
@@ -36,7 +37,6 @@ export abstract class WidgetBase {
   public host: HTMLElement
   public definition: LDflexPath
   public values: LDflexPath
-  public valuesFetcher: () => LDflexPath
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
 
   public inputAttributes = {
@@ -47,16 +47,22 @@ export abstract class WidgetBase {
   public showDescription: boolean = false
   public showEmptyItem: boolean = false
 
-  constructor (settings: Settings, host: HTMLElement, definition: ShapeDefinition, values: LDflexPath) {
+  public valuesFetcher: () => LDflexPath
+
+  constructor (settings: Settings, host: HTMLElement, definition: ShapeDefinition, values: Promise<() => LDflexPath>) {
     this.settings = settings
     this.host = host
     this.definition = definition
-    this.valuesFetcher = values
-    this.values = values()
     this.t = settings.translator.t.bind(settings.translator)
 
+    FieldInstances.add(this)
+
     /** @ts-ignore */
-    return this.init().then(() => this)
+    return values().then((valuesCallback) => {
+      this.valuesFetcher = valuesCallback
+      this.values = this.valuesFetcher()
+      return this.init().then(() => this)
+    })
   }
 
   public async init () {}
@@ -70,7 +76,7 @@ export abstract class WidgetBase {
 
   async preRender () {
     const valueCount = (await this.values.toArray()).length
-    this.showEmptyItem = valueCount === 0
+    if (!this.showEmptyItem) this.showEmptyItem = valueCount === 0
   }
 
   /**
@@ -112,12 +118,11 @@ export abstract class WidgetBase {
     await this.render()
   }
 
-  async removeItem (value: LDflexPath) {
-    if (!value) {
-      this.showEmptyItem = false
-    }
+  async removeItem (value: LDflexPath | null = null) {
+    if (!value) this.showEmptyItem = false
     else {
-      await this.values.delete(value)
+      const term = await value.term
+      await this.values.delete(term)
     }
     await this.render()
   }
@@ -160,6 +165,7 @@ export abstract class WidgetBase {
     `)
 
     // uhtml does not understand what to cache here, so we break the cache on purpose.
+    // TODO improve.
     return html.for({})`
       <div class="items">
         ${this.values.map(callback)}
@@ -232,8 +238,9 @@ export abstract class WidgetBase {
     `
   }
 
-  async render () {
+  public async render () {
     await this.preRender()
+    ;(this.host.parentElement as HTMLElement && { widget: { render: Function }}).widget?.render()
 
     return render(this.host, html`
       ${this.label()}

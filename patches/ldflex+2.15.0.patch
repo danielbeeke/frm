@@ -12,7 +12,7 @@ index f766c31..0a39bc4 100644
      } // Otherwise, create a WHERE clause from all conditions
      else {
 diff --git a/node_modules/ldflex/module/SparqlHandler.js b/node_modules/ldflex/module/SparqlHandler.js
-index 6c64ad7..7c86670 100644
+index 6c64ad7..2896ca7 100644
 --- a/node_modules/ldflex/module/SparqlHandler.js
 +++ b/node_modules/ldflex/module/SparqlHandler.js
 @@ -74,7 +74,7 @@ export default class SparqlHandler {
@@ -24,3 +24,12 @@ index 6c64ad7..7c86670 100644
        where = [];
      } // Otherwise, create a WHERE clause from all conditions
      else {
+@@ -95,7 +95,7 @@ export default class SparqlHandler {
+       objects
+     } of predicateObjects) {
+       // Mutate either only the specified objects, or all of them
+-      const objectStrings = objects ? objects.map(o => this.termToString(o)) : [this.createVar(predicate.value, scope)]; // Generate a triple pattern for all subjects
++      const objectStrings = objects ? objects.map(o => this.termToString(skolemize(o))) : [this.createVar(predicate.value, scope)]; // Generate a triple pattern for all subjects
+ 
+       mutations.push(...this.triplePatterns(subject, predicate, objectStrings, reverse));
+     }
