@@ -13,7 +13,7 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
   async match (settings: Settings, shapeDefinition: ShapeDefinition) {
     // Ensure all the properties on the Widget classes are expanded.
     for (const widgetTypeClass of Object.values(settings.widgets))
-      for (const arrayToExpand of ['supportedDataTypes', 'supportedProperties', 'requiredProperties'])
+      for (const arrayToExpand of ['supportedDataTypes', 'supportedProperties', 'requiredProperties', 'requiredPredicates'])
         widgetTypeClass[arrayToExpand] = widgetTypeClass[arrayToExpand].map(item => settings.context.expandTerm(item))
 
     // Make sure every shacl property has a frm:widget.
@@ -58,7 +58,7 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
       commonName: widgetTypeClass.commonNamesCallback(lastPart(predicate), widgetTypeClass.commonNames),
       datatype: widgetTypeClass.supportedDataTypesCallback(datatypes, widgetTypeClass.supportedDataTypes),
       properties: widgetTypeClass.supportedPropertiesCallback(properties, widgetTypeClass.supportedProperties),
-      required: widgetTypeClass.requiredPropertiesCallback(properties, widgetTypeClass.requiredProperties),
+      requiredProperties: widgetTypeClass.requiredPropertiesCallback(properties, widgetTypeClass.requiredProperties),
       widget: widget,
       total: 0
     }
@@ -72,8 +72,8 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
    * If you want to edit the formula just extend WidgetsMatcher and put that class in the options.
    */
    totalFormula (scoreWidgetPredicate: WidgetScore) {
-    const { commonName, datatype, properties, required } = scoreWidgetPredicate
-    if (required < 0) scoreWidgetPredicate.total = -1
-    else scoreWidgetPredicate.total = datatype + (commonName * 2) + properties + required
+    const { commonName, datatype, properties, requiredProperties } = scoreWidgetPredicate
+    if (requiredProperties < 0) scoreWidgetPredicate.total = -1
+    else scoreWidgetPredicate.total = datatype + (commonName * 2) + properties + requiredProperties
   }
 }

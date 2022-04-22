@@ -24,7 +24,6 @@ import { PlainTextWidget } from './Widgets/PlainTextWidget'
 import { GeoWidget } from './Widgets/GeoWidget'
 import { DropdownWidget } from './Widgets/DropdownWidget'
 import { DateWidget } from './Widgets/DateWidget'
-import { GeocodingAddressWidget } from './Widgets/GeocodingAddressWidget'
 import { NodeWidget } from './Widgets/NodeWidget'
 
 export default {
@@ -48,7 +47,6 @@ export default {
     'geo': GeoWidget,
     'dropdown': DropdownWidget,
     'date': DateWidget,
-    'geocoding-address': GeocodingAddressWidget,
     'node': NodeWidget
   },
   dataFactory: DataFactory,

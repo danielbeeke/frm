@@ -41,13 +41,15 @@ export const init = (settings: Settings) => {
         this.shape = await new ShapeDefinition(this.settings, shapeText, this.shapesubject)  
       }
 
-      this.definition = await this.shape.getShaclProperty(this.predicate)
+      if (!this.definition) {
+        this.definition = await this.shape.getShaclProperty(this.predicate)
+      }
 
       const widgetName = await this.definition['frm:widget'].value
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
-      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.definition, this.values)
+      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values)
 
       await this.widget.render()
       this.classList.remove('loading')

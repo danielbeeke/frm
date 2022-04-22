@@ -1,5 +1,4 @@
 import { WidgetBase } from './WidgetBase'
-import { intersectionCount } from '../helpers/intersectionCount'
 import { LDflexPath } from '../types/LDflexPath'
 
 export class DropdownWidget extends WidgetBase {
@@ -9,8 +8,7 @@ export class DropdownWidget extends WidgetBase {
    */
   static supportedDataTypes = ['xsd:string']
   static supportedProperties = ['html:placeholder', 'sh:in', 'sh:sparql']
-  static requiredProperties = ['sh:in', 'sh:sparql'] // Only one is required
-  static requiredPropertiesCallback = (a: Array<any>, b: Array<any>) => intersectionCount(a, b) ? 1 : -1
+  static requiredProperties = ['sh:in']
   static commonNames = ['options']
 
   public options: { [key: string]: string } = {}
@@ -34,7 +32,7 @@ export class DropdownWidget extends WidgetBase {
       placeholder: await this.definition['html:placeholder']?.value ?? this.t('select-a-value'),
       options: itemOptions,
       selectedValue: await value?.value,
-      callback: async (event: InputEvent) => this.onChange(event, value)
+      callback: async (event: InputEvent) => this.setValue((event.target as HTMLInputElement).value, value)
     })
   }
 

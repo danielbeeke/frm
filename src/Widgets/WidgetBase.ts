@@ -1,13 +1,13 @@
 import { intersectionCount } from '../helpers/intersectionCount'
 import { html, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
-import { ShapeDefinition } from '../core/ShapeDefinition'
+import { QueryEngine } from '@comunica/query-sparql-solid';
+import { Store } from 'n3';
 import { Settings } from '../types/Settings'
 import { lastPart as lastPartOriginal } from '../helpers/lastPart'
 import { flexify } from '../helpers/LDflexToString'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
-import { FieldInstances } from '../core/FieldInstances'
 
 const lastPart = flexify(lastPartOriginal)
 
@@ -25,6 +25,8 @@ export abstract class WidgetBase {
   static requiredProperties: Array<string> = []
   static requiredPropertiesCallback = intersectionCount
 
+  static requiredPredicates: Array<string> = []
+
   static commonNames: Array<string> = []
   static commonNamesCallback = (name, commonNames) => commonNames
     .some(commonName => name.toLowerCase().includes(commonName.toLowerCase())) ? 1 : 0
@@ -37,6 +39,7 @@ export abstract class WidgetBase {
   public host: HTMLElement
   public definition: LDflexPath
   public values: LDflexPath
+  public predicate: string
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
 
   public inputAttributes = {
@@ -46,16 +49,19 @@ export abstract class WidgetBase {
 
   public showDescription: boolean = false
   public showEmptyItem: boolean = false
+  public engine: QueryEngine
+  public store: Store
 
   public valuesFetcher: () => LDflexPath
 
-  constructor (settings: Settings, host: HTMLElement, definition: ShapeDefinition, values: Promise<() => LDflexPath>) {
+  constructor (settings: Settings, host: HTMLElement, predicate: string, definition: LDflexPath, values: Promise<() => LDflexPath>) {
+    this.predicate = predicate
     this.settings = settings
     this.host = host
     this.definition = definition
     this.t = settings.translator.t.bind(settings.translator)
-
-    FieldInstances.add(this)
+    this.engine = this.host.closest('frm-form')!['engine']['engine']
+    this.store = this.host.closest('frm-form')!['store']
 
     /** @ts-ignore */
     return values().then((valuesCallback) => {
@@ -87,26 +93,27 @@ export abstract class WidgetBase {
       const valueCount = (await this.values.toArray()).length
       let maxCount = await this.definition['sh:maxCount'].value
       if (maxCount === 'INF') maxCount = Infinity
-
       return valueCount < maxCount
     })()
   }
 
-  /**
-   * Callbacks
-   */
-   async onChange (event: InputEvent, value: LDflexPath = null) {
-    const textualValue = (event.target as HTMLInputElement).value
+  async setValue (newRawValue: string | number, value: LDflexPath = null) {
+    const dataType = await this.definition['sh:datatype'].value ? 
+    this.settings.dataFactory.namedNode(await this.definition['sh:datatype'].value)
+    : null
     const oldValue = await value?.value
-    const dataType = await this.definition['sh:datatype'].value ? this.settings.dataFactory.namedNode(await this.definition['sh:datatype'].value) : null
-    const isStringLiteral = dataType?.value === 'http://www.w3.org/2001/XMLSchema#string'
-    const newValue = !isStringLiteral && dataType ? this.settings.dataFactory.literal(textualValue, dataType) : this.settings.dataFactory.literal(textualValue)
 
-    if (!oldValue && textualValue) {
+    const isStringLiteral = dataType?.value === 'http://www.w3.org/2001/XMLSchema#string'
+    const newValue = !isStringLiteral && dataType ? 
+      this.settings.dataFactory.literal(newRawValue, dataType) : 
+      this.settings.dataFactory.literal(newRawValue)
+
+    if (!oldValue && newRawValue) {
       this.showEmptyItem = false
       await this.values.add(newValue)
     }
-    else if (oldValue && textualValue) {
+    else if (oldValue && newRawValue) {
+      
       await this.values.replace(oldValue, newValue)
     }
 
@@ -178,7 +185,7 @@ export abstract class WidgetBase {
     return html`
       <input 
         ref=${this.attributes()} 
-        onchange=${(event: InputEvent) => this.onChange(event, value)} 
+        onchange=${(event: InputEvent) => this.setValue((event.target as HTMLInputElement).value, value)} 
         .value=${value} 
       />
     `
@@ -191,7 +198,7 @@ export abstract class WidgetBase {
     return this.button({
       inner: icon('x'),
       callback: () => this.removeItem(value),
-      cssClasses: ['button', 'danger']
+      cssClasses: ['button', 'danger', value ? '' : 'disabled']
     })
   }
 
@@ -224,7 +231,10 @@ export abstract class WidgetBase {
    * Generic dropdown template
    */
   dropdown ({ options, selectedValue = null, placeholder = null, callback = null }: {
-    options: { [key: string]: string }, selectedValue: string | null, placeholder: string | null, callback?: Function | null
+    options: { [key: string]: string }, 
+    selectedValue: string | null, 
+    placeholder: string | null, 
+    callback?: Function | null
   }) {
     return html`
       <select onchange=${(event: InputEvent) => callback ? callback(event) : null}>

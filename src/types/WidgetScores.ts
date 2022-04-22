@@ -6,7 +6,7 @@ export type WidgetScore = {
   commonName: number, 
   datatype: number, 
   properties: number,
-  required: number, 
+  requiredProperties: number,
   total: number,
   widget: string
 } 

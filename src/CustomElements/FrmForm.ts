@@ -1,11 +1,12 @@
 import { ShapeDefinition } from '../core/ShapeDefinition'
 import { Settings } from '../types/Settings'
 import { resolveAttribute } from '../helpers/resolveAttribute'
-import { html, render } from '../helpers/uhtml'
+import { render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import { rdfToLDflex } from '../helpers/rdfToLDflex'
 import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
+import { ShapeToFields } from '../core/ShapeToFields'
 
 export const init = (settings: Settings) => {
   class FrmForm extends HTMLFormElement {
@@ -51,23 +52,8 @@ export const init = (settings: Settings) => {
       this.render()
     }
 
-    async template (definition, shapeSubject) {
-      return html`
-        ${definition.shape['sh:property'].map(async predicatePath => {
-          const predicate = await predicatePath['sh:path'].value
-
-          return html`<frm-field
-            .shape=${definition} 
-            .shapesubject=${shapeSubject} 
-            .predicate=${predicate} 
-            .values=${async () => () => this.data[predicate]}
-          />`
-        })}
-      `
-    }
-
     render () {
-      render(this, this.template(this.definition, this.shapeSubject))
+      render(this, ShapeToFields(settings, this.definition, this.shapeSubject, this.data))
     }
 
   }

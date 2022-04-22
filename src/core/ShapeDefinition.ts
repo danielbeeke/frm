@@ -8,7 +8,6 @@ import { Settings } from '../types/Settings'
 import { JsonLdContextNormalized } from 'jsonld-context-parser'
 import { validateShaclString } from '../helpers/validateShaclString'
 import { ProxyHandlerStatic } from '@comunica/actor-http-proxy'
-import { KeysRdfResolveQuadPattern } from '@comunica/context-entries'
 
 export class ShapeDefinition {
 
