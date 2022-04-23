@@ -30,7 +30,7 @@ export class NodeWidget extends WidgetBase {
   }
 
   async item (value: LDflexPath) {
-    return ShapeToFields(this.settings, this.nodeShapeDefinition, this.nodeShape, this.values[this.predicate], value, this.store, this.engine)
+    return ShapeToFields(this.settings, this.nodeShapeDefinition, this.nodeShape, this.values[this.predicate], value, this.store, this.engine, () => this.render())
   }
 
 }

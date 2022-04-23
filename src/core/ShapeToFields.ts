@@ -12,7 +12,8 @@ export const ShapeToFields = async (
   values: LDflexPath, 
   value: LDflexPath = null,
   store: Store,
-  engine: ComunicaEngine
+  engine: ComunicaEngine,
+  renderCallback: Function
 ) => {
   const renderObject = {}
   
@@ -46,7 +47,7 @@ export const ShapeToFields = async (
           delete renderObject[predicate]
         }
 
-        renderObject[grouperName] = await (await new grouper(settings, predicateElements)).template()
+        renderObject[grouperName] = await (await new grouper(settings, predicateElements, renderCallback)).template()
       }
     }
   }

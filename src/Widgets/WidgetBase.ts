@@ -258,7 +258,7 @@ export abstract class WidgetBase {
 
   public async render () {
     await this.preRender()
-    ;(this.host.parentElement as HTMLElement && { widget: { render: Function }}).widget?.render()
+    ;(this.host?.parentElement as HTMLElement && { widget: { render: Function }}).widget?.render()
 
     return render(this.host, html`
       ${this.label()}

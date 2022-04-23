@@ -46,5 +46,7 @@ export class AddressGrouper extends GrouperBase {
       this.elements.addressLocality.setValue(result.locality),
       this.elements.addressRegion.setValue(result.region),
     ])
+
+    this.render()
   }
 }
