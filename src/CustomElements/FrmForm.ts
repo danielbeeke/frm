@@ -53,7 +53,7 @@ export const init = (settings: Settings) => {
     }
 
     render () {
-      render(this, ShapeToFields(settings, this.definition, this.shapeSubject, this.data))
+      render(this, ShapeToFields(settings, this.definition, this.shapeSubject, this.data, null, this.store, this.engine))
     }
 
   }

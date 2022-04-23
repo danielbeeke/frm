@@ -3,6 +3,8 @@ import { ShapeDefinition } from '../core/ShapeDefinition'
 import { Settings } from '../types/Settings'
 import { resolveAttribute } from '../helpers/resolveAttribute'
 import { WidgetBase } from '../Widgets/WidgetBase'
+import { Store } from 'n3'
+import ComunicaEngine from '@ldflex/comunica'
 
 export const init = (settings: Settings) => {
   class FrmField extends HTMLElement {
@@ -14,6 +16,8 @@ export const init = (settings: Settings) => {
     private values: LDflexPath
     private settings: Settings
     private widget: WidgetBase
+    public store: Store
+    public engine: ComunicaEngine
     
     constructor () {
       super()
@@ -49,10 +53,27 @@ export const init = (settings: Settings) => {
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
-      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values)
+      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values, this.store, this.engine)
 
       await this.widget.render()
       this.classList.remove('loading')
+    }
+
+    async setValue (newValue: Array<any> | any) {
+      newValue = Array.isArray(newValue) ? newValue : [newValue]
+
+      let index = 0
+
+      for await (const oldValue of this.widget.values) {
+        if (newValue[index]) {
+          this.widget.setValue(newValue[index], oldValue)
+        }
+        else {
+          this.widget.removeItem(oldValue)
+        }
+
+        index++
+      }
     }
   }
   

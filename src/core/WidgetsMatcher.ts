@@ -11,11 +11,6 @@ export class WidgetsMatcher implements WidgetsMatcherInterface {
    * This class matches a widget for every SHACL property.
    */
   async match (settings: Settings, shapeDefinition: ShapeDefinition) {
-    // Ensure all the properties on the Widget classes are expanded.
-    for (const widgetTypeClass of Object.values(settings.widgets))
-      for (const arrayToExpand of ['supportedDataTypes', 'supportedProperties', 'requiredProperties', 'requiredPredicates'])
-        widgetTypeClass[arrayToExpand] = widgetTypeClass[arrayToExpand].map(item => settings.context.expandTerm(item))
-
     // Make sure every shacl property has a frm:widget.
     for await (const shallowPredicatePath of shapeDefinition.shape['sh:property']) {
       const predicate = await shallowPredicatePath['sh:path'].value

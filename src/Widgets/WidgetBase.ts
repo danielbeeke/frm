@@ -1,7 +1,7 @@
 import { intersectionCount } from '../helpers/intersectionCount'
 import { html, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
-import { QueryEngine } from '@comunica/query-sparql-solid';
+import ComunicaEngine from '@ldflex/comunica'
 import { Store } from 'n3';
 import { Settings } from '../types/Settings'
 import { lastPart as lastPartOriginal } from '../helpers/lastPart'
@@ -49,19 +49,27 @@ export abstract class WidgetBase {
 
   public showDescription: boolean = false
   public showEmptyItem: boolean = false
-  public engine: QueryEngine
+  public engine: ComunicaEngine
   public store: Store
 
   public valuesFetcher: () => LDflexPath
 
-  constructor (settings: Settings, host: HTMLElement, predicate: string, definition: LDflexPath, values: Promise<() => LDflexPath>) {
+  constructor (
+    settings: Settings, 
+    host: HTMLElement, 
+    predicate: string, 
+    definition: LDflexPath, 
+    values: Promise<() => LDflexPath>,
+    store: Store,
+    engine: ComunicaEngine
+  ) {
     this.predicate = predicate
     this.settings = settings
     this.host = host
     this.definition = definition
     this.t = settings.translator.t.bind(settings.translator)
-    this.engine = this.host.closest('frm-form')!['engine']['engine']
-    this.store = this.host.closest('frm-form')!['store']
+    this.engine = engine
+    this.store = store
 
     /** @ts-ignore */
     return values().then((valuesCallback) => {

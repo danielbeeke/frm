@@ -26,6 +26,12 @@ import { DropdownWidget } from './Widgets/DropdownWidget'
 import { DateWidget } from './Widgets/DateWidget'
 import { NodeWidget } from './Widgets/NodeWidget'
 
+// Groupers
+import { AddressGrouper } from './Groupers/AddressGrouper'
+
+// Plugins
+import { PositionstackGeocoder } from './Plugins/Geocoder/PositionstackGeocoder'
+
 export default {
   context: new JsonLdContextNormalized({
     '@language': 'en',
@@ -48,6 +54,10 @@ export default {
     'dropdown': DropdownWidget,
     'date': DateWidget,
     'node': NodeWidget
+  },
+  // geocoder: new PositionstackGeocoder(YOUR_KEY)
+  groupers: {
+    'address': AddressGrouper
   },
   dataFactory: DataFactory,
   keys: {},

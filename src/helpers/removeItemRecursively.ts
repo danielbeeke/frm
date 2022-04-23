@@ -8,7 +8,8 @@ export const removeItemRecursively = async (widget: WidgetBase, value: LDflexPat
   if (!value) widget.showEmptyItem = false
   else {
     const term = await value.term
-    await widget.engine.queryVoid(`
+    /** @ts-ignore */
+    await widget.engine.engine.queryVoid(`
       delete { ?s ?p ?o }
       where {
         ?term (<http://a.com/a>|!<http://a.com/a>)* ?o . 
