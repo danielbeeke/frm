@@ -8,9 +8,12 @@ export abstract class GrouperBase {
   public elements: { [key: string]: WidgetHtmlElement } = {}
   static aliasses = {}
   public settings: Settings
+  public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
 
   constructor (settings: Settings, elements: { [key: string]: WidgetHtmlElement }) {
     this.settings = settings
+    this.t = settings.translator.t.bind(settings.translator)
+
     /** @ts-ignore */
     const aliasses = this.constructor.aliasses
 

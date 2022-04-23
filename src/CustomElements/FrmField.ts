@@ -75,6 +75,10 @@ export const init = (settings: Settings) => {
         index++
       }
     }
+
+    getValue () {
+      return this.widget.values
+    }
   }
   
   customElements.define('frm-field', FrmField)

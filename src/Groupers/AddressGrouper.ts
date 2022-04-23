@@ -20,7 +20,18 @@ export class AddressGrouper extends GrouperBase {
           <input type="search" onchange=${(event) => this.search(event)} />
         ` : null}
 
-        ${Object.values(this.elements)}
+        <p>
+          ${this.elements.streetAddress.getValue()}<br>
+          ${this.elements.postalCode.getValue()}<br>
+          ${this.elements.addressLocality.getValue()}<br>
+          ${this.elements.addressRegion.getValue()}
+        </p>
+
+        <details>
+          <summary>${this.t('edit-manually')}</summary>
+          ${Object.values(this.elements)}
+        </details>
+
       </div>
     `
   }
@@ -30,7 +41,7 @@ export class AddressGrouper extends GrouperBase {
     if (!result) return
     
     await Promise.all([
-      this.elements.streetAddress.setValue(result.street),
+      this.elements.streetAddress.setValue(`${result.street} ${result.number}`),
       this.elements.postalCode.setValue(result.postalCode),
       this.elements.addressLocality.setValue(result.locality),
       this.elements.addressRegion.setValue(result.region),
