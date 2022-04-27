@@ -21,7 +21,6 @@ export const removeItemRecursively = async (widget: WidgetBase, value: LDflexPat
         ?s ?p ?o .
       }`, { 
       sources: [widget.store],
-      /** @ts-ignore */
       initialBindings: BF.fromRecord({ term }),
     })
   }
