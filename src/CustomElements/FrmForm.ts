@@ -1,12 +1,13 @@
 import { ShapeDefinition } from '../core/ShapeDefinition'
 import { Settings } from '../types/Settings'
 import { resolveAttribute } from '../helpers/resolveAttribute'
-import { render } from '../helpers/uhtml'
+import { render, html } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import { rdfToLDflex } from '../helpers/rdfToLDflex'
 import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
 import { ShapeToFields } from '../core/ShapeToFields'
+import { storeToTurtle } from '../helpers/storeToTurtle'
 
 export const init = (settings: Settings) => {
   class FrmForm extends HTMLFormElement {
@@ -53,7 +54,23 @@ export const init = (settings: Settings) => {
     }
 
     render () {
-      render(this, ShapeToFields(settings, this.definition, this.shapeSubject, this.data, null, this.store, this.engine, () => this.render()))
+      render(this, html`
+        ${ShapeToFields(
+          settings, 
+          this.definition, 
+          this.shapeSubject, 
+          this.data, 
+          null, 
+          this.store, 
+          this.engine, 
+          () => this.render()
+        )}
+
+        <button onclick=${async () => {
+          const turtle = await storeToTurtle(this.store)
+          console.log(turtle)
+        }}>${settings.translator.t('submit')}</button>
+      `)
     }
 
   }

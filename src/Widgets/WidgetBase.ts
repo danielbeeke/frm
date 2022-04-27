@@ -51,7 +51,7 @@ export abstract class WidgetBase {
   public showEmptyItem: boolean = false
   public engine: ComunicaEngine
   public store: Store
-
+  public parentRender: Function
   public valuesFetcher: () => LDflexPath
 
   constructor (
@@ -61,7 +61,8 @@ export abstract class WidgetBase {
     definition: LDflexPath, 
     values: Promise<() => LDflexPath>,
     store: Store,
-    engine: ComunicaEngine
+    engine: ComunicaEngine,
+    parentRender: Function
   ) {
     this.predicate = predicate
     this.settings = settings
@@ -70,6 +71,7 @@ export abstract class WidgetBase {
     this.t = settings.translator.t.bind(settings.translator)
     this.engine = engine
     this.store = store
+    this.parentRender = parentRender ? parentRender : () => null
 
     /** @ts-ignore */
     return values().then((valuesCallback) => {
@@ -118,10 +120,11 @@ export abstract class WidgetBase {
 
     if (!oldValue && newRawValue) {
       this.showEmptyItem = false
+      // console.log(await this.values.add(newValue).sparql)
       await this.values.add(newValue)
     }
     else if (oldValue && newRawValue) {
-      
+      // console.log(await this.values.replace(oldValue, newValue).sparql)
       await this.values.replace(oldValue, newValue)
     }
 
@@ -258,7 +261,7 @@ export abstract class WidgetBase {
 
   public async render () {
     await this.preRender()
-    ;(this.host?.parentElement as HTMLElement && { widget: { render: Function }}).widget?.render()
+    this.parentRender()
 
     return render(this.host, html`
       ${this.label()}

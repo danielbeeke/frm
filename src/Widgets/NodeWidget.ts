@@ -1,8 +1,9 @@
 import { WidgetBase } from './WidgetBase'
 import { ShapeDefinition } from '../core/ShapeDefinition'
 import { LDflexPath } from '../types/LDflexPath'
-import { ShapeToFields } from '../core/ShapeToFields';
-import { removeItemRecursively } from '../helpers/removeItemRecursively';
+import { ShapeToFields } from '../core/ShapeToFields'
+import { removeItemRecursively } from '../helpers/removeItemRecursively'
+import { Literal, NamedNode } from 'n3'
 
 export class NodeWidget extends WidgetBase {
 
@@ -21,7 +22,20 @@ export class NodeWidget extends WidgetBase {
 
   async addItem() {
     const node = this.settings.dataFactory.blankNode()
+    const targetClass = await this.nodeShapeDefinition.shape['sh:targetClass'].value
+
+    /** @ts-ignore */
+    node.skolemized = {
+      termType: 'NamedNode',
+      value: 'urn:comunica_skolem:source_0:' + node.value
+    }
+
     await this.values.add(node)
+
+    if (targetClass) {
+      await this.store.addQuad(node, new NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), new Literal(targetClass))
+    }
+
     await this.render()
   }
 
@@ -30,7 +44,16 @@ export class NodeWidget extends WidgetBase {
   }
 
   async item (value: LDflexPath) {
-    return ShapeToFields(this.settings, this.nodeShapeDefinition, this.nodeShape, this.values[this.predicate], value, this.store, this.engine, () => this.render())
+    return value ? ShapeToFields(
+      this.settings, 
+      this.nodeShapeDefinition, 
+      this.nodeShape, 
+      this.values[this.predicate], 
+      value, 
+      this.store, 
+      this.engine, 
+      () => this.render()
+    ) : null
   }
 
 }

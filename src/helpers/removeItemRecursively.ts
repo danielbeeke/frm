@@ -4,6 +4,11 @@ import { BindingsFactory } from '@comunica/bindings-factory';
 
 const BF = new BindingsFactory();
 
+/**
+ * TODO this removes too much.
+ * @param widget 
+ * @param value 
+ */
 export const removeItemRecursively = async (widget: WidgetBase, value: LDflexPath) => {
   if (!value) widget.showEmptyItem = false
   else {

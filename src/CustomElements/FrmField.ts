@@ -61,9 +61,9 @@ export const init = (settings: Settings) => {
 
     async setValue (newValue: Array<any> | any) {
       newValue = Array.isArray(newValue) ? newValue : [newValue]
-
       let index = 0
 
+      // Replacements and deletions
       for await (const oldValue of this.widget.values) {
         if (newValue[index]) {
           this.widget.setValue(newValue[index], oldValue)
@@ -73,6 +73,13 @@ export const init = (settings: Settings) => {
         }
 
         index++
+      }
+
+      // Additions
+      if (index < newValue.length) {
+        for (let i = index; i < newValue.length; i++) {
+          this.widget.setValue(newValue[index])
+        }
       }
     }
 

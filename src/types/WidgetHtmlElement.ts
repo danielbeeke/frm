@@ -6,4 +6,5 @@ export type WidgetHtmlElement = HTMLElement & {
   widget: WidgetBase
   setValue: (value: string) => Promise<void>
   getValue: LDflexPath
+  nodeName: string
 }

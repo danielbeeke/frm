@@ -8,7 +8,8 @@ export class AddressGrouper extends GrouperBase {
       'schema:streetAddress',
       'schema:addressRegion',
       'schema:addressLocality',
-      'schema:postalCode'
+      'schema:postalCode',
+      'schema:addressCountry'
     ]
   ]
 
@@ -21,15 +22,11 @@ export class AddressGrouper extends GrouperBase {
         ` : null}
 
         <p>
-          ${this.elements.streetAddress.getValue()}<br>
-          ${this.elements.postalCode.getValue()}<br>
-          ${this.elements.addressLocality.getValue()}<br>
-          ${this.elements.addressRegion.getValue()}
         </p>
 
         <details>
           <summary>${this.t('edit-manually')}</summary>
-          ${Object.values(this.elements)}
+          ${Object.values(this.templates)}
         </details>
 
       </div>
@@ -39,14 +36,15 @@ export class AddressGrouper extends GrouperBase {
   async search (event: InputEvent) {
     const result = await this.settings.geocoder!.search((event.target as HTMLInputElement).value)
     if (!result) return
-    
+
     await Promise.all([
-      this.elements.streetAddress.setValue(`${result.street} ${result.number}`),
-      this.elements.postalCode.setValue(result.postalCode),
-      this.elements.addressLocality.setValue(result.locality),
-      this.elements.addressRegion.setValue(result.region),
+      this.values.streetAddress.setValue(`${result.street} ${result.number}`),
+      this.values.postalCode.setValue(result.postalCode),
+      this.values.addressLocality.setValue(result.locality),
+      this.values.addressRegion.setValue(result.region),
+      this.values.addressCountry.setValue(result.country),
     ])
 
-    this.render()
+    await this.render()
   }
 }

@@ -1,5 +1,6 @@
 import { init as initFrmForm } from './CustomElements/FrmForm'
 import { init as initFrmField } from './CustomElements/FrmField'
+
 import defaultConfig from './defaultConfig'
 import { Settings } from './types/Settings'
 

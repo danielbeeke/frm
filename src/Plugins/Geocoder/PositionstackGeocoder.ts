@@ -19,8 +19,8 @@ export class PositionstackGeocoder extends GeocoderBase {
       const response = await fetch(`${this.proxy}http${this.useHttps ? 's' : ''}://api.positionstack.com/v1/forward?access_key=${this.apiKey}&query=${searchTerm}`)
       const { data: [ item ] } = await response.json()
   
-      const { locality, latitude, longitude, number, country, region, postal_code: postalCode, street } = item
-  
+      const { locality, latitude, longitude, number, country_code: country, region, postal_code: postalCode, street } = item
+
       return {
         locality,
         latitude,
@@ -30,7 +30,7 @@ export class PositionstackGeocoder extends GeocoderBase {
         country,
         postalCode,
         street
-      }  
+      }
     }
     catch (exception) {
       console.log(exception)

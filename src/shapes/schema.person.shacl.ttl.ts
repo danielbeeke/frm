@@ -36,6 +36,7 @@ schema:PersonShape
 
 schema:AddressShape
     a sh:NodeShape ;
+    sh:targetClass schema:PostalAddress ;
     sh:closed true ;
     sh:property [
         sh:path schema:streetAddress ;
@@ -54,5 +55,9 @@ schema:AddressShape
         sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] ) ;
         sh:minInclusive 10000 ;
         sh:maxInclusive 99999 ;
+    ] ;
+    sh:property [
+        sh:path schema:addressCountry ;
+        sh:datatype xsd:string ;
     ] .
 `

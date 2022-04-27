@@ -4,6 +4,11 @@ import { ShapeDefinition } from './ShapeDefinition'
 import { html, render } from '../helpers/uhtml'
 import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
+import { GrouperBase } from '../Groupers/GrouperBase'
+import { lastPart } from '../helpers/lastPart'
+
+const grouperCache = new WeakMap()
+const templateCache = new WeakMap()
 
 export const ShapeToFields = async (
   settings: Settings, 
@@ -15,42 +20,77 @@ export const ShapeToFields = async (
   engine: ComunicaEngine,
   renderCallback: Function
 ) => {
-  const renderObject = {}
+  const fields = {}
+
+  let groupers: { [key: string]: GrouperBase } = grouperCache.get(value)
+  let templates: any = templateCache.get(shapeDefinition)
+
+  if (!groupers) {
+    templates = await shapeDefinition.shape['sh:property'].map(async predicatePath => {
+      const predicate = await predicatePath['sh:path'].value
   
-  for await (const predicatePath of shapeDefinition.shape['sh:property']) {
-    const predicate = await predicatePath['sh:path'].value
-    const element = document.createElement('div')
+      return [predicate, html`
+        <frm-field
+          ref=${(element) => fields[predicate] = element}
+          .shape=${shapeDefinition}
+          .shapesubject=${shapeSubject}
+          .predicate=${predicate}
+          .store=${store}
+          .engine=${engine}
+          .values=${async () => () => {
+            if (value?.[predicate]) return value?.[predicate]
+            return values?.[predicate] ? values[predicate] : values
+          }}
+        />
+      `, false]
+    })
 
-    await render(element, html`
-      <frm-field
-        .shape=${shapeDefinition}
-        .shapesubject=${shapeSubject}
-        .predicate=${predicate}
-        .store=${store}
-        .engine=${engine}
-        .values=${async () => () => {
-          if (value?.[predicate]) return value?.[predicate]
-          return values?.[predicate] ? values[predicate] : values
-        }}
-      />
-    `)
+    templateCache.set(shapeDefinition, templates)
 
-    renderObject[predicate] = element.children[0]
-  }
+    for (const [grouperName, Grouper] of Object.entries(settings.groupers)) {
+      groupers = {}
 
-  for (const [grouperName, grouper] of Object.entries(settings.groupers)) {
-    for (const predicateGroup of grouper.applicablePredicateGroups) {
-      if (predicateGroup.every(predicate => predicate in renderObject)) {
-        const predicateElements: { [key: string]: any } = {}
-        for (const predicate of predicateGroup) {
-          predicateElements[predicate] = renderObject[predicate]
-          delete renderObject[predicate]
+      for (const predicateGroup of Grouper.applicablePredicateGroups) {
+        if (predicateGroup.every(predicate => templates.find(item => item[0] === predicate))) {
+
+          const grouperElements = {}
+          const grouperTemplates = {}
+          
+          let hadFirst = false
+          for (const predicate of predicateGroup) {
+            const templateTuple = templates.find(item => item[0] === predicate)
+            templateTuple[2] = hadFirst ? true : grouperName
+            grouperTemplates[predicate] = templateTuple[1]
+            hadFirst = true
+
+            const compactedPredicate = settings.context.compactIri(predicate)
+            let name = lastPart(compactedPredicate)
+            const aliasses = Grouper.aliasses
+
+            if (aliasses[name]) name = aliasses[name]
+
+            Object.defineProperty(grouperElements, name, {
+              get () {
+                return fields[predicate]
+              }
+            })
+          }
+          
+          groupers[grouperName] = new Grouper(settings, grouperTemplates, grouperElements, renderCallback)
         }
+      }  
 
-        renderObject[grouperName] = await (await new grouper(settings, predicateElements, renderCallback)).template()
-      }
+      grouperCache.set(shapeDefinition, value)
     }
   }
 
-  return html`${Object.values(renderObject).filter(Boolean)}`
+  return html`
+    ${templates
+      .map(([_predicate, template, skipOrGrouper]) => {
+        if (!skipOrGrouper) return template
+        if (skipOrGrouper !== true) return groupers[skipOrGrouper].template()
+      })
+      .filter(Boolean)
+    }
+  `
 }
