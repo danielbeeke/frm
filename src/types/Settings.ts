@@ -4,6 +4,7 @@ import { DefinitionEnhancer } from '../core/DefinitionEnhancer'
 import { Translator } from '../core/Translator'
 import { DataFactory } from 'n3'
 import { GeocoderBase } from '../Plugins/Geocoder/GeocoderBase'
+import { Internationalization } from '../core/Internationalization'
 
 export type Settings = {
   context: JsonLdContextNormalized,
@@ -18,5 +19,6 @@ export type Settings = {
   dataFactory: typeof DataFactory,
   keys?: {
     [product: string]: string
-  }
+  },
+  internationalization: Internationalization
 }

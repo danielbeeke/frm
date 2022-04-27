@@ -32,7 +32,7 @@ export class DropdownWidget extends WidgetBase {
       placeholder: await this.definition['html:placeholder']?.value ?? this.t('select-a-value'),
       options: itemOptions,
       selectedValue: await value?.value,
-      callback: async (event: InputEvent) => this.setValue((event.target as HTMLInputElement).value, value)
+      callback: async (dropdownValue: string) => this.setValue(dropdownValue, value)
     })
   }
 

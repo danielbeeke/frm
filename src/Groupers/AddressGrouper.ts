@@ -21,8 +21,16 @@ export class AddressGrouper extends GrouperBase {
           <input type="search" onchange=${(event) => this.search(event)} />
         ` : null}
 
+        ${(
+          await this.values.streetAddress || 
+          await this.values.addressLocality
+        ) ? html`
         <p>
+          ${this.values.streetAddress}<br>
+          ${this.values.postalCode} ${this.values.addressLocality}<br>
+          ${this.values.addressRegion} ${this.values.addressCountry}
         </p>
+        ` : null}
 
         <details>
           <summary>${this.t('edit-manually')}</summary>

@@ -30,7 +30,11 @@ export class NodeWidget extends WidgetBase {
     await this.values.add(skolemizedNode)
 
     if (targetClass) {
-      await this.store.addQuad(skolemizedNode, new NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), new Literal(targetClass))
+      this.store.addQuad(
+        skolemizedNode, 
+        new NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 
+        new Literal(targetClass), 
+      )
     }
 
     await this.render()

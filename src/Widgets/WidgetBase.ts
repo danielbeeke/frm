@@ -2,7 +2,7 @@ import { intersectionCount } from '../helpers/intersectionCount'
 import { html, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import ComunicaEngine from '@ldflex/comunica'
-import { Store } from 'n3';
+import { Literal, Store } from 'n3';
 import { Settings } from '../types/Settings'
 import { lastPart as lastPartOriginal } from '../helpers/lastPart'
 import { flexify } from '../helpers/LDflexToString'
@@ -107,16 +107,23 @@ export abstract class WidgetBase {
     })()
   }
 
-  async setValue (newRawValue: string | number, value: LDflexPath = null) {
+  async setValue (newRawValue: string | number | Literal, value: LDflexPath = null) {
     const dataType = await this.definition['sh:datatype'].value ? 
     this.settings.dataFactory.namedNode(await this.definition['sh:datatype'].value)
     : null
-    const oldValue = await value?.value
-
+    const oldValue = await value?.term
     const isStringLiteral = dataType?.value === 'http://www.w3.org/2001/XMLSchema#string'
-    const newValue = !isStringLiteral && dataType ? 
+    const newValueIsTerm = newRawValue['datatype']?.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#langString'
+
+    let newValue
+    if (!newValueIsTerm && typeof newRawValue === 'string') {
+      newValue = !isStringLiteral && dataType ? 
       this.settings.dataFactory.literal(newRawValue, dataType) : 
       this.settings.dataFactory.literal(newRawValue)
+    }
+    else {
+      newValue = newRawValue
+    }
 
     if (!oldValue && newRawValue) {
       this.showEmptyItem = false
@@ -238,6 +245,29 @@ export abstract class WidgetBase {
     `
   }
 
+  async l10nSelector (value: LDflexPath) {
+    const l10n = this.settings.internationalization.current
+    const labels = this.settings.internationalization.languageLabels[l10n]
+
+    const options = Object.assign({
+      '': await this.t('translation-language-none')
+    }, labels)
+
+    return this.dropdown({
+      options,
+      selectedValue: value ? value.language : '',
+      placeholder: await this.t('translation-language-placeholder') ?? '',
+      callback: async (dropdownValue) => {
+        if (value) {
+          const rawValue = await value.term.value
+          const newTerm = this.settings.dataFactory.literal(rawValue, dropdownValue ? dropdownValue : null)
+          await this.setValue(newTerm, value)
+        }
+        this.render()
+      }
+    })
+  }
+
   /**
    * Generic dropdown template
    */
@@ -248,8 +278,8 @@ export abstract class WidgetBase {
     callback?: Function | null
   }) {
     return html`
-      <select onchange=${(event: InputEvent) => callback ? callback(event) : null}>
-        ${!selectedValue ? html`<option selected disabled>${placeholder}</option>` : null}
+      <select onchange=${(event: InputEvent) => callback ? callback((event.target as HTMLInputElement).value) : null}>
+        ${!selectedValue && !('' in options) ? html`<option selected disabled>${placeholder}</option>` : null}
         ${Object.entries(options).map(([value, label]) => html`
           <option value=${value} ?selected=${value === selectedValue ? true : null}>
             ${label}

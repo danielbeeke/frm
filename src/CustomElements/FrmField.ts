@@ -86,6 +86,11 @@ export const init = (settings: Settings) => {
     getValue () {
       return this.widget.values
     }
+
+    then (resolve) {
+      resolve(this.getValue())
+    }
+
   }
   
   customElements.define('frm-field', FrmField)

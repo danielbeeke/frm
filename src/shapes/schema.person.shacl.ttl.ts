@@ -17,7 +17,6 @@ schema:PersonShape
         sh:name "given name"@en ;
         sh:name "Gegeven name"@nl ;
         sh:minCount 1 ;
-        sh:maxCount 1 ;
     ] ;
     sh:property [
         sh:path schema:birthDate ;

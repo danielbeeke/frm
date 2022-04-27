@@ -18,4 +18,5 @@ export const init = async (settings: Settings | null = null) => {
   
   initFrmForm(settings)
   initFrmField(settings)
+  await settings.internationalization.init()
 }

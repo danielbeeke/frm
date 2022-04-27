@@ -76,7 +76,7 @@ export const ShapeToFields = async (
             })
           }
           
-          groupers[grouperName] = new Grouper(settings, grouperTemplates, grouperElements, renderCallback)
+          groupers[grouperName] = await new Grouper(settings, grouperTemplates, grouperElements, renderCallback)
         }
       }  
 

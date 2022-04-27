@@ -12,6 +12,7 @@ import { DefinitionEnhancer } from './core/DefinitionEnhancer'
 // Translations
 import english from './translations/english'
 import { Translator } from './core/Translator'
+import { Internationalization } from './core/Internationalization'
 
 // AtributeTransformers
 import { RequiredAttributeTransformer } from './AttributeTransformers/RequiredAttributeTransformer'
@@ -37,6 +38,7 @@ export default {
     '@language': 'en',
     ...basePrefixes
   }),
+  internationalization: new Internationalization(['en', 'nl']),
   proxy: 'http://localhost:1234/cors/',
   definitionEnhancer: new DefinitionEnhancer(),
   blacklistedProperties,

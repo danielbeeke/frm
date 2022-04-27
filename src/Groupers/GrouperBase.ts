@@ -1,4 +1,4 @@
-import { html, Hole } from '../helpers/uhtml'
+import { html, Hole, render } from '../helpers/uhtml'
 import { Settings } from '../types/Settings'
 import { WidgetHtmlElement } from '../types/WidgetHtmlElement'
 import { lastPart } from '../helpers/lastPart'
@@ -19,6 +19,14 @@ export abstract class GrouperBase {
     this.t = settings.translator.t.bind(settings.translator)
     this.render = renderCallback
 
+    const promise = Object.values(templates).map(async template => {
+      const temporaryElement = document.createElement('div')
+      await render(temporaryElement, template)
+      if (!temporaryElement.children[0]['widget']) {
+        await (temporaryElement.children[0] as WidgetHtmlElement).connectedCallback()
+      }
+    })
+
     /** @ts-ignore */
     const aliasses = this.constructor.aliasses
 
@@ -29,6 +37,9 @@ export abstract class GrouperBase {
       this.templates[name] = htmlElement
       this.values = values
     }
+
+    /** @ts-ignore */
+    return Promise.all(promise).then(() => this)
   }
 
   async template () {
