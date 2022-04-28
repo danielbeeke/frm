@@ -55,7 +55,7 @@ schema:PersonShape
 
 schema:TopGroup
 	a sh:PropertyGroup ;
-	sh:order 0 ;
+	sh:order 1 ;
     html:class "top-container" ;
 	rdfs:label "Top"@en .
 
