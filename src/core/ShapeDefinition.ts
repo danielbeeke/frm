@@ -77,4 +77,11 @@ export class ShapeDefinition {
     return path['^sh:path']
   }
 
+  /**
+   * Returns a LDflexPath for one predicate.
+   */
+   getShaclGroup (groupIRI: string) {
+    const expandedGroupIRI = this.settings.context.expandTerm(groupIRI)
+    return this.createLDflexPath(this.store, expandedGroupIRI)
+  }
 }

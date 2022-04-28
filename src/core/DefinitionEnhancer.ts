@@ -28,7 +28,7 @@ export class DefinitionEnhancer implements DefinitionEnhancerInterface {
     const bindingsStream = await comunica.queryBindings(`SELECT * { ?s ?p ?o }`, {
       httpProxyHandler: new ProxyHandlerStatic(settings.proxy),
       sources: [predicate],
-      fetch: fetched() // Ontology may be cached :)
+      fetch: fetched // Ontology may be cached :)
     })
 
     const bindings = await bindingsStream.toArray()

@@ -33,12 +33,15 @@ import { AddressGrouper } from './Groupers/AddressGrouper'
 // Plugins
 import { PositionstackGeocoder } from './Plugins/Geocoder/PositionstackGeocoder'
 
+// Elements
+import { FrmLanguageTabs } from './CustomElements/FrmLanguageTabs'
+
 export default {
   context: new JsonLdContextNormalized({
     '@language': 'en',
     ...basePrefixes
   }),
-  internationalization: new Internationalization(['en', 'nl']),
+  internationalization: new Internationalization(['en', 'nl'], 'mixed'),
   proxy: 'http://localhost:1234/cors/',
   definitionEnhancer: new DefinitionEnhancer(),
   blacklistedProperties,
@@ -61,9 +64,12 @@ export default {
   groupers: {
     'address': AddressGrouper
   },
+  elements: {
+    'frm-language-tabs': FrmLanguageTabs
+  },
   dataFactory: DataFactory,
   keys: {},
   translator: new Translator({
-    'en-US': english
+    'en': english
   })
 } as Settings

@@ -10,7 +10,7 @@
     "generate-js-shapes": "node scripts/generate-shapes.mjs",
     "test": "jest",
     "test:watch": "jest --watch",
-    "demo": "parcel demo/index.html",
+    "demo": "npm run generate-js-shapes && parcel demo/index.html",
     "postinstall": "patch-package"
   },
   "author": "Daniel Beeke",

@@ -17,6 +17,9 @@ export type Settings = {
   translator: Translator,
   geocoder?: GeocoderBase,
   dataFactory: typeof DataFactory,
+  elements: {
+    [key: string]: (settings: Settings) => any
+  }
   keys?: {
     [product: string]: string
   },

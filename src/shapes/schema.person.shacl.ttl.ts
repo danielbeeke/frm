@@ -7,17 +7,37 @@ export default `
 @prefix schema: <http://schema.org/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix html: <http://www.w3.org/1999/xhtml/> .
+@prefix frm: <http://frm.danielbeeke.nl/ontology#> .
 
 schema:PersonShape
     a sh:NodeShape ;
+
+    frm:element [
+        sh:group schema:TopGroup ;
+    	rdfs:label "Language"@en ;
+        frm:widget "language-tabs" ;
+    ] ;
+
     sh:targetClass schema:Person ;
     sh:property [
+        sh:group schema:NameGroup ;
         sh:path schema:givenName ;
+        sh:order 1 ;
         sh:datatype xsd:string ;
         sh:name "given name"@en ;
         sh:name "Gegeven name"@nl ;
         sh:minCount 1 ;
     ] ;
+
+    sh:property [
+        sh:group schema:NameGroup ;
+        sh:path schema:familyName ;
+        sh:order 2 ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+    ] ;
+
     sh:property [
         sh:path schema:birthDate ;
         sh:datatype xsd:date ;
@@ -32,6 +52,18 @@ schema:PersonShape
         sh:path schema:address ;
         sh:node schema:AddressShape ;
     ] .
+
+schema:TopGroup
+	a sh:PropertyGroup ;
+	sh:order 0 ;
+    html:class "top-container" ;
+	rdfs:label "Top"@en .
+
+schema:NameGroup
+	a sh:PropertyGroup ;
+	sh:order 2 ;
+    html:class "name-container" ;
+	rdfs:label "Name"@en .
 
 schema:AddressShape
     a sh:NodeShape ;

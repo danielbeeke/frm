@@ -203,7 +203,16 @@ export abstract class WidgetBase {
     return html`
       <input 
         ref=${this.attributes()} 
-        onchange=${(event: InputEvent) => this.setValue((event.target as HTMLInputElement).value, value)} 
+        onchange=${async (event: InputEvent) => {
+          const previousLanguage = await value?.language
+          if (previousLanguage) {
+            const term = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, previousLanguage)
+            this.setValue(term, value)
+          }
+          else {
+            this.setValue((event.target as HTMLInputElement).value, value)
+          }
+        }} 
         .value=${value} 
       />
     `
@@ -246,7 +255,15 @@ export abstract class WidgetBase {
   }
 
   async l10nSelector (value: LDflexPath) {
+    // console.log(this.settings.internationalization.mode)
+    if (this.settings.internationalization.mode === 'tabs') return null
+
     const l10n = this.settings.internationalization.current
+
+    const hasLanguages = Object.keys(this.settings.internationalization.languageLabels).length > 0
+
+    if (!hasLanguages) return null
+
     const labels = this.settings.internationalization.languageLabels[l10n]
 
     const options = Object.assign({
@@ -262,6 +279,11 @@ export abstract class WidgetBase {
           const rawValue = await value.term.value
           const newTerm = this.settings.dataFactory.literal(rawValue, dropdownValue ? dropdownValue : null)
           await this.setValue(newTerm, value)
+        }
+        else {
+          // console.log(dropdownValue)
+          const newTerm = this.settings.dataFactory.literal('', dropdownValue ? dropdownValue : null)
+          await this.setValue(newTerm)
         }
         this.render()
       }
