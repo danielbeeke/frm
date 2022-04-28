@@ -5,7 +5,6 @@ import { lastPart } from '../helpers/lastPart'
 
 export abstract class GrouperBase {
   
-  public templates: { [key: string]: Hole } = {}
   public values: { [key: string]: WidgetHtmlElement } = {}
   static aliasses = {}
   public settings: Settings
@@ -14,29 +13,27 @@ export abstract class GrouperBase {
 
   public static applicablePredicateGroups: Array<Array<string>>
 
-  constructor (settings: Settings, templates: { [key: string]: Hole }, values: { [key: string]: WidgetHtmlElement }, renderCallback) {
+  constructor (settings: Settings, templates: { [key: string]: Hole }, renderCallback) {
     this.settings = settings
     this.t = settings.translator.t.bind(settings.translator)
     this.render = renderCallback
 
-    const promise = Object.values(templates).map(async template => {
+    /** @ts-ignore */
+    const aliasses = this.constructor.aliasses
+
+    const promise = Object.entries(templates).map(async ([expandedPredicate, template]) => {
+      const compactedPredicate = settings.context.compactIri(expandedPredicate)
+      let name = lastPart(compactedPredicate)
+      if (aliasses[name]) name = aliasses[name]
+
       const temporaryElement = document.createElement('div')
       await render(temporaryElement, template)
       if (!temporaryElement.children[0]['widget']) {
         await (temporaryElement.children[0] as WidgetHtmlElement).connectedCallback()
       }
+
+      this.values[name] = (temporaryElement.children[0] as WidgetHtmlElement)
     })
-
-    /** @ts-ignore */
-    const aliasses = this.constructor.aliasses
-
-    for (const [expandedPredicate, htmlElement] of Object.entries(templates)) {
-      const compactedPredicate = settings.context.compactIri(expandedPredicate)
-      let name = lastPart(compactedPredicate)
-      if (aliasses[name]) name = aliasses[name]
-      this.templates[name] = htmlElement
-      this.values = values
-    }
 
     /** @ts-ignore */
     return Promise.all(promise).then(() => this)

@@ -4,7 +4,6 @@ import { ShapeDefinition } from './ShapeDefinition'
 import { html } from '../helpers/uhtml'
 import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
-import { GrouperBase } from '../Groupers/GrouperBase'
 import { lastPart } from '../helpers/lastPart'
 import { stableSort } from '../helpers/stableSort'
 import { RenderItem } from '../types/RenderItem'
@@ -81,8 +80,6 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
   for (const [grouperName, Grouper] of Object.entries(settings.groupers)) {
     for (const predicateGroup of Grouper.applicablePredicateGroups) {
       if (predicateGroup.every(predicate => fields.find(item => item.identifier === predicate))) {
-
-        const grouperElements = {}
         const grouperTemplates = {}
         
         for (const predicate of predicateGroup) {
@@ -96,16 +93,11 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
             const aliasses = Grouper.aliasses
   
             if (aliasses[name]) name = aliasses[name]
-  
-            Object.defineProperty(grouperElements, name, {
-              get () {
-                return fields[predicate]
-              }
-            })  
+
           }
         }
           
-        const grouper = await new Grouper(settings, grouperTemplates, grouperElements, renderCallback)
+        const grouper = await new Grouper(settings, grouperTemplates, renderCallback)
 
         grouperInstances.push({
           grouper,
@@ -138,8 +130,8 @@ export const ShapeToFields = async (
   const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine)
   const groups = await getGroups(shapeDefinition, fields)
   const groupers = await getGroupers(settings, fields, renderCallback)
-  const filteredFields = fields.filter(field => !field.picked)
-  const merged: Array<RenderItem> = [...filteredFields, ...groups, ...groupers]  
+  const unpickedFields = fields.filter(field => !field.picked)
+  const merged: Array<RenderItem> = [...unpickedFields, ...groups, ...groupers]  
   const sortedRenderItems = stableSort(merged, (a: RenderItem, b: RenderItem) => b.order - a.order)
 
   return html`${sortedRenderItems.map(item => item.template)}`

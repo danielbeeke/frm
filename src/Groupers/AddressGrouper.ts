@@ -14,6 +14,8 @@ export class AddressGrouper extends GrouperBase {
   ]
 
   async template () {
+    console.log(this.values)
+
     return html`
       <div class="address-group">
 
@@ -34,7 +36,7 @@ export class AddressGrouper extends GrouperBase {
 
         <details>
           <summary>${this.t('edit-manually')}</summary>
-          ${Object.values(this.templates)}
+          ${Object.values(this.values)}
         </details>
 
       </div>
