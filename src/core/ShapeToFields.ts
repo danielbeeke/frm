@@ -113,9 +113,6 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
   return grouperInstances
 }
 
-/**
- * TODO inject values again into the Groupers
- */
 export const ShapeToFields = async (
   settings: Settings, 
   shapeDefinition: ShapeDefinition, 

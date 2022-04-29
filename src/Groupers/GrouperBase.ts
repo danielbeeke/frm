@@ -8,6 +8,7 @@ export abstract class GrouperBase {
   public values: { [key: string]: WidgetHtmlElement } = {}
   static aliasses = {}
   public settings: Settings
+  public templates: Array<Hole> = []
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
   public render: () => Promise<void>
 
@@ -33,6 +34,7 @@ export abstract class GrouperBase {
       }
 
       this.values[name] = (temporaryElement.children[0] as WidgetHtmlElement)
+      this.templates[name] = template
     })
 
     /** @ts-ignore */

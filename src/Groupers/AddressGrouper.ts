@@ -36,7 +36,7 @@ export class AddressGrouper extends GrouperBase {
 
         <details>
           <summary>${this.t('edit-manually')}</summary>
-          ${Object.values(this.values)}
+          ${Object.values(this.templates)}
         </details>
 
       </div>
