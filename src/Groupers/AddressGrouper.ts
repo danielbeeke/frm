@@ -14,8 +14,6 @@ export class AddressGrouper extends GrouperBase {
   ]
 
   async template () {
-    console.log(this.values)
-
     return html`
       <div class="address-group">
 

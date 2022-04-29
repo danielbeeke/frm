@@ -13,7 +13,7 @@ export type Settings = {
   attributeTransformers: { [key: string]: any },
   widgetsMatcher: WidgetsMatcherInterface,
   definitionEnhancer: DefinitionEnhancer,
-  proxy: string,
+  proxy?: string,
   translator: Translator,
   geocoder?: GeocoderBase,
   dataFactory: typeof DataFactory,

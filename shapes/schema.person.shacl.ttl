@@ -13,7 +13,7 @@ schema:PersonShape
     frm:element [
         sh:group schema:TopGroup ;
     	rdfs:label "Language"@en ;
-        frm:widget "language-tabs" ;
+        frm:widget "frm-language-tabs" ;
     ] ;
 
     sh:targetClass schema:Person ;
@@ -81,7 +81,7 @@ schema:AddressShape
     sh:property [
         sh:path schema:postalCode ;
         sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] ) ;
-        sh:minInclusive 10000 ;
+        sh:minInclusive 1000 ;
         sh:maxInclusive 99999 ;
     ] ;
     sh:property [

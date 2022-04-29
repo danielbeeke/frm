@@ -1,10 +1,12 @@
 import { Settings } from '../types/Settings'
 import { html, render } from '../helpers/uhtml'
+import { LDflexPath } from '../types/LDflexPath'
 
 export const FrmLanguageTabs = (settings: Settings) => {
   return class FrmLanguageTabs extends HTMLElement {
 
     public settings: Settings
+    public definition: LDflexPath
     
     constructor () {
       super()
@@ -21,7 +23,9 @@ export const FrmLanguageTabs = (settings: Settings) => {
     }
 
     async render () {
-      await render(this, html`Hello`)
+      await render(this, html`
+        <h3>${this.definition['rdfs:label']}</h3>
+      `)
     }
 
   }

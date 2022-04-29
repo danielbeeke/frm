@@ -16,7 +16,7 @@ schema:PersonShape
     frm:element [
         sh:group schema:TopGroup ;
     	rdfs:label "Language"@en ;
-        frm:widget "language-tabs" ;
+        frm:widget "frm-language-tabs" ;
     ] ;
 
     sh:targetClass schema:Person ;

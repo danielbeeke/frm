@@ -42,7 +42,6 @@ export default {
     ...basePrefixes
   }),
   internationalization: new Internationalization(['en', 'nl'], 'mixed'),
-  proxy: 'http://localhost:1234/cors/',
   definitionEnhancer: new DefinitionEnhancer(),
   blacklistedProperties,
   widgetsMatcher: new WidgetsMatcher(),

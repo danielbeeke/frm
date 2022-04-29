@@ -122,12 +122,15 @@ const getElements = async (
   return shapeDefinition.shape['frm:element'].map(async predicatePath => {
     const order = await predicatePath['sh:order'].value
     const group = await predicatePath['sh:group'].value
-    const element = await predicatePath['frm:widget'].value
+    const elementName = await predicatePath['frm:widget'].value
+    const element = document.createElement(elementName)
+
+    element.definition = predicatePath
 
     return {
-      template: document.createElement('frm-' + element),
+      template: element,
       type: 'field',
-      identifier: element,
+      identifier: elementName,
       order: order !== undefined ? parseInt(order) : 0,
       group
     }
