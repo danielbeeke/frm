@@ -35,7 +35,7 @@ const getFields = async (
       />`,
       type: 'field',
       identifier: predicate,
-      order: order !== undefined ? parseInt(order) : 0,
+      order: order !== undefined ? parseInt(order) : 1000,
       group
     }
   })
@@ -66,7 +66,7 @@ const getGroups = async (shapeDefinition: ShapeDefinition, fields: Array<RenderI
         </div>`,
         type: 'group',
         identifier: groupIRI,
-        order: order !== undefined ? parseInt(order) : 0,
+        order: order !== undefined ? parseInt(order) : 1000,
       }
     }
   })
@@ -82,8 +82,11 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
       if (predicateGroup.every(predicate => fields.find(item => item.identifier === predicate))) {
         const grouperTemplates = {}
         
+        let firstOrder: number | null = null
+
         for (const predicate of predicateGroup) {
           const renderItem = fields.find(item => item.identifier === predicate)
+          if (firstOrder === null) firstOrder = renderItem?.order ?? 1000
           if (renderItem?.template) {
             renderItem.picked = true
             grouperTemplates[predicate] = renderItem.template
@@ -101,7 +104,7 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
 
         grouperInstances.push({
           grouper,
-          order: 0,
+          order: firstOrder!,
           template: grouper.template(),
           type: 'grouper',
           identifier: grouperName
@@ -111,6 +114,24 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
   }  
 
   return grouperInstances
+}
+
+const getElements = async (
+  shapeDefinition: ShapeDefinition, 
+) => {
+  return shapeDefinition.shape['frm:element'].map(async predicatePath => {
+    const order = await predicatePath['sh:order'].value
+    const group = await predicatePath['sh:group'].value
+    const element = await predicatePath['frm:widget'].value
+
+    return {
+      template: document.createElement('frm-' + element),
+      type: 'field',
+      identifier: element,
+      order: order !== undefined ? parseInt(order) : 0,
+      group
+    }
+  })
 }
 
 export const ShapeToFields = async (
@@ -125,11 +146,13 @@ export const ShapeToFields = async (
 ) => {
 
   const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine)
-  const groups = await getGroups(shapeDefinition, fields)
+  const elements = await getElements(shapeDefinition)
+  const mergedItems = [...fields, ...elements]
+  const groups = await getGroups(shapeDefinition, mergedItems)
   const groupers = await getGroupers(settings, fields, renderCallback)
-  const unpickedFields = fields.filter(field => !field.picked)
-  const merged: Array<RenderItem> = [...unpickedFields, ...groups, ...groupers]  
-  const sortedRenderItems = stableSort(merged, (a: RenderItem, b: RenderItem) => b.order - a.order)
+  const unpickedItems = mergedItems.filter(field => !field.picked)
+  const merged: Array<RenderItem> = [...unpickedItems, ...groups, ...groupers]  
+  const sortedRenderItems = stableSort(merged, (a: RenderItem, b: RenderItem) => a.order - b.order)
 
   return html`${sortedRenderItems.map(item => item.template)}`
 }
