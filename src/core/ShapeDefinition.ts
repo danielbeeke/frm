@@ -55,7 +55,7 @@ export class ShapeDefinition {
   createLDflexPath (store, subjectUri) {
     const queryEngine = new ComunicaEngine([store], {
       options: { 
-        httpProxyHandler: new ProxyHandlerStatic(this.settings.proxy),
+        httpProxyHandler: this.settings.proxy ? new ProxyHandlerStatic(this.settings.proxy) : undefined,
       }
     })
     const path = new PathFactory({ context: this.settings.context.getContextRaw(), queryEngine, handlers: {

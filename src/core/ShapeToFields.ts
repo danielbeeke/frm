@@ -41,6 +41,11 @@ const getFields = async (
   })
 }
 
+/**
+ * Enables sh:group
+ * 
+ * TODO check if nested groups work and if te order of the turtle text makes a difference.
+ */
 const getGroups = async (shapeDefinition: ShapeDefinition, fields: Array<RenderItem>) => {
   const groupIRIs = new Set()
 

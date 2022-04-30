@@ -84,7 +84,7 @@ schema:AddressShape
     sh:property [
         sh:path schema:postalCode ;
         sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] ) ;
-        sh:minInclusive 10000 ;
+        sh:minInclusive 1000 ;
         sh:maxInclusive 99999 ;
     ] ;
     sh:property [

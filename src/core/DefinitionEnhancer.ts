@@ -26,7 +26,7 @@ export class DefinitionEnhancer implements DefinitionEnhancerInterface {
 
   async enhanceByOntology (settings: Settings, predicate: string, predicatePath: LDflexPath) {
     const bindingsStream = await comunica.queryBindings(`SELECT * { ?s ?p ?o }`, {
-      httpProxyHandler: new ProxyHandlerStatic(settings.proxy),
+      httpProxyHandler: settings.proxy ? new ProxyHandlerStatic(settings.proxy) : undefined,
       sources: [predicate],
       fetch: fetched // Ontology may be cached :)
     })
