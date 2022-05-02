@@ -18,6 +18,7 @@ export const init = (settings: Settings) => {
     private widget: WidgetBase
     public store: Store
     public engine: ComunicaEngine
+    #errors: Array<any>
     
     constructor () {
       super()
@@ -81,6 +82,15 @@ export const init = (settings: Settings) => {
           this.widget.setValue(newValue[index])
         }
       }
+    }
+
+    set errors (errors) {
+      this.#errors = errors
+      this.widget?.render()
+    }
+
+    get errors () {
+      return this.#errors
     }
 
     getValue () {

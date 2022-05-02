@@ -7,7 +7,7 @@ let shaclStore: Store
 
 const validationCache = new Map()
 
-export const validateShaclString = async (turtleShaclShape: string, ) => {
+export const validateShaclString = async (turtleShaclShape: string) => {
   if (!validationCache.has(turtleShaclShape)) {
     if (!shaclStore) {
       const { store } = await rdfToStore(ShaclShaclShape)

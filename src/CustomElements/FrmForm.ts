@@ -8,6 +8,7 @@ import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
 import { ShapeToFields } from '../core/ShapeToFields'
 import { storeToTurtle } from '../helpers/storeToTurtle'
+import SHACLValidator from 'rdf-validate-shacl'
 
 export const init = (settings: Settings) => {
   class FrmForm extends HTMLFormElement {
@@ -21,6 +22,7 @@ export const init = (settings: Settings) => {
     private dataSubject: string
     private store: Store
     private engine: ComunicaEngine
+    private validationReport: any
 
     constructor () {
       super()
@@ -48,13 +50,18 @@ export const init = (settings: Settings) => {
       this.store = store
       this.engine = engine
 
+      this.validator = new SHACLValidator(this.definition.store)
       this.classList.remove('loading')
 
-      this.render()
-    }
+      this.addEventListener('value-deleted', this.render)
+      this.addEventListener('value-changed', this.render)
 
-    render () {
-      render(this, html`
+      await this.render()
+    }
+    async render () {
+      this.validationReport = this.validator.validate(this.store)
+
+      await render(this, html`
         ${ShapeToFields(
           settings, 
           this.definition, 
@@ -63,12 +70,15 @@ export const init = (settings: Settings) => {
           null, 
           this.store, 
           this.engine, 
-          () => this.render()
+          () => this.render(),
+          this.validationReport
         )}
 
         <button onclick=${async () => {
           const turtle = await storeToTurtle(this.store)
           console.log(turtle)
+          this.validate()
+          await this.render()
         }}>${settings.translator.t('submit')}</button>
       `)
     }

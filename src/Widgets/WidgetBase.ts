@@ -62,7 +62,7 @@ export abstract class WidgetBase {
     values: Promise<() => LDflexPath>,
     store: Store,
     engine: ComunicaEngine,
-    parentRender: Function
+    parentRender: Function,
   ) {
     this.predicate = predicate
     this.settings = settings
@@ -79,6 +79,10 @@ export abstract class WidgetBase {
       this.values = this.valuesFetcher()
       return this.init().then(() => this)
     })
+  }
+
+  get validationErrors () {
+    return this.host?.['errors'] ?? []
   }
 
   public async init () {}
@@ -125,14 +129,19 @@ export abstract class WidgetBase {
       newValue = newRawValue
     }
 
-    if (!oldValue && newRawValue) {
+    if (!oldValue) {
       this.showEmptyItem = false
-      // console.log(await this.values.add(newValue).sparql)
       await this.values.add(newValue)
+      this.host.dispatchEvent(new CustomEvent('value-changed', { detail: { newValue, oldValue: null }, bubbles: true }))
     }
-    else if (oldValue && newRawValue) {
-      // console.log(await this.values.replace(oldValue, newValue).sparql)
-      await this.values.replace(oldValue, newValue)
+    else if (oldValue) {
+      if (!newRawValue) {
+        await this.values.delete(oldValue)
+      }
+      else {
+        await this.values.replace(oldValue, newValue)
+      }
+      this.host.dispatchEvent(new CustomEvent('value-changed', { detail: { newValue, oldValue }, bubbles: true }))
     }
 
     await this.render()
@@ -148,6 +157,7 @@ export abstract class WidgetBase {
     else {
       const term = await value.term
       await this.values.delete(term)
+      this.host.dispatchEvent(new CustomEvent('value-deleted', { detail: { oldValue: term }, bubbles: true }))
     }
     await this.render()
   }
@@ -281,7 +291,6 @@ export abstract class WidgetBase {
           await this.setValue(newTerm, value)
         }
         else {
-          // console.log(dropdownValue)
           const newTerm = this.settings.dataFactory.literal('', dropdownValue ? dropdownValue : null)
           await this.setValue(newTerm)
         }
@@ -311,12 +320,28 @@ export abstract class WidgetBase {
     `
   }
 
+  async errors () {
+    return this.validationErrors?.length ? html`
+      <details>
+        <summary>${this.t('validation-error-title')}</summary>
+        <ul>
+        ${this.validationErrors.map(error => {
+          return html`
+            <li>${error.message.map(message => message.value)}</li>
+          `
+        })}
+        </ul>
+      </details>
+    ` : null
+  }
+
   public async render () {
     await this.preRender()
     this.parentRender()
 
     return render(this.host, html`
       ${this.label()}
+      ${this.errors()}
       ${this.showDescription ? this.description() : html``}
       ${this.items()}
       ${(await this.allowMultiple) && !this.showEmptyItem ? this.addButton() : null}

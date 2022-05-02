@@ -51,11 +51,5 @@ export class DefinitionEnhancer implements DefinitionEnhancerInterface {
       await predicatePath.set({ 'sh:datatype': new NamedNode(inTypes[0]) })
     }
 
-    /**
-     * maxCount is infinity if not given.
-     */
-    if (!await predicatePath['sh:maxCount'].value)
-      await predicatePath.set({ 'sh:maxCount': Infinity })
-
   }
 }

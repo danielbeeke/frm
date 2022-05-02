@@ -15,11 +15,18 @@ const getFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
+  validationReport: any
 ) => {
   return shapeDefinition.shape['sh:property'].map(async predicatePath => {
     const predicate = await predicatePath['sh:path'].value
     const order = await predicatePath['sh:order'].value
     const group = await predicatePath['sh:group'].value
+    const fieldErrors = validationReport?.results.filter(error => error.path.value === predicate) ?? []
+
+    if (predicate === 'http://schema.org/givenName') {
+      console.log(fieldErrors)
+    }
+
 
     return {
       template: html`<frm-field
@@ -27,6 +34,7 @@ const getFields = async (
         .shapesubject=${shapeSubject}
         .predicate=${predicate}
         .store=${store}
+        .errors=${fieldErrors}
         .engine=${engine}
         .values=${async () => () => {
           if (value?.[predicate]) return value?.[predicate]
@@ -121,25 +129,32 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
   return grouperInstances
 }
 
+const elementCache = new WeakMap()
 const getElements = async (
   shapeDefinition: ShapeDefinition, 
 ) => {
-  return shapeDefinition.shape['frm:element'].map(async predicatePath => {
-    const order = await predicatePath['sh:order'].value
-    const group = await predicatePath['sh:group'].value
-    const elementName = await predicatePath['frm:widget'].value
-    const element = document.createElement(elementName)
+  if (!elementCache.has(shapeDefinition)) {
+    const elements = shapeDefinition.shape['frm:element'].map(async predicatePath => {
+      const order = await predicatePath['sh:order'].value
+      const group = await predicatePath['sh:group'].value
+      const elementName = await predicatePath['frm:widget'].value
+      const element = document.createElement(elementName)
+  
+      element.definition = predicatePath
+  
+      return {
+        template: element,
+        type: 'field',
+        identifier: elementName,
+        order: order !== undefined ? parseInt(order) : 0,
+        group
+      }
+    })
 
-    element.definition = predicatePath
+    elementCache.set(shapeDefinition, elements)
+  }
 
-    return {
-      template: element,
-      type: 'field',
-      identifier: elementName,
-      order: order !== undefined ? parseInt(order) : 0,
-      group
-    }
-  })
+  return elementCache.get(shapeDefinition)
 }
 
 export const ShapeToFields = async (
@@ -150,10 +165,11 @@ export const ShapeToFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
-  renderCallback: Function
+  renderCallback: Function,
+  validationReport: any
 ) => {
 
-  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine)
+  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport)
   const elements = await getElements(shapeDefinition)
   const mergedItems = [...fields, ...elements]
   const groups = await getGroups(shapeDefinition, mergedItems)

@@ -6,4 +6,5 @@ edit-manually = Edit manually
 submit = Submit
 translation-language-placeholder = - Language of text -
 translation-language-none = No language
+validation-error-title = Validation errors
 `
