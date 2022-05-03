@@ -7,5 +7,5 @@ submit = Submit
 translation-language-placeholder = - Language of text -
 translation-language-none = No language
 validation-error-title = Validation errors
-no-language = - No language -
+no-more-values-not-allowed = No more values allowed, remove one value first.
 `

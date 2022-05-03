@@ -1,5 +1,7 @@
 import { GrouperBase } from './GrouperBase'
 import { html } from '../helpers/uhtml'
+import { icon } from '../helpers/icon'
+import { button } from '../core/CommonTemplates'
 
 export class AddressGrouper extends GrouperBase {
 
@@ -13,12 +15,14 @@ export class AddressGrouper extends GrouperBase {
     ]
   ]
 
+  public expanded: boolean = false
+
   async template () {
     return html`
       <div class="address-group">
 
         ${this.settings.geocoder ? html`
-          <input type="search" onchange=${(event) => this.search(event)} />
+          <input type="search" onchange=${(event) => this.search(event)} />${icon('search')}
         ` : null}
 
         ${(
@@ -32,10 +36,16 @@ export class AddressGrouper extends GrouperBase {
         </p>
         ` : null}
 
-        <details>
-          <summary>${this.t('edit-manually')}</summary>
-          ${Object.values(this.templates)}
-        </details>
+        ${button({
+          cssClasses: [this.expanded ? 'active' : ''],
+          inner: icon('gearFill'),
+          callback: () => {
+            this.expanded = !this.expanded
+            this.render()
+          }
+        })}
+
+        ${this.expanded ? Object.values(this.templates) : null}
 
       </div>
     `

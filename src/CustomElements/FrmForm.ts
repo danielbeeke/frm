@@ -7,8 +7,8 @@ import { rdfToLDflex } from '../helpers/rdfToLDflex'
 import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
 import { ShapeToFields } from '../core/ShapeToFields'
-import { storeToTurtle } from '../helpers/storeToTurtle'
 import SHACLValidator from 'rdf-validate-shacl'
+import { button } from '../core/CommonTemplates'
 
 export const init = (settings: Settings) => {
   class FrmForm extends HTMLElement {
@@ -77,15 +77,18 @@ export const init = (settings: Settings) => {
           this.validationReport
         )}
 
-        <button onclick=${async (event: InputEvent) => {
-          // if (this.validationReport.results.length) {
-          //   event.preventDefault()
-          // }
-          
-          // const turtle = await storeToTurtle(this.store)
-          // console.log(turtle)
-        }}>${settings.translator.t('submit')}</button>
-        </form>
+        ${button({
+          isSubmit: true,
+          callback: async (event: InputEvent) => {
+            // if (this.validationReport.results.length) {
+            //   event.preventDefault()
+            // }
+            
+            // const turtle = await storeToTurtle(this.store)
+            // console.log(turtle)
+          },
+          inner: settings.translator.t('submit')
+        })}
       `)
     }
 

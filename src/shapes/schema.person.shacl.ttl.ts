@@ -28,6 +28,7 @@ schema:PersonShape
         sh:name "given name"@en ;
         sh:name "Gegeven name"@nl ;
         sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] ;
 
     sh:property [
@@ -47,6 +48,7 @@ schema:PersonShape
     sh:property [
         sh:path schema:gender ;
         sh:in ( "female" "male" ) ;
+        sh:maxCount 1 ;
     ] ;
     sh:property [
         sh:path schema:address ;
@@ -72,23 +74,33 @@ schema:AddressShape
     sh:property [
         sh:path schema:streetAddress ;
         sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] ;
     sh:property [
         sh:path schema:addressRegion ;
         sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] ;
     sh:property [
         sh:path schema:addressLocality ;
         sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] ;
     sh:property [
         sh:path schema:postalCode ;
         sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] ) ;
         sh:minInclusive 1000 ;
         sh:maxInclusive 99999 ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] ;
     sh:property [
         sh:path schema:addressCountry ;
         sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] .
 `

@@ -1,6 +1,7 @@
 import { Settings } from '../types/Settings'
 import { html, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
+import { button } from '../core/CommonTemplates'
 
 export const FrmLanguageTabs = (settings: Settings) => {
   return class FrmLanguageTabs extends HTMLElement {
@@ -32,16 +33,14 @@ export const FrmLanguageTabs = (settings: Settings) => {
         <h3 class="title">${this.definition['rdfs:label']}</h3>
 
         <nav class="tabs">
-          ${Object.entries(labels).map(([langCode, label]) => html`
-            <button type="button" onclick=${() => {
+          ${Object.entries(labels).map(([langCode, label]) => button({
+            callback: () => {
               this.settings.internationalization.current = langCode
-            }} class=${`tab ${currentLangCode === langCode ? 'active' : ''}`}>
-              ${label}
-            </button>
-          `)}
-
-
-        </ul>
+            },
+            cssClasses: ['tab', currentLangCode === langCode ? 'active' : ''],
+            inner: label
+          }))}
+        </nav>
       `)
     }
 

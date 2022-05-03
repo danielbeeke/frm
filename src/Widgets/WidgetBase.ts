@@ -1,5 +1,5 @@
 import { intersectionCount } from '../helpers/intersectionCount'
-import { html, render } from '../helpers/uhtml'
+import { html, render, Hole } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import ComunicaEngine from '@ldflex/comunica'
 import { Literal, Store } from 'n3';
@@ -8,6 +8,7 @@ import { lastPart as lastPartOriginal } from '../helpers/lastPart'
 import { flexify } from '../helpers/LDflexToString'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
+import { button, dropdown } from '../core/CommonTemplates'
 
 const lastPart = flexify(lastPartOriginal)
 
@@ -41,6 +42,8 @@ export abstract class WidgetBase {
   public values: LDflexPath
   public predicate: string
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
+
+  public errorsExpanded: boolean = false
 
   public inputAttributes = {
     class: 'input',
@@ -126,6 +129,8 @@ export abstract class WidgetBase {
   async preRender () {
     const valueCount = (await this.values.toArray()).length
     if (!this.showEmptyItem) this.showEmptyItem = valueCount === 0
+
+    if (this.validationErrors.length === 0) this.errorsExpanded = false
   }
 
   /**
@@ -135,7 +140,7 @@ export abstract class WidgetBase {
     return (async () => {
       const valueCount = (await this.values.toArray()).length
       let maxCount = await this.definition['sh:maxCount'].value
-      if (maxCount === 'INF') maxCount = Infinity
+      if (maxCount === 'INF' || maxCount === undefined) maxCount = Infinity
       return valueCount < maxCount
     })()
   }
@@ -179,17 +184,21 @@ export abstract class WidgetBase {
   /**
    * Templates
    */
-  label () {
+  label (inner: Array<Hole> = []) {
     return html`
       <h5 class="label">
         ${this.definition['sh:name|rdfs:label']}
 
-        ${this.button({
-          inner: icon('info'),
-          callback: () => { this.showDescription = !this.showDescription; this.render() },
-        })}
+        ${inner.filter(Boolean).length ? inner.filter(Boolean) : null}
       </h5>
     `
+  }
+
+  descriptionToggle () {
+    return button({
+      inner: icon('info'),
+      callback: () => { this.showDescription = !this.showDescription; this.render() },
+    })
   }
 
   description () {
@@ -213,19 +222,23 @@ export abstract class WidgetBase {
       </div>
     `)
 
-    const values = await this.values.filter(async value => {
+    const filteredValues = await this.values.filter(async value => {
       if (this.settings.internationalization.mode === 'mixed') return value
 
       const valueLanguage = await value.language
       return valueLanguage === this.settings.internationalization.current || !valueLanguage
     })
 
+    const valueCount = (await this.values.toArray()).length
+    let maxCount = parseInt(await this.definition['sh:maxCount'].value)
+
     // uhtml does not understand what to cache here, so we break the cache on purpose.
     // TODO improve.
     return html.for({})`
       <div class="items">
-        ${values.map(callback)}
-        ${!values.length || this.showEmptyItem ? callback() : null}
+        ${filteredValues.map(callback)}
+        ${!filteredValues.length && valueCount === maxCount ? this.t('no-more-values-not-allowed') : null}
+        ${!filteredValues.length && valueCount < maxCount || this.showEmptyItem ? callback() : null}
       </div>
     `
   }
@@ -235,7 +248,10 @@ export abstract class WidgetBase {
       <input 
         ref=${this.attributes()} 
         onchange=${async (event: InputEvent) => {
-          const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value)
+          const allowedDatatypes = [...await this.allowedDatatypes]
+          const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
+
+          const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
           this.setValue(newValue, value)
         }} 
         .value=${value} 
@@ -247,7 +263,7 @@ export abstract class WidgetBase {
    * The button to remove one item
    */
    removeButton (value: LDflexPath) {
-    return this.button({
+    return button({
       inner: icon('x'),
       callback: () => this.removeItem(value),
       cssClasses: ['button', 'danger', value ? '' : 'disabled']
@@ -258,7 +274,7 @@ export abstract class WidgetBase {
    * The button to remove one item
    */
    addButton () {
-    return this.button({
+    return button({
       inner: icon('plus'),
       callback: () => this.addItem(),
       cssClasses: ['button', 'primary']
@@ -266,88 +282,91 @@ export abstract class WidgetBase {
   }
 
   /**
-   * Generic button template
+   * The language selector, used in 'mixed' internationalization mode.
    */
-  button ({ inner, callback, cssClasses }: { 
-    inner: any, callback: Function, cssClasses?: Array<string> 
-  }) {
-    if (!cssClasses) cssClasses = ['button', 'primary']
-    return html`
-      <button type="button" onclick=${callback} class=${cssClasses.join(' ')}>
-        ${inner}
-      </button>
-    `
-  }
-
   async l10nSelector (value: LDflexPath) {
-    if (this.settings.internationalization.mode === 'tabs') return null
-    const l10n = this.settings.internationalization.current
-    const settingsHasLanguages = Object.keys(this.settings.internationalization.languageLabels).length > 0
-    if (!settingsHasLanguages) return null
+    const currentLanguage = this.settings.translator.current
+    const labels = this.settings.internationalization.languageLabels[currentLanguage]
 
+    const label = await value?.value ? html`
+    <span class="language-label">
+      ${await value?.language ? (labels[value.language] ?? value.language) : null}
+    </span>
+    ` : null
+    
     const valueHasLanguage = await value?.language
 
     // We allow the language selector if there is already a language.
     if (!valueHasLanguage && !(await this.allowedDatatypes).has('http://www.w3.org/1999/02/22-rdf-syntax-ns#langString')) return null
 
-    const labels = this.settings.internationalization.languageLabels[l10n]
+    if (this.settings.internationalization.mode === 'tabs') {
+      return html`
+      ${await value?.value ? html`
+      ${icon('translate')}
+      ${label}
+      ${button({
+        callback: async () => {
+          const hadLanguage = await value?.language
+          const rawValue = await value?.term?.value ?? ''
+          const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : this.settings.internationalization.current)
+          await this.setValue(newTerm, value)
+        },
+        inner: await value?.language ? icon('x') : icon('plus')
+      })}
+      ` : null}`
+    }
+
+    const l10n = this.settings.internationalization.current
+    const settingsHasLanguages = Object.keys(this.settings.internationalization.languageLabels).length > 0
+    if (!settingsHasLanguages) return null
+
+    const optionLabels = this.settings.internationalization.languageLabels[l10n]
 
     const options = Object.assign({
       '': await this.t('translation-language-none')
-    }, labels)
+    }, optionLabels)
 
-    return this.dropdown({
-      options,
-      selectedValue: value ? value.language : '',
-      placeholder: await this.t('translation-language-placeholder') ?? '',
-      callback: async (dropdownValue) => {
-        if (value) {
-          const rawValue = await value.term.value
-          const newTerm = this.settings.dataFactory.literal(rawValue, dropdownValue ? dropdownValue : null)
-          await this.setValue(newTerm, value)
-        }
-        else {
-          const newTerm = this.settings.dataFactory.literal('', dropdownValue ? dropdownValue : null)
-          await this.setValue(newTerm)
-        }
-        this.render()
-      }
-    })
-  }
-
-  /**
-   * Generic dropdown template
-   */
-  dropdown ({ options, selectedValue = null, placeholder = null, callback = null }: {
-    options: { [key: string]: string }, 
-    selectedValue: string | null, 
-    placeholder: string | null, 
-    callback?: Function | null
-  }) {
     return html`
-      <select onchange=${(event: InputEvent) => callback ? callback((event.target as HTMLInputElement).value) : null}>
-        ${!selectedValue && !('' in options) ? html`<option selected disabled>${placeholder}</option>` : null}
-        ${Object.entries(options).map(([value, label]) => html`
-          <option value=${value} ?selected=${value === selectedValue ? true : null}>
-            ${label}
-          </option>
-        `)}
-      </select>
+      ${label}
+      ${dropdown({
+        options,
+        selectedValue: value ? value.language : '',
+        placeholder: await this.t('translation-language-placeholder') ?? '',
+        callback: async (dropdownValue) => {
+          if (value) {
+            const rawValue = await value.term.value
+            const newTerm = this.settings.dataFactory.literal(rawValue, dropdownValue ? dropdownValue : null)
+            await this.setValue(newTerm, value)
+          }
+          else {
+            const newTerm = this.settings.dataFactory.literal('', dropdownValue ? dropdownValue : null)
+            await this.setValue(newTerm)
+          }
+          this.render()
+        }
+      })}
     `
   }
 
+  async errorToggle () {
+    return this.validationErrors?.length ? button({
+      inner: icon('exclamationTriangleFill'),
+      callback: () => {
+        this.errorsExpanded = !this.errorsExpanded
+        this.render()
+      }
+    }) : null
+  }
+
   async errors () {
-    return this.validationErrors?.length ? html`
-      <details>
-        <summary>${this.t('validation-error-title')}</summary>
-        <ul>
-        ${this.validationErrors.map(error => {
-          return html`
-            <li>${error.message.map(message => message.value)}</li>
-          `
-        })}
-        </ul>
-      </details>
+    return this.validationErrors?.length && this.errorsExpanded ? html`
+      <ul>
+      ${this.validationErrors.map(error => {
+        return html`
+          <li>${error.message.map(message => message.value)}</li>
+        `
+      })}
+      </ul>
     ` : null
   }
 
@@ -356,11 +375,14 @@ export abstract class WidgetBase {
     this.parentRender()
 
     return render(this.host, html`
-      ${this.label()}
-      ${this.errors()}
+      ${this.label([
+        await this.descriptionToggle(),
+        await this.errorToggle()
+      ])}
       ${this.showDescription ? this.description() : html``}
       ${this.items()}
       ${(await this.allowMultiple) && !this.showEmptyItem ? this.addButton() : null}
+      ${this.errors()}
     `)
   }
 
