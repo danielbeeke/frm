@@ -11,7 +11,7 @@ import { storeToTurtle } from '../helpers/storeToTurtle'
 import SHACLValidator from 'rdf-validate-shacl'
 
 export const init = (settings: Settings) => {
-  class FrmForm extends HTMLFormElement {
+  class FrmForm extends HTMLElement {
 
     private settings: Settings
     private shapeText: string
@@ -23,6 +23,7 @@ export const init = (settings: Settings) => {
     private store: Store
     private engine: ComunicaEngine
     private validationReport: any
+    private validator: SHACLValidator
 
     constructor () {
       super()
@@ -53,8 +54,9 @@ export const init = (settings: Settings) => {
       this.validator = new SHACLValidator(this.definition.store)
       this.classList.remove('loading')
 
-      this.addEventListener('value-deleted', this.render)
-      this.addEventListener('value-changed', this.render)
+      this.addEventListener('value-deleted', () => this.render())
+      this.addEventListener('value-changed', () => this.render())
+      this.settings.internationalization.addEventListener('language-changed', () => this.render())
 
       await this.render()
     }
@@ -62,6 +64,7 @@ export const init = (settings: Settings) => {
       this.validationReport = this.validator.validate(this.store)
 
       await render(this, html`
+        <form>
         ${ShapeToFields(
           settings, 
           this.definition, 
@@ -74,16 +77,19 @@ export const init = (settings: Settings) => {
           this.validationReport
         )}
 
-        <button onclick=${async () => {
-          const turtle = await storeToTurtle(this.store)
-          console.log(turtle)
-          this.validate()
-          await this.render()
+        <button onclick=${async (event: InputEvent) => {
+          // if (this.validationReport.results.length) {
+          //   event.preventDefault()
+          // }
+          
+          // const turtle = await storeToTurtle(this.store)
+          // console.log(turtle)
         }}>${settings.translator.t('submit')}</button>
+        </form>
       `)
     }
 
   }
   
-  customElements.define('frm-form', FrmForm, { extends: 'form' })
+  customElements.define('frm-form', FrmForm)
 }

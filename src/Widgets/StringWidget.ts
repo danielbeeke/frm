@@ -10,12 +10,32 @@ export class StringWidget extends WidgetBase {
   static commonNames = ['label', 'name']
 
   async item (value: LDflexPath) {
-    const input = super.item(value)
+    const currentLanguage = this.settings.translator.current
+    const labels = this.settings.internationalization.languageLabels[currentLanguage]
 
     return html`
-      ${input}
+      ${await value?.value ? html`
+        <span class="language-label">
+          ${await value?.language ? (labels[value.language] ?? value.language) : this.t('no-language')}
+        </span>
+      ` : null}
+      
+      <input 
+        ref=${this.attributes()} 
+        onchange=${async (event: InputEvent) => {
+          const selectedLanguage = this.settings.internationalization.mode === 'tabs' ?
+            this.settings.internationalization.current : 
+            await value?.language
+
+          const term = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, selectedLanguage)
+          this.setValue(term, value)
+        }} 
+        .value=${value} 
+      />
+
       ${this.l10nSelector(value)}
     `
   }
+
 
 }

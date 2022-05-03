@@ -5,12 +5,18 @@ export class Internationalization extends EventTarget {
   public langCodes: Array<string> = []
   #current: string
   public languageLabels: { [key: string]: { [key: string]: string } }
-  public mode: 'tabs' | 'mixed'
+  public mode: 'tabs' | 'mixed' = 'mixed'
+  public allowCreation: boolean = true
 
-  constructor (langCodes: Array<string> = [], mode: 'tabs' | 'mixed' = 'mixed') {
+  constructor ({ langCodes, mode, allowCreation }: { 
+    langCodes: Array<string>, 
+    mode: 'tabs' | 'mixed',
+    allowCreation: boolean
+  }) {
     super()
     this.langCodes = langCodes
     this.#current = langCodes[0]
+    this.allowCreation = allowCreation
     this.mode = mode
   }
 
@@ -22,5 +28,9 @@ export class Internationalization extends EventTarget {
     return this.#current
   }
 
+  set current (newValue) {
+    this.#current = newValue
+    this.dispatchEvent(new CustomEvent('language-changed'))
+  }
 
 }

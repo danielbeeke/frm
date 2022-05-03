@@ -23,11 +23,6 @@ const getFields = async (
     const group = await predicatePath['sh:group'].value
     const fieldErrors = validationReport?.results.filter(error => error.path.value === predicate) ?? []
 
-    if (predicate === 'http://schema.org/givenName') {
-      console.log(fieldErrors)
-    }
-
-
     return {
       template: html`<frm-field
         .shape=${shapeDefinition}
@@ -87,6 +82,7 @@ const getGroups = async (shapeDefinition: ShapeDefinition, fields: Array<RenderI
   return groups.filter(Boolean)
 }
 
+const grouperCache = new WeakMap()
 const getGroupers = async (settings: Settings, fields: Array<RenderItem>, renderCallback) => {
   const grouperInstances: Array<RenderItem> = []
 
@@ -109,11 +105,14 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
             const aliasses = Grouper.aliasses
   
             if (aliasses[name]) name = aliasses[name]
-
           }
         }
           
-        const grouper = await new Grouper(settings, grouperTemplates, renderCallback)
+        let grouper = grouperCache.get(Grouper)
+        if (!grouper) {
+          grouper = await new Grouper(settings, grouperTemplates, renderCallback)
+          grouperCache.set(Grouper, grouper)
+        }
 
         grouperInstances.push({
           grouper,

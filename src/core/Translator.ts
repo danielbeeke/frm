@@ -4,7 +4,7 @@ import { fluentResourceText } from '../types/fluentResourceText'
 export class Translator extends EventTarget {
 
   private bundles: { [langCode: string]: FluentBundle } = {}
-  private current: string
+  public current: string
 
   constructor (languages: { [langCode: string]: fluentResourceText }, defaultLanguage: string | null = null) {
     super()

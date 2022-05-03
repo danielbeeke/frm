@@ -85,13 +85,42 @@ export abstract class WidgetBase {
     return this.host?.['errors'] ?? []
   }
 
+  get allowedDatatypes () {
+    return (async () => {
+      const allowedDatatypes: Set<string> = new Set()
+      for await(const datatype of this.definition['sh:datatype']) {
+        allowedDatatypes.add(await datatype.value)
+      }
+  
+      const orStatements = await this.definition['sh:or'].list()
+      for (const orStatement of orStatements) {
+        const datatype = await orStatement['sh:datatype'].value
+        if (datatype) allowedDatatypes.add(datatype)
+      }
+      
+      return allowedDatatypes
+    })()
+  }
+
   public async init () {}
 
   async attributes () {
     const attributeObjects: Array<{}> = []
     for (const transformer of Object.values(this.settings.attributeTransformers))
       attributeObjects.push(await transformer.transform(this.values, this.definition))
-    return attributesDiff(Object.assign({}, this.inputAttributes, ...attributeObjects))
+    const differ = attributesDiff(Object.assign({}, this.inputAttributes, ...attributeObjects))
+
+    return (node) => {
+      if (!this.validationErrors.length) {
+        node.setCustomValidity('')
+      }
+      else {
+        const messages = this.validationErrors.flatMap(error => error.message.map(message => message.value))
+        node.setCustomValidity(messages.join('\n'))
+      }
+
+      differ(node)
+    }
   }
 
   async preRender () {
@@ -111,23 +140,8 @@ export abstract class WidgetBase {
     })()
   }
 
-  async setValue (newRawValue: string | number | Literal, value: LDflexPath = null) {
-    const dataType = await this.definition['sh:datatype'].value ? 
-    this.settings.dataFactory.namedNode(await this.definition['sh:datatype'].value)
-    : null
+  async setValue (newValue: Literal, value: LDflexPath = null) {
     const oldValue = await value?.term
-    const isStringLiteral = dataType?.value === 'http://www.w3.org/2001/XMLSchema#string'
-    const newValueIsTerm = newRawValue['datatype']?.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#langString'
-
-    let newValue
-    if (!newValueIsTerm && typeof newRawValue === 'string') {
-      newValue = !isStringLiteral && dataType ? 
-      this.settings.dataFactory.literal(newRawValue, dataType) : 
-      this.settings.dataFactory.literal(newRawValue)
-    }
-    else {
-      newValue = newRawValue
-    }
 
     if (!oldValue) {
       this.showEmptyItem = false
@@ -135,7 +149,7 @@ export abstract class WidgetBase {
       this.host.dispatchEvent(new CustomEvent('value-changed', { detail: { newValue, oldValue: null }, bubbles: true }))
     }
     else if (oldValue) {
-      if (!newRawValue) {
+      if (!newValue) {
         await this.values.delete(oldValue)
       }
       else {
@@ -199,12 +213,19 @@ export abstract class WidgetBase {
       </div>
     `)
 
+    const values = await this.values.filter(async value => {
+      if (this.settings.internationalization.mode === 'mixed') return value
+
+      const valueLanguage = await value.language
+      return valueLanguage === this.settings.internationalization.current || !valueLanguage
+    })
+
     // uhtml does not understand what to cache here, so we break the cache on purpose.
     // TODO improve.
     return html.for({})`
       <div class="items">
-        ${this.values.map(callback)}
-        ${!(await this.values.toArray()).length || this.showEmptyItem ? callback() : null}
+        ${values.map(callback)}
+        ${!values.length || this.showEmptyItem ? callback() : null}
       </div>
     `
   }
@@ -214,14 +235,8 @@ export abstract class WidgetBase {
       <input 
         ref=${this.attributes()} 
         onchange=${async (event: InputEvent) => {
-          const previousLanguage = await value?.language
-          if (previousLanguage) {
-            const term = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, previousLanguage)
-            this.setValue(term, value)
-          }
-          else {
-            this.setValue((event.target as HTMLInputElement).value, value)
-          }
+          const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value)
+          this.setValue(newValue, value)
         }} 
         .value=${value} 
       />
@@ -265,14 +280,15 @@ export abstract class WidgetBase {
   }
 
   async l10nSelector (value: LDflexPath) {
-    // console.log(this.settings.internationalization.mode)
     if (this.settings.internationalization.mode === 'tabs') return null
-
     const l10n = this.settings.internationalization.current
+    const settingsHasLanguages = Object.keys(this.settings.internationalization.languageLabels).length > 0
+    if (!settingsHasLanguages) return null
 
-    const hasLanguages = Object.keys(this.settings.internationalization.languageLabels).length > 0
+    const valueHasLanguage = await value?.language
 
-    if (!hasLanguages) return null
+    // We allow the language selector if there is already a language.
+    if (!valueHasLanguage && !(await this.allowedDatatypes).has('http://www.w3.org/1999/02/22-rdf-syntax-ns#langString')) return null
 
     const labels = this.settings.internationalization.languageLabels[l10n]
 

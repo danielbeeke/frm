@@ -14,7 +14,7 @@ schema:examplePerson
     schema:streetAddress "100 Main Street"^^xsd:string
   ] ;
   schema:alumniOf "Dartmouth"^^xsd:string ;
-  schema:birthDate "1979-10-12"^^schema:Date ;
+  schema:birthDate "1979-10-12"^^xsd:date ;
   schema:birthPlace "Philadelphia, PA"^^xsd:string ;
   schema:colleague <http://www.example.com/JohnColleague.html>, <http://www.example.com/JameColleague.html> ;
   schema:email "info@example.com"^^xsd:string ;

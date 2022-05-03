@@ -41,7 +41,11 @@ export default {
     '@language': 'en',
     ...basePrefixes
   }),
-  internationalization: new Internationalization(['en', 'nl'], 'mixed'),
+  internationalization: new Internationalization({
+    langCodes: ['en', 'nl'], 
+    mode: 'mixed',
+    allowCreation: true
+  }),
   definitionEnhancer: new DefinitionEnhancer(),
   blacklistedProperties,
   widgetsMatcher: new WidgetsMatcher(),

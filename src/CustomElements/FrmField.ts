@@ -3,7 +3,7 @@ import { ShapeDefinition } from '../core/ShapeDefinition'
 import { Settings } from '../types/Settings'
 import { resolveAttribute } from '../helpers/resolveAttribute'
 import { WidgetBase } from '../Widgets/WidgetBase'
-import { Store } from 'n3'
+import { Literal, Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
 
 export const init = (settings: Settings) => {
@@ -60,7 +60,7 @@ export const init = (settings: Settings) => {
       this.classList.remove('loading')
     }
 
-    async setValue (newValue: Array<any> | any) {
+    async setValue (newValue: Array<Literal> | Literal) {
       newValue = Array.isArray(newValue) ? newValue : [newValue]
       let index = 0
 

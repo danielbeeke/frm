@@ -23,8 +23,25 @@ export const FrmLanguageTabs = (settings: Settings) => {
     }
 
     async render () {
+      if (this.settings.internationalization.mode === 'mixed') return
+      
+      const currentLangCode = this.settings.internationalization.current
+      const labels = this.settings.internationalization.languageLabels[currentLangCode]
+
       await render(this, html`
-        <h3>${this.definition['rdfs:label']}</h3>
+        <h3 class="title">${this.definition['rdfs:label']}</h3>
+
+        <nav class="tabs">
+          ${Object.entries(labels).map(([langCode, label]) => html`
+            <button type="button" onclick=${() => {
+              this.settings.internationalization.current = langCode
+            }} class=${`tab ${currentLangCode === langCode ? 'active' : ''}`}>
+              ${label}
+            </button>
+          `)}
+
+
+        </ul>
       `)
     }
 

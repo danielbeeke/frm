@@ -24,7 +24,7 @@ schema:PersonShape
         sh:group schema:NameGroup ;
         sh:path schema:givenName ;
         sh:order 1 ;
-        sh:datatype xsd:string ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype <http://www.w3.org/1999/02/22-rdf-syntax-ns#langString> ] ) ;
         sh:name "given name"@en ;
         sh:name "Gegeven name"@nl ;
         sh:minCount 1 ;

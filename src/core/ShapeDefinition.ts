@@ -1,13 +1,13 @@
 import { LDflexPath } from '../types/LDflexPath'
 import { NamedNode, Store } from 'n3'
-import { PathFactory, defaultHandlers } from 'ldflex'
-import defaultIterationHandlers from '@ldflex/async-iteration-handlers'
+import { PathFactory } from 'ldflex'
 import ComunicaEngine from '@ldflex/comunica'
 import { rdfToStore } from '../helpers/rdfToStore'
 import { Settings } from '../types/Settings'
 import { JsonLdContextNormalized } from 'jsonld-context-parser'
 import { validateShaclString } from '../helpers/validateShaclString'
 import { ProxyHandlerStatic } from '@comunica/actor-http-proxy'
+import handlers from '../helpers/ldFlexSettings'
 
 export class ShapeDefinition {
 
@@ -58,10 +58,7 @@ export class ShapeDefinition {
         httpProxyHandler: this.settings.proxy ? new ProxyHandlerStatic(this.settings.proxy) : undefined,
       }
     })
-    const path = new PathFactory({ context: this.settings.context.getContextRaw(), queryEngine, handlers: {
-      ...defaultHandlers,
-      ...defaultIterationHandlers
-    }})
+    const path = new PathFactory({ context: this.settings.context.getContextRaw(), queryEngine, handlers })
     const expandedSubject = this.settings.context.expandTerm(subjectUri)
     if (!expandedSubject) throw new Error(`Failed to expand the term: ${subjectUri}`)
     const subject = new NamedNode(expandedSubject)
