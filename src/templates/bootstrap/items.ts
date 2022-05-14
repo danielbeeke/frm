@@ -1,13 +1,17 @@
 import { html } from '../../helpers/uhtml'
 
 export const items = (items: Array<any>) => {
-  return html.for({})`<div class="items">
+  return html`<div class="items mb-4">
     ${items.map(item => html`
-    <div class="item">
-      <div class="input-group">
-        ${item}
+      <div class="d-block mb-2">
+        <div class="input-group">
+          ${typeof item === 'string' ? html`
+            <span class="form-control">
+              ${item}
+            </span>
+          ` : item}
+        </div>
       </div>
-    </div>
     `)}
   </div>`
 }

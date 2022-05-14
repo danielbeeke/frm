@@ -5,6 +5,7 @@ import { ShapeToFields } from '../core/ShapeToFields'
 import { removeItemRecursively } from '../helpers/removeItemRecursively'
 import { Literal, NamedNode } from 'n3'
 import { skolemize } from '../helpers/skolemize'
+import { html } from '../helpers/uhtml'
 
 export class NodeWidget extends WidgetBase {
 
@@ -45,17 +46,20 @@ export class NodeWidget extends WidgetBase {
   }
 
   async item (value: LDflexPath) {
-    return value ? ShapeToFields(
-      this.settings, 
-      this.nodeShapeDefinition, 
-      this.nodeShape, 
-      this.values[this.predicate], 
-      value, 
-      this.store, 
-      this.engine, 
-      () => this.render(), 
-      null
-      ) : null
+    return value ? html`
+      ${ShapeToFields(
+        this.settings, 
+        this.nodeShapeDefinition, 
+        this.nodeShape, 
+        this.values[this.predicate], 
+        value, 
+        this.store, 
+        this.engine, 
+        () => this.render(), 
+        null
+      )}
+      ${this.removeButton(value)}
+    ` : null
   }
 
 }

@@ -8,4 +8,6 @@ translation-language-none = No language
 validation-error-title = Validation errors
 no-more-values-not-allowed = No more values allowed, remove one value first.
 add-language = Add language
+address-autocomplete-placeholder = Search for an address
+language = Language
 `

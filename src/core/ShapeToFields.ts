@@ -82,8 +82,7 @@ const getGroups = async (shapeDefinition: ShapeDefinition, fields: Array<RenderI
   return groups.filter(Boolean)
 }
 
-const grouperCache = new WeakMap()
-const getGroupers = async (settings: Settings, fields: Array<RenderItem>, renderCallback) => {
+const getGroupers = async (settings: Settings, fields: Array<RenderItem>, renderCallback, value: LDflexPath) => {
   const grouperInstances: Array<RenderItem> = []
 
   for (const [grouperName, Grouper] of Object.entries(settings.groupers)) {
@@ -108,11 +107,12 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
           }
         }
           
-        let grouper = grouperCache.get(Grouper)
-        if (!grouper) {
-          grouper = await new Grouper(settings, grouperTemplates, renderCallback)
-          grouperCache.set(Grouper, grouper)
-        }
+        // TODO Grouper should have cache so it can remember state.
+        // let grouper = grouperCache.get(value)
+        // if (!grouper) {
+          let grouper = await new Grouper(settings, grouperTemplates, renderCallback)
+        //   grouperCache.set(Grouper, grouper)
+        // }
 
         grouperInstances.push({
           grouper,
@@ -172,7 +172,7 @@ export const ShapeToFields = async (
   const elements = await getElements(shapeDefinition)
   const mergedItems = [...fields, ...elements]
   const groups = await getGroups(shapeDefinition, mergedItems)
-  const groupers = await getGroupers(settings, fields, renderCallback)
+  const groupers = await getGroupers(settings, fields, renderCallback, value)
   const unpickedItems = mergedItems.filter(field => !field.picked)
   const merged: Array<RenderItem> = [...unpickedItems, ...groups, ...groupers]  
   const sortedRenderItems = stableSort(merged, (a: RenderItem, b: RenderItem) => a.order - b.order)

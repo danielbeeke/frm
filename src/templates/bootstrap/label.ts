@@ -3,9 +3,15 @@ import { LDflexPath } from '../../types/LDflexPath'
 
 export const label = (text: LDflexPath, inner: Array<Hole> = []) => {
   return html`
-    <h5 class="label">
+  <div class="label-wrapper d-flex align-items-end">
+    <label class="form-label text-capitalize">
       ${text}
-      ${inner.filter(Boolean).length ? inner.filter(Boolean) : null}
-    </h5>
+    </label>
+
+    <span class="m-auto"></span>
+    <div class="mb-1 btn-group">
+    ${inner.filter(Boolean).length ? inner.filter(Boolean) : null}
+    </div>
+  </div>
   `
 }

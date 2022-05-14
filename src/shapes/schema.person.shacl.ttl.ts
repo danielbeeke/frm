@@ -15,7 +15,7 @@ schema:PersonShape
 
     frm:element [
         sh:group schema:TopGroup ;
-    	rdfs:label "Language"@en ;
+    	# rdfs:label "Language"@en ;
         frm:widget "frm-language-tabs" ;
     ] ;
 
@@ -58,14 +58,14 @@ schema:PersonShape
 schema:TopGroup
 	a sh:PropertyGroup ;
 	sh:order 1 ;
-    html:class "top-container" ;
-	rdfs:label "Top"@en .
+	# rdfs:label "Top"@en ;
+    html:class "top-container" .
 
 schema:NameGroup
 	a sh:PropertyGroup ;
 	sh:order 2 ;
-    html:class "name-container" ;
-	rdfs:label "Name"@en .
+	# rdfs:label "Name"@en ;
+    html:class "name-container" .
 
 schema:AddressShape
     a sh:NodeShape ;

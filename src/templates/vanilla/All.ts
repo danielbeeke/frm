@@ -6,6 +6,9 @@ import { list } from './list'
 import { items } from './items'
 import { grouper } from './grouper'
 import { input } from './input'
+import { tabs } from './tabs'
+import { text } from './text'
+import { small } from './small'
 
 export default {
   dropdown,
@@ -15,5 +18,8 @@ export default {
   list,
   items,
   grouper,
-  input
+  input,
+  tabs,
+  text,
+  small
 }

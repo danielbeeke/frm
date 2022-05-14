@@ -3,7 +3,7 @@ import { LDflexPath } from '../../types/LDflexPath'
 
 export const description = (text: LDflexPath) => {
   return html`
-    <div class="description">
+    <div class="alert alert-warning" role="alert">
       ${text}
     </div>
   `

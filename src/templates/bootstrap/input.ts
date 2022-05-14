@@ -1,10 +1,22 @@
-import { html } from '../../helpers/uhtml'
+import { icon } from '../../helpers/icon'
+import { html, Hole } from '../../helpers/uhtml'
 
-export const input = (
+export const input = async (
   value: string | number | boolean, 
   ref: Promise<(element: HTMLElement) => void> | null, 
   onchange: (event: InputEvent) => void,
-  type: string = 'text'
+  type: string = 'text',
+  suffix: Hole | null = null,
+  placeholder: string = ''
 ) => {
-  return html`<input type=${type} .value=${value ?? ''} onchange=${onchange} ref=${ref ? ref : () => null} />`
+
+  const resolvedSuffix = await suffix
+  const suffixIsSvg = resolvedSuffix?.['template']?.[0]?.includes('svg')
+
+  return html`
+    <div class="input-group">
+      <input class="form-control" placeholder=${placeholder} type=${type} .value=${value ?? ''} onchange=${onchange} ref=${ref ? ref : () => null} />
+      ${suffixIsSvg ? html`<span class="input-group-text">${resolvedSuffix}</span>` : resolvedSuffix}
+    </div>
+  `
 }

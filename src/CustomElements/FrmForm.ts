@@ -78,6 +78,7 @@ export const init = (settings: Settings) => {
 
         ${settings.templates.button({
           isSubmit: true,
+          cssClasses: ['primary', 'button', 'end'],
           callback: async (event: InputEvent) => {
             // if (this.validationReport.results.length) {
             //   event.preventDefault()

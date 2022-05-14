@@ -1,6 +1,7 @@
 import { WidgetBase } from './WidgetBase'
 import { LDflexPath } from '../types/LDflexPath'
 import { Literal } from 'n3'
+import { html } from '../helpers/uhtml'
 
 export class DropdownWidget extends WidgetBase {
 
@@ -34,14 +35,19 @@ export class DropdownWidget extends WidgetBase {
       selectOptions[resolvedValue] = resolvedValue
 
 
-    return this.settings.templates.dropdown({
-      placeholder: await this.definition['html:placeholder']?.value ?? this.t('select-a-value'),
-      options: selectOptions,
-      selectedValue: await value?.value,
-      callback: async (dropdownValue: string) => {
-        this.setValue(this.options[dropdownValue], value)
-      }
-    })
+    return html`
+      <div class="input-group">
+        ${this.settings.templates.dropdown({
+          placeholder: await this.definition['html:placeholder']?.value ?? this.t('select-a-value'),
+          options: selectOptions,
+          selectedValue: await value?.value,
+          callback: async (dropdownValue: string) => {
+            this.setValue(this.options[dropdownValue], value)
+          }
+        })}
+        ${this.removeButton(value)}
+      </div>
+    `
   }
 
 }

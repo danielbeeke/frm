@@ -41,7 +41,6 @@ export abstract class WidgetBase {
   public errorsExpanded: boolean = false
 
   public inputAttributes = {
-    class: 'input',
     type: 'text'
   }
 
@@ -179,15 +178,13 @@ export abstract class WidgetBase {
   descriptionToggle () {
     return this.settings.templates.button({
       inner: icon('info'),
+      cssClasses: ['button', 'title-button'],
       callback: () => { this.showDescription = !this.showDescription; this.render() },
     })
   }
 
   async items () {
-    const callback = ((value = null) => html`
-      ${this.item(value)}
-      ${this.removeButton(value)}
-    `)
+    const callback = ((value = null) => this.item(value))
 
     const filteredValues = await this.values.filter(async value => {
       if (this.settings.internationalization.mode === 'mixed') return value
@@ -206,7 +203,8 @@ export abstract class WidgetBase {
     if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem)
       renderItems.push(callback())
 
-    return this.settings.templates.items(renderItems)
+    const resolvedRenderItems = await Promise.all(renderItems)
+    return this.settings.templates.items(resolvedRenderItems)
   }
 
   async item (value: LDflexPath) {
@@ -215,7 +213,7 @@ export abstract class WidgetBase {
       const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
       const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
       this.setValue(newValue, value)
-    })
+    }, 'text', this.removeButton(value))
   }
 
   /**
@@ -225,7 +223,7 @@ export abstract class WidgetBase {
     return this.settings.templates.button({
       inner: icon('x'),
       callback: () => this.removeItem(value),
-      cssClasses: ['button', 'danger', value ? '' : 'disabled']
+      cssClasses: ['button', 'remove-item', 'danger', value ? '' : 'disabled']
     })
   }
 
@@ -236,7 +234,7 @@ export abstract class WidgetBase {
     return this.settings.templates.button({
       inner: icon('plus'),
       callback: () => this.addItem(),
-      cssClasses: ['button', 'primary']
+      cssClasses: ['button', 'primary', 'title-button']
     })
   }
 
@@ -247,7 +245,7 @@ export abstract class WidgetBase {
     const currentLanguage = this.settings.translator.current
     const labels = this.settings.internationalization.languageLabels[currentLanguage]
 
-    const languageLabel = await value?.value ? this.settings.templates.label(await value?.language ? (labels[value.language] ?? value.language) : null) : null
+    const languageLabel = await value?.value ? this.settings.templates.small(await value?.language ? (labels[value.language] ?? value.language) : null) : null
 
     const valueHasLanguage = await value?.language
 
@@ -257,8 +255,6 @@ export abstract class WidgetBase {
     if (this.settings.internationalization.mode === 'tabs') {
       return html`
       ${await value?.value ? html`
-      ${icon('translate')}
-      ${languageLabel}
       ${this.settings.templates.button({
         callback: async () => {
           const hadLanguage = await value?.language
@@ -266,7 +262,11 @@ export abstract class WidgetBase {
           const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : this.settings.internationalization.current)
           await this.setValue(newTerm, value)
         },
-        inner: await value?.language ? icon('x') : icon('plus')
+        inner: html`
+          ${icon('translate')}
+          ${languageLabel}  
+          ${await value?.language ? icon('x') : icon('plus')}
+        `
       })}
       ` : null}`
     }
@@ -305,6 +305,7 @@ export abstract class WidgetBase {
   async errorToggle () {
     return this.validationErrors?.length ? this.settings.templates.button({
       inner: icon('exclamationTriangleFill'),
+      cssClasses: ['button', 'title-button'],
       callback: () => {
         this.errorsExpanded = !this.errorsExpanded
         this.render()
@@ -314,7 +315,9 @@ export abstract class WidgetBase {
 
   async errors () {
     const errors = this.validationErrors.flatMap(error => error.message.map(message => message.value))
-    return this.validationErrors?.length && this.errorsExpanded ? this.settings.templates.list(errors) : null
+    return this.validationErrors?.length && this.errorsExpanded ? 
+    this.settings.templates.description(this.settings.templates.list(errors))
+     : null
   }
 
 
@@ -324,13 +327,13 @@ export abstract class WidgetBase {
 
     return render(this.host, html`
       ${this.settings.templates.label(this.definition['sh:name|rdfs:label'], [
+        await this.allowMultiple && !this.showEmptyItem ? this.addButton() : null,
         await this.descriptionToggle(),
         await this.errorToggle()
       ])}
+      ${this.errors()}
       ${this.showDescription ? this.settings.templates.description(this.definition['sh:comment|rdfs:comment']) : html``}
       ${this.items()}
-      ${(await this.allowMultiple) && !this.showEmptyItem ? this.addButton() : null}
-      ${this.errors()}
     `)
   }
 

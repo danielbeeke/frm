@@ -31,30 +31,35 @@ export const FrmLanguageTabs = (settings: Settings) => {
       if (this.settings.internationalization.mode === 'mixed') return
       
       const currentLangCode = this.settings.internationalization.current
-      const labels = this.settings.internationalization.languageLabels[currentLangCode]
+      const currentUILangCode = this.settings.translator.current
+      const labels = this.settings.internationalization.languageLabels[currentUILangCode]
+
+      const tabs = Object.entries(labels).map(([langCode, label]) => settings.templates.button({
+        callback: () => {
+          this.expandedCreationForm = false
+          this.settings.internationalization.hideFields = false
+          this.settings.internationalization.current = langCode
+          this.render()
+        },
+        cssClasses: ['tab', currentLangCode === langCode && !this.expandedCreationForm ? 'active' : ''],
+        inner: label
+      }))
+
+      tabs.push(settings.templates.button({
+        callback: () => {
+          this.settings.internationalization.hideFields = true
+          this.expandedCreationForm = !this.expandedCreationForm
+          this.render()
+        },
+        cssClasses: ['tab', this.expandedCreationForm ? 'active' : ''],
+        inner: this.t('add-language')
+      }))
 
       await render(this, html`
-        <h3 class="title">${this.definition['rdfs:label']}</h3>
-
-        <nav class="tabs">
-          ${Object.entries(labels).map(([langCode, label]) => settings.templates.button({
-            callback: () => {
-              this.settings.internationalization.current = langCode
-            },
-            cssClasses: ['tab', currentLangCode === langCode ? 'active' : ''],
-            inner: label
-          }))}
-
-          ${settings.templates.button({
-            callback: () => {
-              this.expandedCreationForm = !this.expandedCreationForm
-              this.render()
-            },
-            inner: this.t('add-language')
-          })}
-        </nav>
-
+        ${this.settings.templates.label(this.definition['rdfs:label'])}
+        ${this.settings.templates.tabs(tabs)}
         ${this.expandedCreationForm ? html`
+          ${this.settings.templates.label(this.t('language'))}
           <bcp47-picker />
         ` : null}
       `)

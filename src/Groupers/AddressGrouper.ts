@@ -18,29 +18,34 @@ export class AddressGrouper extends GrouperBase {
 
   async template () {
     return this.settings.templates.grouper('address', html`
-      ${this.settings.geocoder ? this.settings.templates.input('', null, (event) => this.search(event), 'search') : null}
+    ${this.settings.geocoder ? this.settings.templates.input(
+      '', 
+      null, 
+      (event) => this.search(event), 
+      'search', 
+      icon('search'), 
+      await this.t('address-autocomplete-placeholder')
+    ) : null}
 
-      ${(
-        await this.values.streetAddress || 
-        await this.values.addressLocality
-      ) ? html`
-      <p>
-        ${this.values.streetAddress}<br>
-        ${this.values.postalCode} ${this.values.addressLocality}<br>
-        ${this.values.addressRegion} ${this.values.addressCountry}
-      </p>
-      ` : null}
+    ${this.settings.templates.button({
+      cssClasses: ['button', 'expand-address-grouper', this.expanded ? 'active' : ''],
+      inner: icon('gearFill'),
+      callback: () => {
+        this.expanded = !this.expanded
+        this.render()
+      }
+    })}    
 
-      ${this.settings.templates.button({
-        cssClasses: [this.expanded ? 'active' : ''],
-        inner: icon('gearFill'),
-        callback: () => {
-          this.expanded = !this.expanded
-          this.render()
-        }
-      })}
+    ${(
+      await this.values.streetAddress || 
+      await this.values.addressLocality
+    ) ? this.settings.templates.text(html`
+      ${this.values.streetAddress}<br>
+      ${this.values.postalCode} ${this.values.addressLocality}<br>
+      ${this.values.addressRegion} ${this.values.addressCountry}
+    `) : null}
 
-      ${this.expanded ? Object.values(this.templates) : null}
+    ${this.expanded ? Object.values(this.templates) : null}
   `)
   }
 

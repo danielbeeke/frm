@@ -1,9 +1,9 @@
 import { html } from '../../helpers/uhtml'
 
-export const items = (items: Array<any>) => {
-  return html`<div class="items">
+export const tabs = (items: Array<any>) => {
+  return html`<div class="tabs">
     ${items.map(item => html`
-    <div class="item">
+    <div class="tab">
       ${item}
     </div>
     `)}
