@@ -1,7 +1,6 @@
 import { WidgetBase } from './WidgetBase'
 import { LDflexPath } from '../types/LDflexPath'
 import { Literal } from 'n3'
-import { dropdown } from '../core/CommonTemplates'
 
 export class DropdownWidget extends WidgetBase {
 
@@ -35,7 +34,7 @@ export class DropdownWidget extends WidgetBase {
       selectOptions[resolvedValue] = resolvedValue
 
 
-    return dropdown({
+    return this.settings.templates.dropdown({
       placeholder: await this.definition['html:placeholder']?.value ?? this.t('select-a-value'),
       options: selectOptions,
       selectedValue: await value?.value,

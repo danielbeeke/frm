@@ -1,8 +1,5 @@
-import { html } from '../helpers/uhtml'
+import { html } from '../../helpers/uhtml'
 
-/**
- * Generic dropdown template
- */
 export const dropdown = ({ options, selectedValue = null, placeholder = null, callback = null }: {
   options: { [key: string]: string }, 
   selectedValue: string | null, 
@@ -18,19 +15,5 @@ export const dropdown = ({ options, selectedValue = null, placeholder = null, ca
         </option>
       `)}
     </select>
-  `
-}
-
-/**
- * Generic button template
- */
-export const button = ({ inner, callback, cssClasses, isSubmit }: { 
-  inner: any, callback: Function, cssClasses?: Array<string> , isSubmit?: boolean
-}) => {
-  if (!cssClasses) cssClasses = ['button', 'primary']
-  return html`
-    <button type=${isSubmit ? null : 'button'} onclick=${callback} class=${cssClasses.join(' ')}>
-      ${inner}
-    </button>
   `
 }

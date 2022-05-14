@@ -8,7 +8,6 @@ import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
 import { ShapeToFields } from '../core/ShapeToFields'
 import SHACLValidator from 'rdf-validate-shacl'
-import { button } from '../core/CommonTemplates'
 
 export const init = (settings: Settings) => {
   class FrmForm extends HTMLElement {
@@ -77,7 +76,7 @@ export const init = (settings: Settings) => {
           this.validationReport
         )}
 
-        ${button({
+        ${settings.templates.button({
           isSubmit: true,
           callback: async (event: InputEvent) => {
             // if (this.validationReport.results.length) {

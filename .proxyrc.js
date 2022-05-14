@@ -11,4 +11,10 @@ module.exports = function (app) {
     req.url = req.url.replace('/cors', '')
     proxy.emit('request', req, res)
   })
+
+  app.use('/data', async (req, res) => {
+    req.url = `/https://bcp47.danielbeeke.nl/data${req.url}`
+    console.log(req.url)
+    proxy.emit('request', req, res)
+  })
 };

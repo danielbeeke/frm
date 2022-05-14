@@ -36,6 +36,9 @@ import { PositionstackGeocoder } from './Plugins/Geocoder/PositionstackGeocoder'
 // Elements
 import { FrmLanguageTabs } from './CustomElements/FrmLanguageTabs'
 
+// Templates
+import templates from './templates/bootstrap/All'
+
 export default {
   context: new JsonLdContextNormalized({
     '@language': 'en',
@@ -74,5 +77,6 @@ export default {
   keys: {},
   translator: new Translator({
     'en': english
-  })
+  }),
+  templates
 } as Settings

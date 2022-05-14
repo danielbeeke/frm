@@ -53,8 +53,9 @@ export class NodeWidget extends WidgetBase {
       value, 
       this.store, 
       this.engine, 
-      () => this.render()
-    ) : null
+      () => this.render(), 
+      null
+      ) : null
   }
 
 }

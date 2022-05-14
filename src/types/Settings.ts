@@ -5,6 +5,7 @@ import { Translator } from '../core/Translator'
 import { DataFactory } from 'n3'
 import { GeocoderBase } from '../Plugins/Geocoder/GeocoderBase'
 import { Internationalization } from '../core/Internationalization'
+import templates from '../templates/vanilla/All'
 
 export type Settings = {
   context: JsonLdContextNormalized,
@@ -23,5 +24,6 @@ export type Settings = {
   keys?: {
     [product: string]: string
   },
+  templates: typeof templates,
   internationalization: Internationalization
 }

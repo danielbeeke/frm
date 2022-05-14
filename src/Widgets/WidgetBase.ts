@@ -1,16 +1,11 @@
 import { intersectionCount } from '../helpers/intersectionCount'
-import { html, render, Hole } from '../helpers/uhtml'
+import { html, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import ComunicaEngine from '@ldflex/comunica'
 import { Literal, Store } from 'n3';
 import { Settings } from '../types/Settings'
-import { lastPart as lastPartOriginal } from '../helpers/lastPart'
-import { flexify } from '../helpers/LDflexToString'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
-import { button, dropdown } from '../core/CommonTemplates'
-
-const lastPart = flexify(lastPartOriginal)
 
 export abstract class WidgetBase {
   
@@ -181,45 +176,17 @@ export abstract class WidgetBase {
     await this.render()
   }
 
-  /**
-   * Templates
-   */
-  label (inner: Array<Hole> = []) {
-    return html`
-      <h5 class="label">
-        ${this.definition['sh:name|rdfs:label']}
-
-        ${inner.filter(Boolean).length ? inner.filter(Boolean) : null}
-      </h5>
-    `
-  }
-
   descriptionToggle () {
-    return button({
+    return this.settings.templates.button({
       inner: icon('info'),
       callback: () => { this.showDescription = !this.showDescription; this.render() },
     })
   }
 
-  description () {
-    return html`
-      <div class="description">
-        <h6 class="title">${this.t('field-description-label', { 
-          predicate: lastPart(this.definition['sh:path']) 
-        })}</h6>
-        ${this.definition['sh:comment|rdfs:comment']}
-      </div>
-    `
-  }
-
   async items () {
     const callback = ((value = null) => html`
-      <div class="item">
-        <div class="input-group">
-          ${this.item(value)}
-          ${this.removeButton(value)}
-        </div>
-      </div>
+      ${this.item(value)}
+      ${this.removeButton(value)}
     `)
 
     const filteredValues = await this.values.filter(async value => {
@@ -232,38 +199,30 @@ export abstract class WidgetBase {
     const valueCount = (await this.values.toArray()).length
     let maxCount = parseInt(await this.definition['sh:maxCount'].value)
 
-    // uhtml does not understand what to cache here, so we break the cache on purpose.
-    // TODO improve.
-    return html.for({})`
-      <div class="items">
-        ${filteredValues.map(callback)}
-        ${!filteredValues.length && valueCount === maxCount ? this.t('no-more-values-not-allowed') : null}
-        ${!filteredValues.length && valueCount < maxCount || this.showEmptyItem ? callback() : null}
-      </div>
-    `
+    const renderItems = [...filteredValues.map(callback)]
+    if (!filteredValues.length && valueCount === maxCount)
+      renderItems.push(this.t('no-more-values-not-allowed'))
+
+    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem)
+      renderItems.push(callback())
+
+    return this.settings.templates.items(renderItems)
   }
 
   async item (value: LDflexPath) {
-    return html`
-      <input 
-        ref=${this.attributes()} 
-        onchange=${async (event: InputEvent) => {
-          const allowedDatatypes = [...await this.allowedDatatypes]
-          const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
-
-          const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
-          this.setValue(newValue, value)
-        }} 
-        .value=${value} 
-      />
-    `
+    return this.settings.templates.input(value, this.attributes(), async (event: InputEvent) => {
+      const allowedDatatypes = [...await this.allowedDatatypes]
+      const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
+      const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
+      this.setValue(newValue, value)
+    })
   }
 
   /**
    * The button to remove one item
    */
    removeButton (value: LDflexPath) {
-    return button({
+    return this.settings.templates.button({
       inner: icon('x'),
       callback: () => this.removeItem(value),
       cssClasses: ['button', 'danger', value ? '' : 'disabled']
@@ -274,7 +233,7 @@ export abstract class WidgetBase {
    * The button to remove one item
    */
    addButton () {
-    return button({
+    return this.settings.templates.button({
       inner: icon('plus'),
       callback: () => this.addItem(),
       cssClasses: ['button', 'primary']
@@ -288,12 +247,8 @@ export abstract class WidgetBase {
     const currentLanguage = this.settings.translator.current
     const labels = this.settings.internationalization.languageLabels[currentLanguage]
 
-    const label = await value?.value ? html`
-    <span class="language-label">
-      ${await value?.language ? (labels[value.language] ?? value.language) : null}
-    </span>
-    ` : null
-    
+    const languageLabel = await value?.value ? this.settings.templates.label(await value?.language ? (labels[value.language] ?? value.language) : null) : null
+
     const valueHasLanguage = await value?.language
 
     // We allow the language selector if there is already a language.
@@ -303,8 +258,8 @@ export abstract class WidgetBase {
       return html`
       ${await value?.value ? html`
       ${icon('translate')}
-      ${label}
-      ${button({
+      ${languageLabel}
+      ${this.settings.templates.button({
         callback: async () => {
           const hadLanguage = await value?.language
           const rawValue = await value?.term?.value ?? ''
@@ -327,8 +282,7 @@ export abstract class WidgetBase {
     }, optionLabels)
 
     return html`
-      ${label}
-      ${dropdown({
+      ${this.settings.templates.dropdown({
         options,
         selectedValue: value ? value.language : '',
         placeholder: await this.t('translation-language-placeholder') ?? '',
@@ -349,7 +303,7 @@ export abstract class WidgetBase {
   }
 
   async errorToggle () {
-    return this.validationErrors?.length ? button({
+    return this.validationErrors?.length ? this.settings.templates.button({
       inner: icon('exclamationTriangleFill'),
       callback: () => {
         this.errorsExpanded = !this.errorsExpanded
@@ -359,27 +313,21 @@ export abstract class WidgetBase {
   }
 
   async errors () {
-    return this.validationErrors?.length && this.errorsExpanded ? html`
-      <ul>
-      ${this.validationErrors.map(error => {
-        return html`
-          <li>${error.message.map(message => message.value)}</li>
-        `
-      })}
-      </ul>
-    ` : null
+    const errors = this.validationErrors.flatMap(error => error.message.map(message => message.value))
+    return this.validationErrors?.length && this.errorsExpanded ? this.settings.templates.list(errors) : null
   }
+
 
   public async render () {
     await this.preRender()
     this.parentRender()
 
     return render(this.host, html`
-      ${this.label([
+      ${this.settings.templates.label(this.definition['sh:name|rdfs:label'], [
         await this.descriptionToggle(),
         await this.errorToggle()
       ])}
-      ${this.showDescription ? this.description() : html``}
+      ${this.showDescription ? this.settings.templates.description(this.definition['sh:comment|rdfs:comment']) : html``}
       ${this.items()}
       ${(await this.allowMultiple) && !this.showEmptyItem ? this.addButton() : null}
       ${this.errors()}
