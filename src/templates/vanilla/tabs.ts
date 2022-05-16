@@ -1,10 +1,10 @@
 import { html } from '../../helpers/uhtml'
 
-export const tabs = (items: Array<any>) => {
-  return html`<div class="tabs">
+export const tabs = (items: Array<any>, extraCssClasses: Array<string> = []) => {
+  return html`<div class=${`tabs ${extraCssClasses.join(' ')}`}>
     ${items.map(item => html`
-    <div class="tab">
-      ${item}
+    <div class=${`tab ${Array.isArray(item) ? item[1] : ''}`}>
+      ${Array.isArray(item) ? item[0] : item}
     </div>
     `)}
   </div>`

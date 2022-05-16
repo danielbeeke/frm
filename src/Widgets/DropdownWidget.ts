@@ -28,12 +28,13 @@ export class DropdownWidget extends WidgetBase {
       selectOptions[value] = term.value
     }
 
+    const resolvedValue = await value?.value
+    const isInvalid = resolvedValue && !(resolvedValue in selectOptions)
+
     // We allowed invalid values to be displayed. 
     // They will not pass validation when saving.
-    const resolvedValue = await value?.value
     if (resolvedValue && !this.options[resolvedValue])
       selectOptions[resolvedValue] = resolvedValue
-
 
     return html`
       <div class="input-group">
@@ -43,7 +44,8 @@ export class DropdownWidget extends WidgetBase {
           selectedValue: await value?.value,
           callback: async (dropdownValue: string) => {
             this.setValue(this.options[dropdownValue], value)
-          }
+          },
+          isInvalid
         })}
         ${this.removeButton(value)}
       </div>

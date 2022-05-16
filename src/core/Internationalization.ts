@@ -33,4 +33,9 @@ export class Internationalization extends EventTarget {
     this.dispatchEvent(new CustomEvent('language-changed'))
   }
 
+  addLanguage (langcode: string, label: string) {
+    langcode = langcode.toLocaleLowerCase()
+    this.langCodes.push(langcode)
+    this.languageLabels['en'][langcode] = label
+  }
 }

@@ -9,6 +9,7 @@ import { input } from './input'
 import { tabs } from './tabs'
 import { text } from './text'
 import { small } from './small'
+import { group } from './group'
 
 export default {
   dropdown,
@@ -21,5 +22,6 @@ export default {
   input,
   tabs,
   text,
-  small
+  small,
+  group
 }

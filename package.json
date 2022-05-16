@@ -18,6 +18,7 @@
   "devDependencies": {
     "@happy-dom/jest-environment": "^2.55.0",
     "@parcel/transformer-inline-string": "^2.4.1",
+    "@parcel/transformer-sass": "^2.5.0",
     "@types/jest": "^27.4.1",
     "@types/rdf-validate-shacl": "^0.4.0",
     "buffer": "^6.0.3",

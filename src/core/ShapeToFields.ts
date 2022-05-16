@@ -49,7 +49,7 @@ const getFields = async (
  * 
  * TODO check if nested groups work and if te order of the turtle text makes a difference.
  */
-const getGroups = async (shapeDefinition: ShapeDefinition, fields: Array<RenderItem>) => {
+const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, fields: Array<RenderItem>) => {
   const groupIRIs = new Set()
 
   const groups = await shapeDefinition.shape['sh:property|frm:element'].map(async predicatePath => {
@@ -68,10 +68,7 @@ const getGroups = async (shapeDefinition: ShapeDefinition, fields: Array<RenderI
       })
 
       return {
-        template: html`<div class=${`group ${extraCssClasses?.join()}`}>
-          <h3 class="group-label">${definition['rdfs:label']}</h3>
-          ${groupFields.map(field => field.template)}
-        </div>`,
+        template: settings.templates.group(definition['rdfs:label'], definition['rdfs:label'], groupFields.map(field => field.template), extraCssClasses),
         type: 'group',
         identifier: groupIRI,
         order: order !== undefined ? parseInt(order) : 1000,
@@ -171,7 +168,7 @@ export const ShapeToFields = async (
   const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport)
   const elements = await getElements(shapeDefinition)
   const mergedItems = [...fields, ...elements]
-  const groups = await getGroups(shapeDefinition, mergedItems)
+  const groups = await getGroups(settings, shapeDefinition, mergedItems)
   const groupers = await getGroupers(settings, fields, renderCallback, value)
   const unpickedItems = mergedItems.filter(field => !field.picked)
   const merged: Array<RenderItem> = [...unpickedItems, ...groups, ...groupers]  

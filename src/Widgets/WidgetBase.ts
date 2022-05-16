@@ -262,6 +262,7 @@ export abstract class WidgetBase {
           const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : this.settings.internationalization.current)
           await this.setValue(newTerm, value)
         },
+        cssClasses: ['button', 'outline', 'language-toggle'],
         inner: html`
           ${icon('translate')}
           ${languageLabel}  
