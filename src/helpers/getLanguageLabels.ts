@@ -1,6 +1,6 @@
 import { fetched } from '../helpers/fetched'
 
-export const getLanguageLabels = async (langCodes: Array<string>) => {
+export const getLanguageLabels = async (langCodes: Array<string>, fallback: { [key: string]: string }) => {
   if (!langCodes.length) return {}
 
   const languageLabelsQuery = `
@@ -20,11 +20,17 @@ export const getLanguageLabels = async (langCodes: Array<string>) => {
     })
 
     const json = await response.json()
-    const languageLabels = {}
+    const languageLabels: { [key: string]: {}} = {}
 
     for (const binding of json.results.bindings) {
       if (!languageLabels[binding.label['xml:lang']]) languageLabels[binding.label['xml:lang']] = {}
       languageLabels[binding.label['xml:lang']][binding.code.value] = binding.label.value
+    }
+
+    for (const [langCode, translations] of Object.entries(languageLabels)) {
+      for (const [fallbackLangCode, label] of Object.entries(fallback)) {
+        if (!translations[fallbackLangCode]) translations[fallbackLangCode] = label
+      }
     }
 
     return languageLabels

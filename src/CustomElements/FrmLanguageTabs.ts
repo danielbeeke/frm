@@ -3,6 +3,7 @@ import { html, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import 'bcp47-picker'
 import { icon } from '../helpers/icon'
+import { replace } from '../helpers/cssClassReplacer'
 
 export const FrmLanguageTabs = (settings: Settings) => {
   return class FrmLanguageTabs extends HTMLElement {
@@ -43,7 +44,10 @@ export const FrmLanguageTabs = (settings: Settings) => {
         },
         cssClasses: ['tab', currentLangCode === langCode ? 'active' : ''],
         inner: html`
-          ${label} ${icon('x')}
+          ${label} <span onclick=${async () => {
+            settings.internationalization.removeLanguage(langCode)
+            await this.render()
+          }} class=${replace(['remove-language-button'])}>${icon('x')}</span>
         `
       }))
 
@@ -65,7 +69,7 @@ export const FrmLanguageTabs = (settings: Settings) => {
               inner: this.t('add-language'),
               callback: async () => {
                 /** @ts-ignore */
-                settings.internationalization.addLanguage(this.picker.value, this.picker.label)
+                await settings.internationalization.addLanguage(this.picker.value, this.picker.label)
                 this.expandedCreationForm = false
                 await this.render()
               },

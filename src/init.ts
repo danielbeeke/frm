@@ -3,7 +3,6 @@ import { init as initFrmField } from './CustomElements/FrmField'
 
 import defaultConfig from './defaultConfig'
 import { Settings } from './types/Settings'
-import './scss/styles.scss'
 
 export const init = async (settings: Settings | null = null) => {
   if (settings === null) settings = defaultConfig

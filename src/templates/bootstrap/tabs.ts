@@ -1,5 +1,5 @@
 import { html } from '../../helpers/uhtml'
-import { replace } from './cssReplacements'
+import { replace } from '../../helpers/cssClassReplacer'
 
 export const tabs = (items: Array<any>, extraCssClasses: Array<string> = []) => {
   return html`<div class=${`nav ${replace(extraCssClasses).join(' ')}`}>

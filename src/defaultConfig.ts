@@ -38,6 +38,10 @@ import { FrmLanguageTabs } from './CustomElements/FrmLanguageTabs'
 
 // Templates
 import templates from './templates/bootstrap/All'
+import cssReplacements from './templates/bootstrap/cssReplacements'
+import './scss/bootstrap.scss'
+
+import { cssClassReplacer } from './helpers/cssClassReplacer'
 
 export default {
   context: new JsonLdContextNormalized({
@@ -78,5 +82,6 @@ export default {
   translator: new Translator({
     'en': english
   }),
+  cssClasses: cssClassReplacer(cssReplacements),
   templates
 } as Settings

@@ -43,6 +43,7 @@ export class DropdownWidget extends WidgetBase {
           options: selectOptions,
           selectedValue: await value?.value,
           callback: async (dropdownValue: string) => {
+            console.log(this.options[dropdownValue], value, dropdownValue)
             this.setValue(this.options[dropdownValue], value)
           },
           isInvalid

@@ -72,4 +72,8 @@ clip-path: polygon(0% 0%, 0% 100%,
   .btn-outline-secondary {
     border: 1px solid #ced4da;
   }
+
+  .is-invalid + .btn:not(:hover) {
+    border-color: var(--bs-danger);
+  }
 }

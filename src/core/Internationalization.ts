@@ -21,7 +21,8 @@ export class Internationalization extends EventTarget {
   }
 
   async init () {
-    this.languageLabels = await getLanguageLabels(this.langCodes)
+    
+    this.languageLabels = await getLanguageLabels(this.langCodes, {})
   }
 
   get current () {
@@ -33,9 +34,15 @@ export class Internationalization extends EventTarget {
     this.dispatchEvent(new CustomEvent('language-changed'))
   }
 
-  addLanguage (langcode: string, label: string) {
+  async addLanguage (langcode: string, label: string) {
     langcode = langcode.toLocaleLowerCase()
     this.langCodes.push(langcode)
-    this.languageLabels['en'][langcode] = label
+    this.languageLabels = await getLanguageLabels(this.langCodes, {[langcode]: label})
+
+    console.log(this.languageLabels)
+  }
+
+  removeLanguage (langcode: string) {
+    
   }
 }

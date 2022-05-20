@@ -1,5 +1,5 @@
 import { html } from '../../helpers/uhtml'
-import { replace } from './cssReplacements'
+import { replace } from '../../helpers/cssClassReplacer'
 
 export const button = ({ inner, callback, cssClasses, isSubmit }: { 
   inner: any, callback: Function, cssClasses?: Array<string> , isSubmit?: boolean

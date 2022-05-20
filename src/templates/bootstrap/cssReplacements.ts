@@ -1,4 +1,4 @@
-const cssClassReplacements = {
+export default {
   'button': 'btn',
   // 'danger': 'btn-secondary', 
   'primary': 'btn-primary',
@@ -10,8 +10,4 @@ const cssClassReplacements = {
   'expand-address-grouper': 'float-end btn-light mt-2',
   'language-tabs': 'relative nav-tabs mb-4 flex-nowrap',
   'add-language-button': 'ms-auto add-language-button'
-}
-
-export const replace = (cssClasses: Array<string>) => {
-  return cssClasses.map(cssClass => cssClassReplacements[cssClass] ?? cssClass)
 }
