@@ -178,7 +178,7 @@ export abstract class WidgetBase {
   descriptionToggle () {
     return this.settings.templates.button({
       inner: icon('info'),
-      cssClasses: ['button', 'title-button'],
+      cssClasses: ['title-button'],
       callback: () => { this.showDescription = !this.showDescription; this.render() },
     })
   }
@@ -234,7 +234,7 @@ export abstract class WidgetBase {
     return this.settings.templates.button({
       inner: icon('plus'),
       callback: () => this.addItem(),
-      cssClasses: ['button', 'primary', 'title-button']
+      cssClasses: ['title-button', 'title-button-add']
     })
   }
 
@@ -306,7 +306,7 @@ export abstract class WidgetBase {
   async errorToggle () {
     return this.validationErrors?.length ? this.settings.templates.button({
       inner: icon('exclamationTriangleFill'),
-      cssClasses: ['button', 'title-button'],
+      cssClasses: ['title-button'],
       callback: () => {
         this.errorsExpanded = !this.errorsExpanded
         this.render()
@@ -328,9 +328,9 @@ export abstract class WidgetBase {
 
     return render(this.host, html`
       ${this.settings.templates.label(this.definition['sh:name|rdfs:label'], [
-        await this.allowMultiple && !this.showEmptyItem ? this.addButton() : null,
         await this.descriptionToggle(),
-        await this.errorToggle()
+        await this.errorToggle(),
+        await this.allowMultiple && !this.showEmptyItem ? this.addButton() : null,
       ])}
       ${this.errors()}
       ${this.showDescription ? this.settings.templates.description(this.definition['sh:comment|rdfs:comment']) : html``}
