@@ -8,6 +8,7 @@ import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
 import { ShapeToFields } from '../core/ShapeToFields'
 import SHACLValidator from 'rdf-validate-shacl'
+import { storeToTurtle } from '../helpers/storeToTurtle'
 
 export const init = (settings: Settings) => {
   class FrmForm extends HTMLElement {
@@ -80,12 +81,13 @@ export const init = (settings: Settings) => {
           isSubmit: true,
           cssClasses: ['primary', 'button', 'end'],
           callback: async (event: InputEvent) => {
+            event.preventDefault()
             // if (this.validationReport.results.length) {
             //   event.preventDefault()
             // }
             
-            // const turtle = await storeToTurtle(this.store)
-            // console.log(turtle)
+            const turtle = await storeToTurtle(this.store)
+            console.log(turtle)
           },
           inner: settings.translator.t('submit')
         })}

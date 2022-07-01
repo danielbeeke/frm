@@ -32,6 +32,7 @@
     "stream-browserify": "^3.0.0",
     "ts-jest": "^27.1.4",
     "typescript": "^4.6.3",
+    "umap": "^1.0.2",
     "util": "^0.12.4"
   },
   "dependencies": {
@@ -39,14 +40,14 @@
     "@fluent/bundle": "^0.17.1",
     "@ldflex/async-iteration-handlers": "^1.1.1",
     "@ldflex/comunica": "^5.0.1",
-    "bcp47-picker": "^1.0.3",
+    "bcp47-picker": "^1.0.9",
     "bootstrap-icons": "^1.8.1",
     "jsonld-context-parser": "^2.1.5",
     "ldflex": "^2.15.0",
     "n3": "^1.16.0",
     "rdf-validate-shacl": "^0.4.3",
     "uhandlers": "^0.6.1",
-    "uhtml": "^2.8.1"
+    "uhtml": "^3.0.0"
   },
   "staticFiles": {
     "staticPath": "src/shapes",
