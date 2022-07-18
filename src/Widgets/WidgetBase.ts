@@ -6,6 +6,7 @@ import { Literal, Store } from 'n3';
 import { Settings } from '../types/Settings'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
+import { Hole } from 'uhtml';
 
 export abstract class WidgetBase {
   
@@ -50,6 +51,7 @@ export abstract class WidgetBase {
   public store: Store
   public parentRender: Function
   public valuesFetcher: () => LDflexPath
+  public theme: (templateName: string, ...args: any[]) => Hole
 
   constructor (
     settings: Settings, 
@@ -61,6 +63,8 @@ export abstract class WidgetBase {
     engine: ComunicaEngine,
     parentRender: Function,
   ) {
+    this.theme = settings.templates.apply.bind(settings.templates)
+
     this.predicate = predicate
     this.settings = settings
     this.host = host
@@ -176,14 +180,14 @@ export abstract class WidgetBase {
   }
 
   descriptionToggle () {
-    return this.settings.templates.button({
+    return this.theme('button', {
       inner: icon('info'),
-      cssClasses: ['title-button'],
+      context: 'toggle-description',
       callback: () => { this.showDescription = !this.showDescription; this.render() },
     })
   }
 
-  async items () {
+  async items (after: any) {
     const callback = ((value = null) => this.item(value))
 
     const filteredValues = await this.values.filter(async value => {
@@ -204,11 +208,11 @@ export abstract class WidgetBase {
       renderItems.push(callback())
 
     const resolvedRenderItems = await Promise.all(renderItems)
-    return this.settings.templates.items(resolvedRenderItems)
+    return this.theme('items', resolvedRenderItems, after)
   }
 
   async item (value: LDflexPath) {
-    return this.settings.templates.input(value, this.attributes(), async (event: InputEvent) => {
+    return this.theme('input', value, this.attributes(), async (event: InputEvent) => {
       const allowedDatatypes = [...await this.allowedDatatypes]
       const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
       const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
@@ -220,10 +224,10 @@ export abstract class WidgetBase {
    * The button to remove one item
    */
    removeButton (value: LDflexPath) {
-    return this.settings.templates.button({
+    return this.theme('button', {
       inner: icon('x'),
       callback: () => this.removeItem(value),
-      cssClasses: ['button', 'remove-item', 'danger', value ? '' : 'disabled']
+      context: 'remove-item'
     })
   }
 
@@ -231,10 +235,10 @@ export abstract class WidgetBase {
    * The button to remove one item
    */
    addButton () {
-    return this.settings.templates.button({
+    return this.theme('button', {
       inner: icon('plus'),
       callback: () => this.addItem(),
-      cssClasses: ['title-button', 'title-button-add']
+      context: 'add-item'
     })
   }
 
@@ -245,7 +249,7 @@ export abstract class WidgetBase {
     const currentLanguage = this.settings.translator.current
     const labels = this.settings.internationalization.languageLabels[currentLanguage]
 
-    const languageLabel = await value?.value ? this.settings.templates.small(await value?.language ? (labels[value.language] ?? value.language) : null) : null
+    const languageLabel = await value?.value ? this.theme('small', await value?.language ? (labels[value.language] ?? value.language) : null) : null
 
     const valueHasLanguage = await value?.language
 
@@ -255,14 +259,14 @@ export abstract class WidgetBase {
     if (this.settings.internationalization.mode === 'tabs') {
       return html`
       ${await value?.value ? html`
-      ${this.settings.templates.button({
+      ${this.theme('button', {
         callback: async () => {
           const hadLanguage = await value?.language
           const rawValue = await value?.term?.value ?? ''
           const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : this.settings.internationalization.current)
           await this.setValue(newTerm, value)
         },
-        cssClasses: ['button', 'outline', 'language-toggle'],
+        context: 'language-toggle',
         inner: html`
           ${icon('translate')}
           ${languageLabel}  
@@ -283,7 +287,7 @@ export abstract class WidgetBase {
     }, optionLabels)
 
     return html`
-      ${this.settings.templates.dropdown({
+      ${this.theme('dropdown', {
         options,
         selectedValue: value ? value.language : '',
         placeholder: await this.t('translation-language-placeholder') ?? '',
@@ -304,9 +308,9 @@ export abstract class WidgetBase {
   }
 
   async errorToggle () {
-    return this.validationErrors?.length ? this.settings.templates.button({
+    return this.validationErrors?.length ? this.theme('button', {
       inner: icon('exclamationTriangleFill'),
-      cssClasses: ['title-button'],
+      context: 'toggle-errors',
       callback: () => {
         this.errorsExpanded = !this.errorsExpanded
         this.render()
@@ -317,7 +321,7 @@ export abstract class WidgetBase {
   async errors () {
     const errors = this.validationErrors.flatMap(error => error.message.map(message => message.value))
     return this.validationErrors?.length && this.errorsExpanded ? 
-    this.settings.templates.description(this.settings.templates.list(errors))
+    this.theme('messages', errors, 'error')
      : null
   }
 
@@ -327,14 +331,13 @@ export abstract class WidgetBase {
     this.parentRender()
 
     return render(this.host, html`
-      ${this.settings.templates.label(this.definition['sh:name|rdfs:label'], [
+      ${this.theme('label', this.definition['sh:name|rdfs:label'], [
         await this.descriptionToggle(),
         await this.errorToggle(),
-        await this.allowMultiple && !this.showEmptyItem ? this.addButton() : null,
       ])}
       ${this.errors()}
-      ${this.showDescription ? this.settings.templates.description(this.definition['sh:comment|rdfs:comment']) : html``}
-      ${this.items()}
+      ${this.showDescription ? this.theme('messages', this.definition['sh:comment|rdfs:comment'], 'info') : html``}
+      ${this.items(await this.allowMultiple && !this.showEmptyItem ? this.addButton() : null)}
     `)
   }
 

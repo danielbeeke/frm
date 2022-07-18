@@ -30,6 +30,11 @@ clip-path: polygon(0% 0%, 0% 100%,
   display: block;
   position: relative;
 
+  bcp47-picker {
+    flex: 1 1 auto;
+    width: auto;
+  }
+
   .nav-link {
     white-space: nowrap;
     color: #bfbfbf;
@@ -64,12 +69,23 @@ clip-path: polygon(0% 0%, 0% 100%,
     position: sticky;
     right: 0;
     padding-inline-start: 10px;
+    margin-inline-start: auto;
   }
 }
 
+.is-invalid + .remove-item-button {
+  border-color: var(--bs-danger);
 
-.input-group {
-  .btn-outline-secondary {
-    border: 1px solid #ced4da;
+  .bi-x {
+    fill: var(--bs-danger);
+  }
+}
+
+.is-invalid + .remove-item-button:hover {
+  background: var(--bs-danger);
+  border-color: var(--bs-danger);
+
+  .bi-x {
+    fill: var(--bs-white);
   }
 }

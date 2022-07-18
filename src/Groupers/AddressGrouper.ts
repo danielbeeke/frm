@@ -17,36 +17,38 @@ export class AddressGrouper extends GrouperBase {
   public expanded: boolean = false
 
   async template () {
-    return this.settings.templates.grouper('address', html`
-    ${this.settings.geocoder ? this.settings.templates.input(
-      '', 
-      null, 
-      (event) => this.search(event), 
-      'search', 
-      icon('search'), 
-      await this.t('address-autocomplete-placeholder')
-    ) : null}
+    return [html`
+      ${this.settings.geocoder ? this.settings.templates.apply('input', 
+        '', 
+        null, 
+        (event) => this.search(event), 
+        'search', 
+        icon('search'), 
+        await this.t('address-autocomplete-placeholder')
+      ) : null}
+    `, html`
 
-    ${this.settings.templates.button({
-      cssClasses: ['button', 'expand-address-grouper', this.expanded ? 'active' : ''],
-      inner: icon('gearFill'),
-      callback: () => {
-        this.expanded = !this.expanded
-        this.render()
-      }
-    })}    
+      ${this.settings.templates.apply('button', {
+        context: 'expand',
+        cssClasses: [this.expanded ? 'active' : '', 'end'],
+        inner: icon('gearFill'),
+        callback: () => {
+          this.expanded = !this.expanded
+          this.render()
+        }
+      })}    
 
-    ${(
-      await this.values.streetAddress || 
-      await this.values.addressLocality
-    ) ? this.settings.templates.text(html`
-      ${this.values.streetAddress}<br>
-      ${this.values.postalCode} ${this.values.addressLocality}<br>
-      ${this.values.addressRegion} ${this.values.addressCountry}
-    `) : null}
+      ${(
+        await this.values.streetAddress || 
+        await this.values.addressLocality
+      ) ? this.settings.templates.apply('text', html`
+        ${this.values.streetAddress}<br>
+        ${this.values.postalCode} ${this.values.addressLocality}<br>
+        ${this.values.addressRegion} ${this.values.addressCountry}
+      `) : null}
 
-    ${this.expanded ? Object.values(this.templates) : null}
-  `)
+      ${this.expanded ? Object.values(this.templates) : null}
+    `]
   }
 
   async search (event: InputEvent) {

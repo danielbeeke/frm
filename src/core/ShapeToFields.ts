@@ -68,7 +68,7 @@ const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, f
       })
 
       return {
-        template: settings.templates.group(definition['rdfs:label'], definition['rdfs:label'], groupFields.map(field => field.template), extraCssClasses),
+        template: settings.templates.apply('group', await definition['rdfs:label'], await definition['rdfs:label'], groupFields.map(field => field.template), extraCssClasses),
         type: 'group',
         identifier: groupIRI,
         order: order !== undefined ? parseInt(order) : 1000,
@@ -114,7 +114,7 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
         grouperInstances.push({
           grouper,
           order: firstOrder!,
-          template: grouper.template(),
+          template: settings.templates.apply('grouper', grouperName, grouper.template()),
           type: 'grouper',
           identifier: grouperName
         })

@@ -10,7 +10,7 @@ export class StringWidget extends WidgetBase {
   static commonNames = ['label', 'name']
 
   async item (value: LDflexPath) {
-    return this.settings.templates.input(value, this.attributes(), async (event: InputEvent) => {
+    return this.theme('input', value, this.attributes(), async (event: InputEvent) => {
       const allowedDatatypes = [...await this.allowedDatatypes]
       const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
       const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)

@@ -11,11 +11,13 @@ export abstract class GrouperBase {
   public templates: Array<Hole> = []
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
   public render: () => Promise<void>
+  public theme: (templateName: string, ...args: any[]) => Hole
 
   public static applicablePredicateGroups: Array<Array<string>>
 
   constructor (settings: Settings, templates: { [key: string]: Hole }, renderCallback) {
     this.settings = settings
+    this.theme = settings.templates.apply.bind(settings.templates)
     this.t = settings.translator.t.bind(settings.translator)
     this.render = renderCallback
 

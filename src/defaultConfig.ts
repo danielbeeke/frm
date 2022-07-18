@@ -37,6 +37,7 @@ import { PositionstackGeocoder } from './Plugins/Geocoder/PositionstackGeocoder'
 import { FrmLanguageTabs } from './CustomElements/FrmLanguageTabs'
 
 // Templates
+import { TemplateResolver } from './core/TemplateResolver'
 import templates from './templates/bootstrap/All'
 
 export default {
@@ -78,5 +79,5 @@ export default {
   translator: new Translator({
     'en': english
   }),
-  templates
+  templates: new TemplateResolver(templates)
 } as Settings

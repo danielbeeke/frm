@@ -38,7 +38,7 @@ export class DropdownWidget extends WidgetBase {
 
     return html`
       <div class="input-group">
-        ${this.settings.templates.dropdown({
+        ${this.theme('dropdown', {
           placeholder: await this.definition['html:placeholder']?.value ?? this.t('select-a-value'),
           options: selectOptions,
           selectedValue: await value?.value,

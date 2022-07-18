@@ -1,47 +1,13 @@
 import { Settings } from '../types/Settings'
-import { html, render } from '../helpers/uhtml'
+import { html, render, Hole } from '../helpers/uhtml'
+import '../helpers/bcp47Picker'
 import { LDflexPath } from '../types/LDflexPath'
-import { init } from 'bcp47-picker/src/init'
 import { icon } from '../helpers/icon'
-
-/* @ts-ignore */
-const bcp47PickerSettings = {
-  get sources () {
-    return (async () => {
-      return { 
-        lmt: await fetch('https://bcp47.danielbeeke.nl/data/lmt.json')
-          .then(response => response.json())
-          .then((json) => new Map(json)), 
-        grn: await fetch('https://bcp47.danielbeeke.nl/data/grn.json')
-          .then(response => response.json())
-          .then((json) => new Map(json)), 
-      }
-    })()
-  },
-  theme: {
-    valueInput: 'form-control',
-    valueContainer: 'input-group',
-    base: 'bootstrap',
-    valueContainerAdvanced: 'form-floating mb-3',
-    showPartsButton: 'btn btn-outline-secondary',
-    showSearchButton: 'btn btn-outline-secondary',
-    backButton: 'btn btn-outline-secondary',
-    results: 'list-group',
-    resultItem: 'list-group-item list-group-item-action',
-    code: 'badge rounded-pill bg-light text-dark',
-    resultCount: 'input-group-text',
-    collapseButton: 'btn btn-outline-secondary',
-    expandButton: 'btn btn-outline-secondary',
-    loading: 'loading',
-    advanced: 'mt-4',
-    advancedTitle: 'mb-2'
-  }
-}
-
-/* @ts-ignore */
-init(bcp47PickerSettings)
+import { parse } from 'bcp-47'
 
 export const FrmLanguageTabs = (settings: Settings) => {
+  const theme = settings.templates.apply.bind(settings.templates)
+
   return class FrmLanguageTabs extends HTMLElement {
 
     public settings: Settings
@@ -72,44 +38,42 @@ export const FrmLanguageTabs = (settings: Settings) => {
       const currentUILangCode = this.settings.translator.current
       const labels = this.settings.internationalization.languageLabels[currentUILangCode]
 
-      const tabs = Object.entries(labels).map(([langCode, label]) => settings.templates.button({
+      const tabs: Array<Hole> = Object.entries(labels).map(([langCode, label]) => [theme('button', {
         callback: () => {
           this.expandedCreationForm = false
           this.settings.internationalization.current = langCode
           this.render()
         },
-        cssClasses: ['tab', currentLangCode === langCode ? 'active' : ''],
+        context: 'language-tab',
+        cssClasses: [currentLangCode === langCode ? 'active' : ''],
         inner: html`
           ${label} ${icon('x')}
         `
-      }))
+      }), [currentLangCode === langCode ? 'active' : '']])
 
-      tabs.push([html`<button class="btn btn-light btn-sm dropdown-toggle relative" style="z-index: 11" type="button" onclick=${async () => {
+      tabs.push([theme('addLanguageTab', html`${icon('plus')} ${this.t('add-language')}`, async () => {
         this.expandedCreationForm = !this.expandedCreationForm
         await this.render()
-        ;(document.querySelector('bcp47-picker') as HTMLInputElement)?.focus()
-      }}>
-        ${icon('plus')} ${this.t('add-language')}
-      </button>`, ['add-language-button']])
+        ;(document.querySelector('bcp47-picker') as HTMLInputElement)?.focus()    
+      }), ['add-language-button']])
 
       await render(this, html`
-        ${this.settings.templates.label(this.definition['rdfs:label'])}
-        ${this.settings.templates.tabs(tabs, ['language-tabs'])}
-        ${this.expandedCreationForm ? html`
-          <div class="fixed-bcp47-picker bg-light p-3 rounded shadow">
-            <bcp47-picker ref=${element => this.picker = element} class="mb-3" />
-            ${settings.templates.button({
-              inner: this.t('add-language'),
-              callback: async () => {
-                /** @ts-ignore */
-                settings.internationalization.addLanguage(this.picker.value, this.picker.label)
-                this.expandedCreationForm = false
-                await this.render()
-              },
-              cssClasses: ['button', 'primary', 'float-end']
-            })}
-          </div>
-        ` : null}
+        ${theme('label', this.definition['rdfs:label'])}
+        ${theme('tabs', tabs, ['language-tabs'])}
+        ${this.expandedCreationForm ? theme('addLanguagePopup', html`
+          <bcp47-picker ref=${element => this.picker = element} />
+          ${theme('button', {
+            inner: this.t('add-language'),
+            callback: async () => {
+              const parsed = parse(this.picker.value)
+              /** @ts-ignore */
+              settings.internationalization.addLanguage(this.picker.value, this.picker.label(parsed))
+              this.expandedCreationForm = false
+              await this.render()
+            },
+            context: 'add-language-submit'
+          })}
+        `) : null}
       `)
     }
 

@@ -1,21 +1,25 @@
 import { dropdown } from './dropdown'
 import { button } from './button'
 import { label } from './label'
-import { description } from './description'
 import { list } from './list'
 import { items } from './items'
 import { grouper } from './grouper'
+import { grouperAddress } from './grouper-address'
 import { input } from './input'
 import { tabs } from './tabs'
 import { text } from './text'
 import { small } from './small'
 import { group } from './group'
+import { addLanguageTab } from './addLanguageTab'
+import { addLanguagePopup } from './addLanguagePopup'
+import { messages } from './messages'
 
 export default {
+  addLanguageTab,
+  addLanguagePopup,
   dropdown,
   button,
   label,
-  description,
   list,
   items,
   grouper,
@@ -23,5 +27,7 @@ export default {
   tabs,
   text,
   small,
-  group
+  group,
+  messages,
+  'grouper-address': grouperAddress,
 }
