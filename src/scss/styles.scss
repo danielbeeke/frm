@@ -1,3 +1,5 @@
+@import 'language-picker';
+
 frm-multi-field, frm-field {
   display: block;
 }
@@ -16,61 +18,6 @@ clip-path: polygon(0% 0%, 0% 100%,
                  var(--a) var(--bw), var(--a) var(--a),
                  var(--b) var(--a), var(--b) 100%,
                  100% 100%, 100% 0%);
-}
-
-.fixed-bcp47-picker {
-  position: absolute;
-  right: 0;
-  width: calc(100% - 120px);
-  top: 28px;
-  z-index: 10;
-}
-
-.language-picker {
-  display: block;
-  position: relative;
-
-  bcp47-picker {
-    flex: 1 1 auto;
-    width: auto;
-  }
-
-  .nav-link {
-    white-space: nowrap;
-    color: #bfbfbf;
-  }
-
-
-  .nav-item.active {
-    position: sticky;
-    left: 0;
-    z-index: 20;
-    right: 150px;
-  }
-
-  .nav-tabs {
-    scrollbar-width: none;
-    overflow-x: auto;
-    overflow-y: hidden;
-    border-bottom: none;
-
-    &:after {
-      content: '';
-      display: block;
-      width: 100%;
-      border-bottom: 1px solid #dee2e6;
-      position: absolute;
-      z-index: -1;
-      bottom: 0;
-    }
-  }
-
-  .add-language-button {
-    position: sticky;
-    right: 0;
-    padding-inline-start: 10px;
-    margin-inline-start: auto;
-  }
 }
 
 .is-invalid + .remove-item-button {

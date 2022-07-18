@@ -1,19 +1,43 @@
 import { html } from '../../helpers/uhtml'
 
 export const grouperAddress = async (name: string, inner: any) => {
-  const [search, currentValue] = await inner
+  const {
+    expanded,
+    hasValue,
+    searchField,
+    expandButton,
+    valueDisplay,
+    fields
+  } = await inner
 
   return html`
-    <div class=${`grouper-${name} form-control pt-3`}>
-      <div class="row">
-        <div class="value-part col">
-          ${currentValue}
+    <div class=${`grouper-${name} form-control pt-3 pb-3 d-flex flex-wrap`}>
+      ${!expanded ? html`
+        <div class="col">
+          ${hasValue ? valueDisplay : searchField}
         </div>
 
-        <div class="search-part col">
-          ${search}
+        <div class="ps-2">
+            ${expandButton}
         </div>
-      </div>
+      ` : null}
+
+      ${expanded ? html`
+        <div class="col pb-3">
+          ${searchField}
+        </div>
+
+        <div class="ps-2">
+            ${expandButton}
+        </div>
+        <hr class="col-12">
+        <div class="col-12">
+          ${fields}
+        </div>
+
+      ` : null}
+
+
     </div>
   `
 }

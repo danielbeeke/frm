@@ -17,38 +17,50 @@ export class AddressGrouper extends GrouperBase {
   public expanded: boolean = false
 
   async template () {
-    return [html`
-      ${this.settings.geocoder ? this.settings.templates.apply('input', 
-        '', 
-        null, 
-        (event) => this.search(event), 
-        'search', 
-        icon('search'), 
-        await this.t('address-autocomplete-placeholder')
-      ) : null}
-    `, html`
+    const hasValue = await this.values.streetAddress || await this.values.addressLocality
 
-      ${this.settings.templates.apply('button', {
-        context: 'expand',
-        cssClasses: [this.expanded ? 'active' : '', 'end'],
-        inner: icon('gearFill'),
-        callback: () => {
-          this.expanded = !this.expanded
-          this.render()
-        }
-      })}    
+    const searchField = this.settings.geocoder ? this.settings.templates.apply('input', 
+      '', 
+      null, 
+      (event) => this.search(event), 
+      'search', 
+      null, 
+      await this.t('address-autocomplete-placeholder')
+    ) : null
 
-      ${(
-        await this.values.streetAddress || 
-        await this.values.addressLocality
-      ) ? this.settings.templates.apply('text', html`
-        ${this.values.streetAddress}<br>
-        ${this.values.postalCode} ${this.values.addressLocality}<br>
-        ${this.values.addressRegion} ${this.values.addressCountry}
-      `) : null}
+    const expandButton = this.settings.templates.apply('button', {
+      context: 'expand',
+      cssClasses: [this.expanded ? 'active' : '', 'end'],
+      inner: icon('gearFill'),
+      callback: () => {
+        this.expanded = !this.expanded
+        this.render()
+      }
+    })
 
-      ${this.expanded ? Object.values(this.templates) : null}
-    `]
+    const valueDisplay = (
+      await this.values.streetAddress || 
+      await this.values.addressLocality
+    ) && !this.expanded ? this.settings.templates.apply('text', html`
+      ${this.values.streetAddress}<br>
+      ${this.values.postalCode} ${this.values.addressLocality}<br>
+      ${this.values.addressRegion} ${this.values.addressCountry}
+    `) : null
+
+    const fields = html`
+      <div>
+        ${Object.values(this.templates)}
+      </div>
+    `
+
+    return {
+      expanded: this.expanded,
+      hasValue,
+      searchField,
+      expandButton,
+      valueDisplay,
+      fields
+    }
   }
 
   async search (event: InputEvent) {

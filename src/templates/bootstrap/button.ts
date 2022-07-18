@@ -3,12 +3,12 @@ import { html } from '../../helpers/uhtml'
 const buttonMapping = {
   'language-tab': 'nav-link',
   'add-language-submit': 'btn btn-primary ms-3',
-  'toggle-description': 'btn btn-light btn-sm',
-  'toggle-errors': 'btn btn-light btn-sm',
+  'toggle-description': 'btn btn- btn-sm  text-muted',
+  'toggle-errors': 'btn btn- btn-sm text-muted',
   'add-item': 'btn btn-light btn-sm ms-auto',
   'language-toggle': 'btn-outline-secondary btn',
   'form-submit': 'btn-primary btn btn-lg float-end',
-  'expand': 'btn btn-light btn-sm',
+  'expand': 'btn btn-light',
   'remove-item': 'btn btn-outline-secondary btn-sm remove-item-button',
 }
 

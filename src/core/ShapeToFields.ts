@@ -79,6 +79,8 @@ const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, f
   return groups.filter(Boolean)
 }
 
+const grouperCache = new Map()
+
 const getGroupers = async (settings: Settings, fields: Array<RenderItem>, renderCallback, value: LDflexPath) => {
   const grouperInstances: Array<RenderItem> = []
 
@@ -103,13 +105,13 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
             if (aliasses[name]) name = aliasses[name]
           }
         }
-          
-        // TODO Grouper should have cache so it can remember state.
-        // let grouper = grouperCache.get(value)
-        // if (!grouper) {
-          let grouper = await new Grouper(settings, grouperTemplates, renderCallback)
-        //   grouperCache.set(Grouper, grouper)
-        // }
+
+        let grouper = grouperCache.get(await value.term.value)
+
+        if (!grouper) {
+          grouper = await new Grouper(settings, grouperTemplates, renderCallback)
+          grouperCache.set(await value.term.value, grouper)
+        }
 
         grouperInstances.push({
           grouper,
