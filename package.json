@@ -36,6 +36,9 @@
   },
   "dependencies": {
     "@comunica/query-sparql": "^2.1.0",
+    "@editorjs/editorjs": "^2.25.0",
+    "@editorjs/header": "^2.6.2",
+    "@editorjs/list": "^1.7.0",
     "@fluent/bundle": "^0.17.1",
     "@ldflex/async-iteration-handlers": "^1.1.1",
     "@ldflex/comunica": "^5.0.1",

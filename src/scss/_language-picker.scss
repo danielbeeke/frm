@@ -3,7 +3,7 @@
   right: 0;
   width: calc(100% - 120px);
   top: 28px;
-  z-index: 10;
+  z-index: 100;
 }
 
 .language-picker {
@@ -48,6 +48,7 @@
   .add-language-button {
     position: sticky;
     right: 0;
+    z-index: 101;
     padding-inline-start: 10px;
     margin-inline-start: auto;
   }

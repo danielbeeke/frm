@@ -26,6 +26,7 @@ import { GeoWidget } from './Widgets/GeoWidget'
 import { DropdownWidget } from './Widgets/DropdownWidget'
 import { DateWidget } from './Widgets/DateWidget'
 import { NodeWidget } from './Widgets/NodeWidget'
+import { EditorJsWidget } from './Widgets/EditorJsWidget'
 
 // Groupers
 import { AddressGrouper } from './Groupers/AddressGrouper'
@@ -65,7 +66,8 @@ export default {
     'geo': GeoWidget,
     'dropdown': DropdownWidget,
     'date': DateWidget,
-    'node': NodeWidget
+    'node': NodeWidget,
+    'editor': EditorJsWidget
   },
   // geocoder: new PositionstackGeocoder(YOUR_KEY)
   groupers: {

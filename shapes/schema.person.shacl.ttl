@@ -37,6 +37,13 @@ schema:PersonShape
     ] ;
 
     sh:property [
+        sh:path schema:abstract ;
+        sh:order 2 ;
+        frm:widget "editor" ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
         sh:path schema:birthDate ;
         sh:datatype xsd:date ;
         sh:lessThan schema:deathDate ;
