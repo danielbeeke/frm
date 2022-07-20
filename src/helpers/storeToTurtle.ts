@@ -1,6 +1,6 @@
 import { Store, Writer } from 'n3'
 
-export const storeToTurtle = async (store: Store) => {
+export const storeToTurtle = async (store: Store): Promise<string> => {
   return new Promise((resolve, reject) => {
     const writer = new Writer()
     writer.addQuads(store.getQuads(null, null, null, null))

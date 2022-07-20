@@ -1,10 +1,11 @@
 import { WidgetBase } from './WidgetBase'
 import { StringBasedConstraints } from '../core/shaclProperties'
 import { LDflexPath } from '../types/LDflexPath'
-import { html, render } from '../helpers/uhtml'
-import EditorJS from '@editorjs/editorjs';
-import Header from '@editorjs/header'; 
-import List from '@editorjs/list'; 
+import EditorJS from '@editorjs/editorjs'
+import { html } from '../helpers/uhtml'
+import { debounce } from '../helpers/debounce'
+
+let cache = new Map()
 
 export class EditorJsWidget extends WidgetBase {
 
@@ -15,25 +16,67 @@ export class EditorJsWidget extends WidgetBase {
   static supportedProperties = [...StringBasedConstraints, 'html:rows', 'html:placeholder']
   static commonNames = ['description', 'abstract', 'text']
 
+  async parsedValue (index: number) {
+    const value = await this.getValue(index)
+    return await value?.value ? JSON.parse(atob(await value?.value)) : null
+  }
 
-  async item (value: LDflexPath) {
-    return html`<div class="col-12 form-control" ref=${element => {
-      if (element.editor) return
-      
-      element.editor = new EditorJS({
+  /**
+   * The form widget using EditorJs
+   */
+  async item (value: LDflexPath, index: number) {
+    const cid = `${this.predicate}|${index}`
+    const element = cache.get(cid) ?? document.createElement('div')
+
+    if (!cache.has(cid)) {
+      cache.set(cid, element)
+      element.classList.add('form-control')
+      element.classList.add('editor-widget')
+
+      element.editor = new EditorJS(Object.assign({
+        minHeight: 100,
+      }, this.settings.editorJs, {
+        logLevel: 'ERROR',
         holder: element,
-          /** 
-           * Available Tools list. 
-           * Pass Tool's class or Settings object for each Tool you want to use 
-           */ 
-          tools: { 
-            header: Header, 
-            list: List 
-          },
-      })
-    }}></div>
-    ${this.removeButton(value)}
+        onChange: debounce(async () => {
+          const newData = await element.editor.save()
+          const newValue = this.settings.dataFactory.literal(btoa(JSON.stringify(newData)))
+          await this.setValue(newValue, await this.getValue(index))
+        }, 500),
+        data: await this.parsedValue(index)
+      }))
+    }
+
+    return html`
+      ${element}
+      ${this.removeButton(value)}
     `
   }
 
+  /**
+   * When removing we need to refresh the widgets 
+   * after the one that is removed so they render the next item.
+   */
+  async removeItem (value: LDflexPath | null = null) {
+    await super.removeItem(value)
+
+    const newCache = new Map()
+    let counter = 0
+
+    for (const [index, element] of [...cache.values()].entries()) {
+      if (element.isConnected) {
+        const data = await this.parsedValue(index)
+        if (data) {
+          element.editor.render(data)
+        }
+        else {
+          element.editor.clear()
+        }
+        newCache.set(`${this.predicate}|${counter}`, element)
+        counter++  
+      }
+    }
+
+    cache = newCache
+  }
 }

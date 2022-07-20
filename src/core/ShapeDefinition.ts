@@ -8,6 +8,8 @@ import { JsonLdContextNormalized } from 'jsonld-context-parser'
 import { validateShaclString } from '../helpers/validateShaclString'
 import { ProxyHandlerStatic } from '@comunica/actor-http-proxy'
 import handlers from '../helpers/ldFlexSettings'
+import { hash } from 'spark-md5'
+import { storeToTurtle } from '../helpers/storeToTurtle'
 
 export class ShapeDefinition {
 
@@ -15,7 +17,7 @@ export class ShapeDefinition {
   public store: Store
   public shape: LDflexPath
   private settings: Settings
-  private subjectUri: string
+  public subjectUri: string
 
   constructor (settings: Settings, turtleShaclShape: string, subjectUri: string) {
     this.settings = settings
@@ -23,30 +25,56 @@ export class ShapeDefinition {
 
     // You have to init this class with 'await' in front of it.
     /** @ts-ignore */
-    return this.init(turtleShaclShape, subjectUri).then(async () => {
-      // Fetch ontology data.
-      await this.settings.definitionEnhancer.enhance(this.settings, this)
-
-      // When this class is loaded we trigger the widgetsMatcher.
-      // After this is all loaded our shacl definitions all have a frm:widget.
-      return this.settings.widgetsMatcher.match(this.settings, this).then(() => this)
-    })
+    return this.init(turtleShaclShape, subjectUri).then(() => this)
   }
 
   /**
    * Inits this shape definition, delegates enhancing it to the widgetsMatcher.
    */
-  async init (turtleShaclShape: string) {
-    const { store: data, prefixes } = await rdfToStore(turtleShaclShape)
+  async init (turtleShaclShape: string, subjectUri: string) {
+    const turtleId = `${hash(turtleShaclShape)}-${this.settings.context.compactIri(subjectUri)}`
 
-    const mergedContext = Object.assign(this.settings.context.getContextRaw(), prefixes)
-    this.settings.context = new JsonLdContextNormalized(mergedContext) 
+    const cacheEnhancedTurtleShaclShape = localStorage.getItem(turtleId)
 
-    this.store = data
-    this.shape = await this.createLDflexPath(data, this.subjectUri)
+    /**
+     * Put it into the cache
+     */
+    if (!cacheEnhancedTurtleShaclShape) {
+      const { store: data, prefixes } = await rdfToStore(turtleShaclShape)
 
-    // We want SHACL shape validation but also performance
-    setTimeout(() => validateShaclString(turtleShaclShape), 1000)
+      const mergedContext = Object.assign(this.settings.context.getContextRaw(), prefixes)
+      this.settings.context = new JsonLdContextNormalized(mergedContext) 
+  
+      this.store = data
+      this.shape = await this.createLDflexPath(data, this.subjectUri)
+  
+      // We want SHACL shape validation but also performance
+      setTimeout(() => validateShaclString(turtleShaclShape), 4000)
+  
+      // Fetch ontology data.
+      await this.settings.definitionEnhancer.enhance(this.settings, this)
+  
+      // When this class is loaded we trigger the widgetsMatcher.
+      // After this is all loaded our shacl definitions all have a frm:widget.
+      await this.settings.widgetsMatcher.match(this.settings, this)
+
+      const newCacheTurtle = await storeToTurtle(this.store)
+      localStorage.setItem(turtleId, newCacheTurtle)
+    }
+
+    /**
+     * Cache version
+     */
+    else {
+      const { store: data, prefixes } = await rdfToStore(cacheEnhancedTurtleShaclShape)
+      const mergedContext = Object.assign(this.settings.context.getContextRaw(), prefixes)
+      this.settings.context = new JsonLdContextNormalized(mergedContext) 
+  
+      this.store = data
+      this.shape = await this.createLDflexPath(data, this.subjectUri)
+    }
+
+    return this
   }
 
   /**

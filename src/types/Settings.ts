@@ -7,6 +7,7 @@ import { GeocoderBase } from '../Plugins/Geocoder/GeocoderBase'
 import { Internationalization } from '../core/Internationalization'
 import templates from '../templates/bootstrap/All'
 import { TemplateResolver } from '../core/TemplateResolver'
+import { EditorConfig } from '@editorjs/editorjs';
 
 export type Settings = {
   context: JsonLdContextNormalized,
@@ -18,6 +19,7 @@ export type Settings = {
   proxy?: string,
   translator: Translator,
   geocoder?: GeocoderBase,
+  editorJs: EditorConfig,
   dataFactory: typeof DataFactory,
   elements: {
     [key: string]: (settings: Settings) => any
@@ -25,6 +27,6 @@ export type Settings = {
   keys?: {
     [product: string]: string
   },
-  templates: TemplateResolver,
+  templates: TemplateResolver<typeof templates>,
   internationalization: Internationalization
 }

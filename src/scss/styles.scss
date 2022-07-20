@@ -36,3 +36,41 @@ clip-path: polygon(0% 0%, 0% 100%,
     fill: var(--bs-white);
   }
 }
+
+frm-form {
+  &.loading {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bs-gray-100);
+    padding: 100px 30px;
+    border-radius: .25rem;
+
+    .icon {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+.ce-block__content, .ce-toolbar__content { 
+  max-width: calc(100% - 100px) !important; 
+}
+
+.cdx-block { 
+  max-width: 100% !important; 
+}
+
+[widget="editor"] .editor-widget {
+  position: relative;
+
+  &:before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--bs-gray-100);
+  }
+}

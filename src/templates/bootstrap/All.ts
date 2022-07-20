@@ -13,6 +13,7 @@ import { group } from './group'
 import { addLanguageTab } from './addLanguageTab'
 import { addLanguagePopup } from './addLanguagePopup'
 import { messages } from './messages'
+import { textarea } from './textarea'
 
 export default {
   addLanguageTab,
@@ -29,5 +30,6 @@ export default {
   small,
   group,
   messages,
+  textarea,
   'grouper-address': grouperAddress,
 }

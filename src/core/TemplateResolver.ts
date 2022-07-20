@@ -2,10 +2,10 @@ import { Hole, html } from "../helpers/uhtml";
 
 const debug = localStorage.debug
 
-export class TemplateResolver {
-  #templates: { [key: string]: (...args: Array<any>) => Hole }
+export class TemplateResolver<Templates> {
+  #templates: Templates
 
-  constructor (templates: { [key: string]: (...args: Array<any> | any) => Hole }) {
+  constructor (templates: Templates) {
     this.#templates = templates
   }
 

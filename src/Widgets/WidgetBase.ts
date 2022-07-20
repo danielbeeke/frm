@@ -143,17 +143,29 @@ export abstract class WidgetBase {
     })()
   }
 
+  async getValue (index) {
+    let counter = 0
+    let item
+    for await (const value of this.values) {
+      if (counter === index)
+        item = value
+      counter++
+    }
+    return item
+  }
+
   async setValue (newValue: Literal, value: LDflexPath = null) {
     const oldValue = await value?.term
 
     if (!oldValue) {
       this.showEmptyItem = false
       await this.values.add(newValue)
-      this.host.dispatchEvent(new CustomEvent('value-changed', { detail: { newValue, oldValue: null }, bubbles: true }))
+      this.host.dispatchEvent(new CustomEvent('value-added', { detail: { newValue, oldValue }, bubbles: true }))
     }
     else if (oldValue) {
       if (!newValue) {
         await this.values.delete(oldValue)
+        this.host.dispatchEvent(new CustomEvent('value-deleted', { detail: { newValue, oldValue }, bubbles: true }))
       }
       else {
         await this.values.replace(oldValue, newValue)
@@ -188,7 +200,7 @@ export abstract class WidgetBase {
   }
 
   async items (after: any) {
-    const callback = ((value = null) => this.item(value))
+    const callback = ((value = null, index: number = -1) => this.item(value, index))
 
     const filteredValues = await this.values.filter(async value => {
       if (this.settings.internationalization.mode === 'mixed') return value
@@ -205,13 +217,13 @@ export abstract class WidgetBase {
       renderItems.push(this.t('no-more-values-not-allowed'))
 
     if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem)
-      renderItems.push(callback())
+      renderItems.push(callback(null, valueCount))
 
     const resolvedRenderItems = await Promise.all(renderItems)
     return this.theme('items', resolvedRenderItems, after)
   }
 
-  async item (value: LDflexPath) {
+  async item (value: LDflexPath, index: number) {
     return this.theme('input', value, this.attributes(), async (event: InputEvent) => {
       const allowedDatatypes = [...await this.allowedDatatypes]
       const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
@@ -324,7 +336,6 @@ export abstract class WidgetBase {
     this.theme('messages', errors, 'error')
      : null
   }
-
 
   public async render () {
     await this.preRender()

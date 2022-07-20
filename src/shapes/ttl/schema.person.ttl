@@ -10,6 +10,7 @@ schema:examplePerson
     schema:postalCode "80840"^^xsd:string ;
     schema:streetAddress "100 Main Street"^^xsd:string
   ] ;
+  # schema:abstract "eyJ0aW1lIjoxNjU4MjI0MTg3NDQ5LCJibG9ja3MiOlt7ImlkIjoiTzdieXp2T29DcSIsInR5cGUiOiJoZWFkZXIiLCJkYXRhIjp7InRleHQiOiJMb3JlbSBpcHN1bSIsImxldmVsIjoyfX0seyJpZCI6IkNBblMzZUIzeXYiLCJ0eXBlIjoicGFyYWdyYXBoIiwiZGF0YSI6eyJ0ZXh0IjoiVGhpcyBpcyBncmVhdCBtYW4uLi48YnI+In19XSwidmVyc2lvbiI6IjIuMjUuMCJ9" ;
   schema:alumniOf "Dartmouth"^^xsd:string ;
   schema:birthDate "1979-10-12"^^xsd:date ;
   schema:birthPlace "Philadelphia, PA"^^xsd:string ;

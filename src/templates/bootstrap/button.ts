@@ -7,7 +7,7 @@ const buttonMapping = {
   'toggle-errors': 'btn btn- btn-sm text-muted',
   'add-item': 'btn btn-light btn-sm ms-auto',
   'language-toggle': 'btn-outline-secondary btn',
-  'form-submit': 'btn-primary btn btn-lg float-end',
+  'form-submit': 'btn-primary btn btn-lg float-end mb-5',
   'expand': 'btn btn-light',
   'remove-item': 'btn btn-outline-secondary btn-sm remove-item-button',
 }

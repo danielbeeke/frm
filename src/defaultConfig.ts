@@ -41,6 +41,10 @@ import { FrmLanguageTabs } from './CustomElements/FrmLanguageTabs'
 import { TemplateResolver } from './core/TemplateResolver'
 import templates from './templates/bootstrap/All'
 
+// EditorJS
+import Header from '@editorjs/header'; 
+import List from '@editorjs/list'; 
+
 export default {
   context: new JsonLdContextNormalized({
     '@language': 'en',
@@ -68,6 +72,12 @@ export default {
     'date': DateWidget,
     'node': NodeWidget,
     'editor': EditorJsWidget
+  },
+  editorJs: {
+      tools: { 
+        header: Header, 
+        list: List 
+      },
   },
   // geocoder: new PositionstackGeocoder(YOUR_KEY)
   groupers: {

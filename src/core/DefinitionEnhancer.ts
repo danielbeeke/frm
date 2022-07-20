@@ -12,7 +12,6 @@ const comunica = new QueryEngine()
 
 export class DefinitionEnhancer implements DefinitionEnhancerInterface {
   async enhance (settings: Settings, shapeDefinition: ShapeDefinition) {
-
     // Make sure every shacl property has a frm:widget.
     for await (const shallowPredicatePath of shapeDefinition.shape['sh:property']) {
       const predicate = await shallowPredicatePath['sh:path'].value
