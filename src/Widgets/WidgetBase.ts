@@ -7,6 +7,7 @@ import { Settings } from '../types/Settings'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
 import { Hole } from 'uhtml';
+import { lastPart } from '../helpers/lastPart'
 
 export abstract class WidgetBase {
   
@@ -41,8 +42,10 @@ export abstract class WidgetBase {
 
   public errorsExpanded: boolean = false
 
-  public inputAttributes = {
-    type: 'text'
+  public inputAttributes: {
+    type: string,
+  } = {
+    type: 'text',
   }
 
   public showDescription: boolean = false
@@ -111,13 +114,20 @@ export abstract class WidgetBase {
       attributeObjects.push(await transformer.transform(this.values, this.definition))
     const differ = attributesDiff(Object.assign({}, this.inputAttributes, ...attributeObjects))
 
-    return (node) => {
+    return async (node: HTMLInputElement) => {
       if (!this.validationErrors.length) {
         node.setCustomValidity('')
       }
       else {
         const messages = this.validationErrors.flatMap(error => error.message.map(message => message.value))
         node.setCustomValidity(messages.join('\n'))
+      }
+
+      if (await this.disabled()) {
+        node.setAttribute('disabled', '')
+      }
+      else {
+        node.removeAttribute('disabled')
       }
 
       differ(node)
@@ -224,12 +234,18 @@ export abstract class WidgetBase {
   }
 
   async item (value: LDflexPath, index: number) {
-    return this.theme('input', value, this.attributes(), async (event: InputEvent) => {
-      const allowedDatatypes = [...await this.allowedDatatypes]
-      const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
-      const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
-      this.setValue(newValue, value)
-    }, 'text', this.removeButton(value))
+    return this.theme('input', {
+      value,
+      ref: this.attributes(),
+      onchange: async (event: InputEvent) => {
+        const allowedDatatypes = [...await this.allowedDatatypes]
+        const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
+        const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
+        this.setValue(newValue, value)
+      },
+      type: 'text',
+      suffix: this.removeButton(value)
+    })
   }
 
   /**
@@ -254,11 +270,21 @@ export abstract class WidgetBase {
     })
   }
 
+  async disabled () {
+    const l10n = this.settings.internationalization.current
+    if (l10n === false && !(await this.allowedDatatypes).has('http://www.w3.org/2001/XMLSchema#string')) return true
+    return false
+  }
+
   /**
    * The language selector, used in 'mixed' internationalization mode.
    */
   async l10nSelector (value: LDflexPath) {
     const currentLanguage = this.settings.translator.current
+    const l10n = this.settings.internationalization.current
+
+    if (l10n === false) return null
+   
     const labels = this.settings.internationalization.languageLabels[currentLanguage]
 
     const languageLabel = await value?.value ? this.theme('small', await value?.language ? (labels[value.language] ?? value.language) : null) : null
@@ -275,7 +301,7 @@ export abstract class WidgetBase {
         callback: async () => {
           const hadLanguage = await value?.language
           const rawValue = await value?.term?.value ?? ''
-          const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : this.settings.internationalization.current)
+          const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : l10n)
           await this.setValue(newTerm, value)
         },
         context: 'language-toggle',
@@ -288,7 +314,6 @@ export abstract class WidgetBase {
       ` : null}`
     }
 
-    const l10n = this.settings.internationalization.current
     const settingsHasLanguages = Object.keys(this.settings.internationalization.languageLabels).length > 0
     if (!settingsHasLanguages) return null
 
@@ -342,7 +367,7 @@ export abstract class WidgetBase {
     this.parentRender()
 
     return render(this.host, html`
-      ${this.theme('label', this.definition['sh:name|rdfs:label'], [
+      ${this.theme('label', await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate), [
         await this.descriptionToggle(),
         await this.errorToggle(),
       ])}

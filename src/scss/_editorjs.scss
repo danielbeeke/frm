@@ -1,0 +1,84 @@
+frm-form {
+  .ce-block__content, .ce-toolbar__content { 
+    max-width: calc(100%) !important; 
+    margin-left: 0 !important;
+  }
+  
+  .cdx-block { 
+    max-width: 100% !important; 
+  }
+  
+  .ce-editorjsColumns_col {
+    flex: 50%;
+  
+    .codex-editor {
+      height: 100%;
+    }
+  }
+  
+  .ce-editorjsColumns_wrapper {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    margin-top: 20px;;
+    margin-bottom: 20px;
+    padding-right: 60px;
+    justify-items: stretch;
+  }
+  
+  .ce-toolbar__actions {
+    right: 0; 
+  }
+  
+  .ce-toolbox {
+    right: calc(100% + 30px);
+    left: auto;
+  }
+  
+  .ce-toolbar--opened {
+    z-index: 1000;
+  }
+  
+  .codex-editor .ce-toolbox {
+    right: calc(100% - 30px);
+  }
+  
+  .ce-popover {
+    right: 0;
+  }
+  
+  .codex-editor .codex-editor {
+    padding: 10px;
+    border: 1px solid var(--bs-gray-100);
+  }
+  
+  .codex-editor--narrow .ce-toolbar__actions {
+    right: 11px;
+  }
+  
+  .editor-widget {
+    position: relative;
+    z-index: 4;
+  }
+
+  .inline-image__tab-wrapper {
+    display: none;
+  }
+
+  .inline-image__control-panel {
+    box-shadow: none;
+    padding-top: 30px;
+  }
+
+  [data-item-name="image"] .ce-popover__item-label {
+    font-size: 0px;
+  }
+
+  // TODO patch the code instead.
+  [data-item-name="image"] .ce-popover__item-label:after {
+    content: 'Image';
+    font-size: 14px;
+    position: relative;
+    top: 2px;
+  }
+}

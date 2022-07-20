@@ -5,7 +5,6 @@ import { Internationalization } from '../src/core/Internationalization'
 
 defaultConfig.geocoder = new PositionstackGeocoder(process.env.POSITIONSTACK)
 defaultConfig.internationalization = new Internationalization({
-  langCodes: ['en', 'fr', 'nl'], 
   mode: 'tabs',
   allowCreation: true
 }),

@@ -1,4 +1,5 @@
 @import 'language-picker';
+@import 'editorjs';
 
 frm-multi-field, frm-field {
   display: block;
@@ -49,28 +50,5 @@ frm-form {
     .icon {
       flex: 0 0 auto;
     }
-  }
-}
-
-.ce-block__content, .ce-toolbar__content { 
-  max-width: calc(100% - 100px) !important; 
-}
-
-.cdx-block { 
-  max-width: 100% !important; 
-}
-
-[widget="editor"] .editor-widget {
-  position: relative;
-
-  &:before {
-    content: '';
-    display: block;
-    width: 36px;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: var(--bs-gray-100);
   }
 }

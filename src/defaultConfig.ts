@@ -44,12 +44,38 @@ import templates from './templates/bootstrap/All'
 // EditorJS
 import Header from '@editorjs/header'; 
 import List from '@editorjs/list'; 
+import EditorjsColumns from './helpers/editorjs-columns';
+import { BlockToolConstructable } from '@editorjs/editorjs'; 
+import InlineImage from 'editorjs-inline-image'
+import Link from '@editorjs/link'
+
+const editorJsPlugins = {
+  header: Header, 
+  list: List,
+  image: {
+    class: InlineImage,
+    config: {
+      unsplash: false
+    }
+  },
+  link: Link,
+}
+
+const rootEditorJsPlugins: any = Object.assign({}, editorJsPlugins)
+rootEditorJsPlugins.columns = {
+  class : EditorjsColumns as unknown as BlockToolConstructable,
+  config : {
+    tools : editorJsPlugins
+  }
+}
 
 export default {
   context: new JsonLdContextNormalized({
     '@language': 'en',
     ...basePrefixes
   }),
+
+  // TODO inject translator some how.
   internationalization: new Internationalization({
     langCodes: ['en', 'nl'], 
     mode: 'mixed',
@@ -74,10 +100,7 @@ export default {
     'editor': EditorJsWidget
   },
   editorJs: {
-      tools: { 
-        header: Header, 
-        list: List 
-      },
+      tools: rootEditorJsPlugins
   },
   // geocoder: new PositionstackGeocoder(YOUR_KEY)
   groupers: {

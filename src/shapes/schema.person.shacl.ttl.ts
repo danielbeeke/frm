@@ -39,6 +39,15 @@ schema:PersonShape
         sh:minCount 1 ;
     ] ;
 
+
+    sh:property [
+        sh:path schema:callSign ;
+        sh:order 2 ;
+        sh:datatype <http://www.w3.org/1999/02/22-rdf-syntax-ns#langString> ;
+        sh:minCount 1 ;
+    ] ;
+
+
     sh:property [
         sh:path schema:description ;
         sh:order 2 ;

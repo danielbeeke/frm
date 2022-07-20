@@ -1,6 +1,6 @@
 import { fetched } from '../helpers/fetched'
 
-export const getLanguageLabels = async (langCodes: Array<string>) => {
+export const getLanguageLabels = async (langCodes: Array<string>, UIlangCodes: Array<string>) => {
   if (!langCodes.length) return {}
 
   const languageLabelsQuery = `
@@ -8,7 +8,7 @@ export const getLanguageLabels = async (langCodes: Array<string>) => {
       ?s wdt:P218 ?code .
       OPTIONAL { ?s rdfs:label ?label . }
       FILTER (${langCodes.map(langCode => `?code = '${langCode}'`).join(' || ')})
-      FILTER (${langCodes.map(langCode => `lang(?label) = '${langCode}'`).join(' || ')})
+      FILTER (${UIlangCodes.map(langCode => `lang(?label) = '${langCode}'`).join(' || ')})
     }
     ORDER BY ?code
   `
@@ -27,6 +27,15 @@ export const getLanguageLabels = async (langCodes: Array<string>) => {
       languageLabels[binding.label['xml:lang']][binding.code.value] = binding.label.value
     }
 
+    // Worst case scenario, fallback to langcode.
+    for (const langCode of UIlangCodes) {
+      if (!languageLabels[langCode]) languageLabels[langCode] = {}
+
+      for (const innerLangCode of langCodes) {
+        if (!languageLabels[langCode][innerLangCode]) languageLabels[langCode][innerLangCode] = innerLangCode
+      }  
+    }
+    
     return languageLabels
   }
   catch (exception) {

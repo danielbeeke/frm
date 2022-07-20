@@ -51,5 +51,11 @@
     z-index: 101;
     padding-inline-start: 10px;
     margin-inline-start: auto;
+    margin-bottom: 10px;
+
+    .btn:focus {
+      outline: none;
+      box-shadow: none;
+    }
   }
 }

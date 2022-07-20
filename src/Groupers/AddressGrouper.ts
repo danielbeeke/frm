@@ -19,14 +19,11 @@ export class AddressGrouper extends GrouperBase {
   async template () {
     const hasValue = await this.values.streetAddress || await this.values.addressLocality
 
-    const searchField = this.settings.geocoder ? this.settings.templates.apply('input', 
-      '', 
-      null, 
-      (event) => this.search(event), 
-      'search', 
-      null, 
-      await this.t('address-autocomplete-placeholder')
-    ) : null
+    const searchField = this.settings.geocoder ? this.settings.templates.apply('input', {
+      onchange: (event) => this.search(event),
+      type: 'search',
+      placeholder: await this.t('address-autocomplete-placeholder'),
+    }) : null
 
     const expandButton = this.settings.templates.apply('button', {
       context: 'expand',

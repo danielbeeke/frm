@@ -36,9 +36,27 @@ export const FrmLanguageTabs = (settings: Settings) => {
       
       const currentLangCode = this.settings.internationalization.current
       const currentUILangCode = this.settings.translator.current
-      const labels = this.settings.internationalization.languageLabels[currentUILangCode]
+      const labels = this.settings.internationalization.languageLabels[currentUILangCode] ?? []
 
-      const tabs: Array<Hole> = Object.entries(labels).map(([langCode, label]) => [theme('button', {
+      const languageNeutral = [theme('button', {
+        callback: () => {
+          this.expandedCreationForm = false
+          this.settings.internationalization.current = false
+          this.render()
+        },
+        context: 'language-tab',
+        cssClasses: [currentLangCode === false ? 'active' : ''],
+        inner: html`
+          ${settings.translator.t('language-neutral')} ${icon('x')}
+        `
+      }), [currentLangCode === false ? 'active' : '']]
+
+
+      const tabs: Array<Hole> = [
+        languageNeutral
+      ]
+
+      const languageTabs = Object.entries(labels).map(([langCode, label]) => [theme('button', {
         callback: () => {
           this.expandedCreationForm = false
           this.settings.internationalization.current = langCode
@@ -50,6 +68,8 @@ export const FrmLanguageTabs = (settings: Settings) => {
           ${label} ${icon('x')}
         `
       }), [currentLangCode === langCode ? 'active' : '']])
+
+      tabs.push(...languageTabs)
 
       tabs.push([theme('addLanguageTab', html`${icon('plus')} ${this.t('add-language')}`, async () => {
         this.expandedCreationForm = !this.expandedCreationForm
@@ -66,9 +86,11 @@ export const FrmLanguageTabs = (settings: Settings) => {
             inner: this.t('add-language'),
             callback: async () => {
               const parsed = parse(this.picker.value)
+
               /** @ts-ignore */
-              settings.internationalization.addLanguage(this.picker.value, this.picker.label(parsed))
+              await settings.internationalization.addLanguage(this.picker.value, this.picker.getLabel(parsed), 'en')
               this.expandedCreationForm = false
+
               await this.render()
             },
             context: 'add-language-submit'
