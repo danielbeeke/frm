@@ -17,6 +17,7 @@ export const init = (settings: Settings) => {
     private settings: Settings
     private widget: WidgetBase
     public store: Store
+    private renderCallback: Function
     public engine: ComunicaEngine
     #errors: Array<any>
     
@@ -31,6 +32,8 @@ export const init = (settings: Settings) => {
      */
     async connectedCallback () {
       this.classList.add('loading')
+      this.dataset.subject = this.settings.context.compactIri(this.shapesubject)
+      this.dataset.predicate = this.settings.context.compactIri(this.predicate)
 
       if (!this.predicate)
         this.predicate = this.getAttribute('predicate')!
@@ -54,10 +57,28 @@ export const init = (settings: Settings) => {
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
-      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values, this.store, this.engine)
+      // TODO make the form re-render or atleast revalidate fields.
+      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values, this.store, this.engine, this.renderCallback)
 
       await this.widget.render()
-      this.classList.remove('loading')
+      this.classList.remove('loading');
+      if (this.settings.afterRender) this.settings.afterRender()
+    }
+
+    get isReady () {
+      if (!this.widget) {
+        return new Promise((resolve) => {
+          setTimeout(async () => {
+            await this.isReady
+            resolve(null)
+          }, 100)
+        })
+      }
+
+      return new Promise(async (resolve) => {
+        await this.widget.render()
+        resolve(null)
+      })
     }
 
     async setValue (newValue: Array<Literal> | Literal) {

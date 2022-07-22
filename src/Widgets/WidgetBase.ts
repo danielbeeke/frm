@@ -183,7 +183,7 @@ export abstract class WidgetBase {
       this.host.dispatchEvent(new CustomEvent('value-changed', { detail: { newValue, oldValue }, bubbles: true }))
     }
 
-    await this.render()
+    await this.parentRender()
   }
 
   async addItem () {
@@ -198,10 +198,12 @@ export abstract class WidgetBase {
       await this.values.delete(term)
       this.host.dispatchEvent(new CustomEvent('value-deleted', { detail: { oldValue: term }, bubbles: true }))
     }
-    await this.render()
+    await this.parentRender()
   }
 
-  descriptionToggle () {
+  async descriptionToggle () {
+    if (!await this.definition['sh:comment|rdfs:comment']) return null
+
     return this.theme('button', {
       inner: icon('info'),
       context: 'toggle-description',
@@ -226,10 +228,11 @@ export abstract class WidgetBase {
     if (!filteredValues.length && valueCount === maxCount)
       renderItems.push(this.t('no-more-values-not-allowed'))
 
-    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem)
+    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem && !(await this.disabled()))
       renderItems.push(callback(null, valueCount))
 
     const resolvedRenderItems = await Promise.all(renderItems)
+
     return this.theme('items', resolvedRenderItems, after)
   }
 
@@ -271,8 +274,11 @@ export abstract class WidgetBase {
   }
 
   async disabled () {
+    const types = await this.allowedDatatypes
     const l10n = this.settings.internationalization.current
-    if (l10n === false && !(await this.allowedDatatypes).has('http://www.w3.org/2001/XMLSchema#string')) return true
+    if (l10n === false && 
+      types.has('http://www.w3.org/1999/02/22-rdf-syntax-ns#langString') && 
+      !types.has('http://www.w3.org/2001/XMLSchema#string')) return true
     return false
   }
 
@@ -295,6 +301,9 @@ export abstract class WidgetBase {
     if (!valueHasLanguage && !(await this.allowedDatatypes).has('http://www.w3.org/1999/02/22-rdf-syntax-ns#langString')) return null
 
     if (this.settings.internationalization.mode === 'tabs') {
+
+      const disabledToSwitch = true
+
       return html`
       ${await value?.value ? html`
       ${this.theme('button', {
@@ -304,11 +313,14 @@ export abstract class WidgetBase {
           const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : l10n)
           await this.setValue(newTerm, value)
         },
+        cssClasses: [disabledToSwitch ? 'disabled' : ''],
         context: 'language-toggle',
         inner: html`
           ${icon('translate')}
-          ${languageLabel}  
-          ${await value?.language ? icon('x') : icon('plus')}
+          ${languageLabel}
+          ${!disabledToSwitch ? (
+            await value?.language ? icon('x') : icon('plus')
+          ) : null}
         `
       })}
       ` : null}`
@@ -344,14 +356,23 @@ export abstract class WidgetBase {
     `
   }
 
-  async errorToggle () {
-    return this.validationErrors?.length ? this.theme('button', {
-      inner: icon('exclamationTriangleFill'),
-      context: 'toggle-errors',
-      callback: () => {
-        this.errorsExpanded = !this.errorsExpanded
-        this.render()
-      }
+  async errorTooltip () {
+    const errors = this.validationErrors.flatMap(error => error.message.map(message => message.value))
+
+    return this.validationErrors?.length ? this.theme('tooltip', {
+      icon: icon('exclamationTriangleFill'),
+      context: 'errors',
+      text: errors.join(', ')
+    }) : null
+  }
+
+  async descriptionTooltip () {
+    const description = await this.definition['sh:comment|rdfs:comment']
+
+    return description ? this.theme('tooltip', {
+      icon: icon('info'),
+      context: 'description',
+      text: description
     }) : null
   }
 
@@ -364,15 +385,12 @@ export abstract class WidgetBase {
 
   public async render () {
     await this.preRender()
-    this.parentRender()
 
     return render(this.host, html`
       ${this.theme('label', await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate), [
-        await this.descriptionToggle(),
-        await this.errorToggle(),
+        await this.descriptionTooltip(),
+        await this.errorTooltip(),
       ])}
-      ${this.errors()}
-      ${this.showDescription ? this.theme('messages', this.definition['sh:comment|rdfs:comment'], 'info') : html``}
       ${this.items(await this.allowMultiple && !this.showEmptyItem ? this.addButton() : null)}
     `)
   }

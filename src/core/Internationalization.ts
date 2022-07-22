@@ -1,4 +1,5 @@
-import { getLanguageLabels } from "../helpers/getLanguageLabels"
+import { getLanguageLabels } from '../helpers/getLanguageLabels'
+import { Settings } from '../types/Settings'
 
 export class Internationalization extends EventTarget {
 
@@ -7,6 +8,7 @@ export class Internationalization extends EventTarget {
   public languageLabels: { [key: string]: { [key: string]: string } }
   public mode: 'tabs' | 'mixed' = 'mixed'
   public allowCreation: boolean = true
+  public settings: Settings
 
   constructor ({ langCodes, mode, allowCreation }: { 
     langCodes?: Array<string>, 
@@ -20,7 +22,8 @@ export class Internationalization extends EventTarget {
     this.mode = mode
   }
 
-  async init () {
+  async init (settings: Settings) {
+    this.settings = settings
     this.languageLabels = await getLanguageLabels(this.langCodes, ['en'])
   }
 
@@ -33,13 +36,17 @@ export class Internationalization extends EventTarget {
     this.dispatchEvent(new CustomEvent('language-changed'))
   }
 
-  async addLanguage (langcode: string, label: string = '', langCodeOfLabel: string = '') {
+  async addLanguage (langcode: string, label: string = '', langCodeOfLabel: string = '', formUri: string = '') {
     langcode = langcode.toLocaleLowerCase()
     this.langCodes.push(langcode)
     this.languageLabels = await getLanguageLabels(this.langCodes, ['en'])
 
     // Override if a label is given
-    if (label && langCodeOfLabel)
+    if (label && langCodeOfLabel) {
       this.languageLabels[langCodeOfLabel][langcode] = label
+
+      console.log(formUri)
+      // We save given language labels in the local storage.
+    }
   }
 }

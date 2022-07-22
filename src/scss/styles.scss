@@ -1,5 +1,7 @@
 @import 'language-picker';
 @import 'editorjs';
+@import 'tooltip';
+@import 'form-control';
 
 frm-multi-field, frm-field {
   display: block;
@@ -39,6 +41,17 @@ clip-path: polygon(0% 0%, 0% 100%,
 }
 
 frm-form {
+  .loading-banner {
+    display: none;
+  }
+
+  .form-actions {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    z-index: 100;
+  }
+
   &.loading {
     display: flex !important;
     justify-content: center;
@@ -47,8 +60,27 @@ frm-form {
     padding: 100px 30px;
     border-radius: .25rem;
 
+    .loading-banner {
+      display: block;
+    }
+
+    form {
+      display: none;
+    }
+
     .icon {
       flex: 0 0 auto;
     }
+  }
+}
+
+frm-field {
+  position: relative;
+
+  .alert.alert-danger {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% - 20px);
+    z-index: 1000;
   }
 }

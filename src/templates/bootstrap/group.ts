@@ -1,8 +1,11 @@
 import { html } from '../../helpers/uhtml'
+import { LDflexPath } from '../../types/LDflexPath'
 
-export const group = (name: string, label: any, inner: any, extraCssClasses: Array<string> = []) => {
+export const group = async (name: string | LDflexPath, label: any, inner: any, extraCssClasses: Array<string> = []) => {
+  const resolvedName = name ? (await name.value ?? name).toLowerCase() : ''
+
   return html`
-    <div class=${`group${name ? '-' + name : ''} ${extraCssClasses?.join()}`}>
+    <div class=${`group${resolvedName ? '-' + resolvedName : ''} ${extraCssClasses?.join()}`}>
       <h3 class="group-label">${label}</h3>
       ${inner}
     </div>

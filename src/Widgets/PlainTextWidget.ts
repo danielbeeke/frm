@@ -1,6 +1,7 @@
 import { WidgetBase } from './WidgetBase'
 import { StringBasedConstraints } from '../core/shaclProperties'
 import { LDflexPath } from '../types/LDflexPath'
+import { html } from '../helpers/uhtml'
 
 export class PlainTextWidget extends WidgetBase {
 
@@ -15,9 +16,17 @@ export class PlainTextWidget extends WidgetBase {
     return this.theme('textarea', value, this.attributes(), async (event: InputEvent) => {
       const allowedDatatypes = [...await this.allowedDatatypes]
       const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
-      const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
+      const languageOrDataType = this.settings.internationalization.current ? 
+      this.settings.internationalization.current : 
+      allowedDatatypes.length === 1 ? firstDatatype : undefined
+
+      const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, languageOrDataType)
       this.setValue(newValue, value)
-    }, this.removeButton(value))
+    }, html`
+      ${this.l10nSelector(value)}
+      ${this.removeButton(value)}
+    `)
   }
 
 }
+

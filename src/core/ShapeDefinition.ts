@@ -33,13 +33,15 @@ export class ShapeDefinition {
    */
   async init (turtleShaclShape: string, subjectUri: string) {
     const turtleId = `${hash(turtleShaclShape)}-${this.settings.context.compactIri(subjectUri)}`
-
+    this.settings.logger.log(`Loading shape ${this.settings.context.compactIri(subjectUri)}`)
     const cacheEnhancedTurtleShaclShape = localStorage.getItem(turtleId)
 
     /**
      * Put it into the cache
      */
     if (!cacheEnhancedTurtleShaclShape) {
+      this.settings.logger.log(`Getting ${this.settings.context.compactIri(subjectUri)} shape meta from network`)
+
       const { store: data, prefixes } = await rdfToStore(turtleShaclShape)
 
       const mergedContext = Object.assign(this.settings.context.getContextRaw(), prefixes)
@@ -60,16 +62,19 @@ export class ShapeDefinition {
 
       const newCacheTurtle = await storeToTurtle(this.store)
       localStorage.setItem(turtleId, newCacheTurtle)
+      localStorage.setItem(turtleId + 'prefixes', JSON.stringify(prefixes))
     }
 
     /**
      * Cache version
      */
     else {
+      const cachedPrefixes = JSON.parse(localStorage.getItem(turtleId + 'prefixes')!)
+
+      this.settings.logger.log(`Getting ${this.settings.context.compactIri(subjectUri)} shape meta from cache`)
       const { store: data, prefixes } = await rdfToStore(cacheEnhancedTurtleShaclShape)
-      const mergedContext = Object.assign(this.settings.context.getContextRaw(), prefixes)
+      const mergedContext = Object.assign(this.settings.context.getContextRaw(), prefixes, cachedPrefixes)
       this.settings.context = new JsonLdContextNormalized(mergedContext) 
-  
       this.store = data
       this.shape = await this.createLDflexPath(data, this.subjectUri)
     }

@@ -9,7 +9,7 @@ export const label = async (text: LDflexPath, inner: Array<Hole> = []) => {
     </label>
 
     ${inner ? html`
-    <div class="mb-1 ms-2 d-flex flex-fill justify-content-end">
+    <div class="mb-1 ms-2 d-flex flex-fill flex-row-reverse">
     ${inner.filter(Boolean).length ? inner.filter(Boolean) : null}
     </div>
     ` : null}

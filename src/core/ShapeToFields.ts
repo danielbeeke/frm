@@ -15,7 +15,8 @@ const getFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
-  validationReport: any
+  validationReport: any,
+  renderCallback: Function
 ) => {
   return shapeDefinition.shape['sh:property'].map(async predicatePath => {
     const predicate = await predicatePath['sh:path'].value
@@ -31,6 +32,7 @@ const getFields = async (
         .store=${store}
         .errors=${fieldErrors}
         .engine=${engine}
+        .renderCallback=${renderCallback}
         .values=${async () => () => {
           if (value?.[predicate]) return value?.[predicate]
           return values?.[predicate] ? values[predicate] : values
@@ -167,7 +169,7 @@ export const ShapeToFields = async (
   validationReport: any
 ) => {
 
-  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport)
+  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport, renderCallback)
   const elements = await getElements(shapeDefinition)
   const mergedItems = [...fields, ...elements]
   const groups = await getGroups(settings, shapeDefinition, mergedItems)

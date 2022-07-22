@@ -7,7 +7,7 @@ const buttonMapping = {
   'toggle-errors': 'btn btn- btn-sm text-muted',
   'add-item': 'btn btn-light btn-sm ms-auto',
   'language-toggle': 'btn-outline-secondary btn',
-  'form-submit': 'btn-primary btn btn-lg float-end mb-5',
+  'form-submit': 'btn-primary btn btn-lg',
   'expand': 'btn btn-light',
   'remove-item': 'btn btn-outline-secondary btn-sm remove-item-button',
 }
@@ -26,7 +26,6 @@ export const button = ({ inner, callback, cssClasses, context, isSubmit }: {
   else {
     console.log(context)
   }
-    
 
   return html`
     <button type=${isSubmit ? null : 'button'} onclick=${callback} class=${cssClasses.join(' ')}>

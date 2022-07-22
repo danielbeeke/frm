@@ -19,7 +19,7 @@ export const init = async (settings: Settings | null = null) => {
   
   initFrmForm(settings)
   initFrmField(settings)
-  await settings.internationalization.init()
+  await settings.internationalization.init(settings)
 
   for (const [name, elementInit] of Object.entries(settings.elements)) {
     customElements.define(name, elementInit(settings))

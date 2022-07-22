@@ -14,6 +14,8 @@ import { addLanguageTab } from './addLanguageTab'
 import { addLanguagePopup } from './addLanguagePopup'
 import { messages } from './messages'
 import { textarea } from './textarea'
+import { tooltip } from './tooltip'
+import { container } from './container'
 
 export default {
   addLanguageTab,
@@ -31,5 +33,7 @@ export default {
   group,
   messages,
   textarea,
+  tooltip,
+  container,
   'grouper-address': grouperAddress,
 }

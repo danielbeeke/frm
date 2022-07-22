@@ -31,6 +31,10 @@ export const FrmLanguageTabs = (settings: Settings) => {
       this.render()
     }
 
+    get isReady () {
+      return this.render()
+    }
+
     async render () {
       if (this.settings.internationalization.mode === 'mixed') return
       
@@ -51,10 +55,7 @@ export const FrmLanguageTabs = (settings: Settings) => {
         `
       }), [currentLangCode === false ? 'active' : '']]
 
-
-      const tabs: Array<Hole> = [
-        languageNeutral
-      ]
+      const tabs: Array<Hole> = [languageNeutral]
 
       const languageTabs = Object.entries(labels).map(([langCode, label]) => [theme('button', {
         callback: () => {
@@ -74,23 +75,33 @@ export const FrmLanguageTabs = (settings: Settings) => {
       tabs.push([theme('addLanguageTab', html`${icon('plus')} ${this.t('add-language')}`, async () => {
         this.expandedCreationForm = !this.expandedCreationForm
         await this.render()
-        ;(document.querySelector('bcp47-picker') as HTMLInputElement)?.focus()    
+
+        setTimeout(() => {
+          const searchField = this.picker.querySelector('.bcp47-search') as HTMLInputElement
+          // TODO Improve bcp47-picker so that we can call focus on the whole element.
+          searchField.focus()  
+        }, 100)
       }), ['add-language-button']])
 
       await render(this, html`
         ${theme('label', this.definition['rdfs:label'])}
         ${theme('tabs', tabs, ['language-tabs'])}
         ${this.expandedCreationForm ? theme('addLanguagePopup', html`
-          <bcp47-picker ref=${element => this.picker = element} />
+          <bcp47-picker ref=${(element: HTMLInputElement) => this.picker = element} />
           ${theme('button', {
             inner: this.t('add-language'),
             callback: async () => {
+              // TODO Improve bcp47-picker so that we do not need to parse the value to get the label.
               const parsed = parse(this.picker.value)
 
-              /** @ts-ignore */
-              await settings.internationalization.addLanguage(this.picker.value, this.picker.getLabel(parsed), 'en')
-              this.expandedCreationForm = false
+              const formUri = (this.closest('frm-form') as any)?.shapeSubject
 
+              console.log(formUri)
+
+              /** @ts-ignore */
+              await settings.internationalization.addLanguage(this.picker.value, this.picker.getLabel(parsed), 'en', formUri)
+              this.expandedCreationForm = false
+              this.settings.internationalization.current = this.picker.value
               await this.render()
             },
             context: 'add-language-submit'

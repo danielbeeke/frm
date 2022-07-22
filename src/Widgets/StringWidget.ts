@@ -17,7 +17,12 @@ export class StringWidget extends WidgetBase {
       onchange: async (event: InputEvent) => {
         const allowedDatatypes = [...await this.allowedDatatypes]
         const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
-        const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
+        const languageOrDataType = this.settings.internationalization.current ? 
+          this.settings.internationalization.current : 
+          allowedDatatypes.length === 1 ? firstDatatype : undefined
+
+        const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, languageOrDataType)
+
         this.setValue(newValue, value)
       },
       suffix: html`

@@ -28,6 +28,8 @@ export class EditorJsWidget extends WidgetBase {
     const cid = `${this.predicate}|${index}`
     const element = cache.get(cid) ?? document.createElement('div')
 
+    console.log(cid)
+
     if (!cache.has(cid)) {
       cache.set(cid, element)
       element.classList.add('form-control')

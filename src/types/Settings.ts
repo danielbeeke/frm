@@ -8,6 +8,7 @@ import { Internationalization } from '../core/Internationalization'
 import templates from '../templates/bootstrap/All'
 import { TemplateResolver } from '../core/TemplateResolver'
 import { EditorConfig } from '@editorjs/editorjs';
+import { Logger } from '../core/Logger'
 
 export type Settings = {
   context: JsonLdContextNormalized,
@@ -27,6 +28,8 @@ export type Settings = {
   keys?: {
     [product: string]: string
   },
+  afterRender?: () => void
+  logger: Logger,
   templates: TemplateResolver<typeof templates>,
   internationalization: Internationalization
 }

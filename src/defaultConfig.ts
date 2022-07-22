@@ -28,6 +28,8 @@ import { DateWidget } from './Widgets/DateWidget'
 import { NodeWidget } from './Widgets/NodeWidget'
 import { EditorJsWidget } from './Widgets/EditorJsWidget'
 
+import { Logger } from './core/Logger'
+
 // Groupers
 import { AddressGrouper } from './Groupers/AddressGrouper'
 
@@ -40,6 +42,7 @@ import { FrmLanguageTabs } from './CustomElements/FrmLanguageTabs'
 // Templates
 import { TemplateResolver } from './core/TemplateResolver'
 import templates from './templates/bootstrap/All'
+import afterRender from './templates/bootstrap/afterRender'
 
 // EditorJS
 import Header from '@editorjs/header'; 
@@ -109,10 +112,12 @@ export default {
   elements: {
     'frm-language-tabs': FrmLanguageTabs
   },
+  logger: new Logger(),
   dataFactory: DataFactory,
   keys: {},
   translator: new Translator({
     'en': english
   }),
+  afterRender: afterRender,
   templates: new TemplateResolver(templates)
 } as Settings
