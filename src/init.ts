@@ -1,5 +1,6 @@
 import { init as initFrmForm } from './CustomElements/FrmForm'
 import { init as initFrmField } from './CustomElements/FrmField'
+import { init as initFrmGrouper } from './CustomElements/FrmGrouper'
 
 import defaultConfig from './defaultConfig'
 import { Settings } from './types/Settings'
@@ -19,6 +20,7 @@ export const init = async (settings: Settings | null = null) => {
   
   initFrmForm(settings)
   initFrmField(settings)
+  initFrmGrouper(settings)
   await settings.internationalization.init(settings)
 
   for (const [name, elementInit] of Object.entries(settings.elements)) {

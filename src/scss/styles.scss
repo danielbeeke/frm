@@ -3,8 +3,17 @@
 @import 'tooltip';
 @import 'form-control';
 
-frm-multi-field, frm-field {
+frm-multi-field, frm-field , frm-grouper {
   display: block;
+}
+
+frm-grouper {
+  flex: 1 1 auto;
+
+  > .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 }
 
 input[type="date"]::-webkit-clear-button,

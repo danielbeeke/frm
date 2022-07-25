@@ -76,9 +76,9 @@ export const init = (settings: Settings) => {
 
       this.addEventListener('value-deleted', () => this.render())
       this.addEventListener('value-changed', () => this.render())
+      this.addEventListener('value-added', () => this.render())
       this.settings.internationalization.addEventListener('language-changed', () => this.render())
 
-      await this.render()
       await this.readyPromise()
       this.classList.remove('loading')
       this.settings.logger.removeEventListener('message', loadingMessages)
@@ -105,6 +105,7 @@ export const init = (settings: Settings) => {
      */
     validate () {
       this.validationReport = this.validator.validate(this.store)
+      this.settings.logger.log('Created validation report')
     }
 
     /**
@@ -137,7 +138,6 @@ export const init = (settings: Settings) => {
         null, 
         this.store, 
         this.engine, 
-        () => this.render(),
         this.validationReport
       )
 

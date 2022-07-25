@@ -6,6 +6,7 @@ import { removeItemRecursively } from '../helpers/removeItemRecursively'
 import { Literal, NamedNode } from 'n3'
 import { skolemize } from '../helpers/skolemize'
 import { html } from '../helpers/uhtml'
+import { rdfType } from '../core/constants'
 
 export class NodeWidget extends WidgetBase {
 
@@ -33,7 +34,7 @@ export class NodeWidget extends WidgetBase {
     if (targetClass) {
       this.store.addQuad(
         skolemizedNode, 
-        new NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 
+        new NamedNode(rdfType), 
         new Literal(targetClass), 
       )
     }
@@ -54,8 +55,7 @@ export class NodeWidget extends WidgetBase {
       value, 
       this.store, 
       this.engine, 
-      () => this.render(), 
-      null
+      (this.host.closest('frm-form') as any)?.validationReport
     )
 
     return value ? html`

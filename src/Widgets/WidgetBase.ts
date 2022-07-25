@@ -52,7 +52,6 @@ export abstract class WidgetBase {
   public showEmptyItem: boolean = false
   public engine: ComunicaEngine
   public store: Store
-  public parentRender: Function
   public valuesFetcher: () => LDflexPath
   public theme: (templateName: string, ...args: any[]) => Hole
 
@@ -64,7 +63,6 @@ export abstract class WidgetBase {
     values: Promise<() => LDflexPath>,
     store: Store,
     engine: ComunicaEngine,
-    parentRender: Function,
   ) {
     this.theme = settings.templates.apply.bind(settings.templates)
 
@@ -75,7 +73,6 @@ export abstract class WidgetBase {
     this.t = settings.translator.t.bind(settings.translator)
     this.engine = engine
     this.store = store
-    this.parentRender = parentRender ? parentRender : () => null
 
     /** @ts-ignore */
     return values().then((valuesCallback) => {
@@ -180,7 +177,7 @@ export abstract class WidgetBase {
       this.host.dispatchEvent(new CustomEvent('value-changed', { detail: { newValue, oldValue }, bubbles: true }))
     }
 
-    await this.parentRender()
+    await this.render()
   }
 
   async addItem () {
@@ -195,7 +192,7 @@ export abstract class WidgetBase {
       await this.values.delete(term)
       this.host.dispatchEvent(new CustomEvent('value-deleted', { detail: { oldValue: term }, bubbles: true }))
     }
-    await this.parentRender()
+    await this.render()
   }
 
   async descriptionToggle () {

@@ -15,8 +15,7 @@ const getFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
-  validationReport: any,
-  renderCallback: Function
+  validationReport: any
 ) => {
   return shapeDefinition.shape['sh:property'].map(async predicatePath => {
     const predicate = await predicatePath['sh:path'].value
@@ -32,7 +31,6 @@ const getFields = async (
         .store=${store}
         .errors=${fieldErrors}
         .engine=${engine}
-        .renderCallback=${renderCallback}
         .values=${async () => () => {
           if (value?.[predicate]) return value?.[predicate]
           return values?.[predicate] ? values[predicate] : values
@@ -81,9 +79,7 @@ const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, f
   return groups.filter(Boolean)
 }
 
-const grouperCache = new Map()
-
-const getGroupers = async (settings: Settings, fields: Array<RenderItem>, renderCallback, value: LDflexPath) => {
+const getGroupers = async (settings: Settings, fields: Array<RenderItem>) => {
   const grouperInstances: Array<RenderItem> = []
 
   for (const [grouperName, Grouper] of Object.entries(settings.groupers)) {
@@ -108,20 +104,12 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
           }
         }
 
-        let grouper = grouperCache.get(await value.term.value)
-
-        if (!grouper) {
-          grouper = await new Grouper(settings, grouperTemplates, renderCallback)
-          grouperCache.set(await value.term.value, grouper)
-        }
-
-        const grouperArgs = await grouper.template()
-        const template = await settings.templates.apply('grouper', grouperName, grouperArgs)
-
         grouperInstances.push({
-          grouper,
           order: firstOrder!,
-          template: template,
+          template: html`<frm-grouper
+            .grouper-type=${Grouper}
+            .templates=${grouperTemplates}
+          />`,
           type: 'grouper',
           identifier: grouperName
         })
@@ -168,15 +156,14 @@ export const ShapeToFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
-  renderCallback: Function,
   validationReport: any
 ) => {
 
-  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport, renderCallback)
+  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport)
   const elements = await getElements(shapeDefinition)
   const mergedItems = [...fields, ...elements]
   const groups = await getGroups(settings, shapeDefinition, mergedItems)
-  const groupers = await getGroupers(settings, fields, renderCallback, value)
+  const groupers = await getGroupers(settings, fields)
   const unpickedItems = mergedItems.filter(field => !field.picked)
   const merged: Array<RenderItem> = [...unpickedItems, ...groups, ...groupers]  
   const sortedRenderItems = stableSort(merged, (a: RenderItem, b: RenderItem) => a.order - b.order)
