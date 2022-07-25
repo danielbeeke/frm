@@ -1,5 +1,7 @@
 import defaultConfig from '../src/defaultConfig'
 import { init } from '../src/init'
+import { render, html } from '../src/helpers/uhtml'
+
 import { PositionstackGeocoder } from '../src/Plugins/Geocoder/PositionstackGeocoder'
 import { Internationalization } from '../src/core/Internationalization'
 
@@ -19,6 +21,10 @@ const forms = {
     data: '/shapes/ttl/schema.person.ttl#schema:examplePerson',
     shape: '/shapes/ttl/schema.person.shacl.ttl#schema:PersonShape'
   },
+  ['person-empty']: {
+    data: null,
+    shape: '/shapes/ttl/schema.person.shacl.ttl#schema:PersonShape'
+  },
   person2: {
     data: '/shapes/ttl/schema.person.ttl#schema:examplePerson',
     shape: '/shapes/ttl/schema.person2.shacl.ttl#ex:PersonShape'
@@ -28,18 +34,17 @@ const forms = {
 if (forms[formId]) {
   const { data, shape } = forms[formId]
 
-  document.body.innerHTML = `
+  render(document.body, html`
   <frm-form 
     class="container-sm d-block col-8"
     data="${data}" 
     shape="${shape}" debug />
-  `
+  `)
 }
 else {
-  document.body.innerHTML = `
+  render(document.body, html`
   <div class="container-sm d-block col-8 d-flex flex-column">
-    <a href="/person">Person</a>
-    <a href="/person2">Person 2</a>
+    ${Object.keys(forms).map((name) => html`<a href=${`/${name}`}>${name}</a>`)}
   </div>
-  `
+  `)
 }

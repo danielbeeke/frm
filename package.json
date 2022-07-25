@@ -55,7 +55,7 @@
     "jsonld-context-parser": "^2.1.5",
     "ldflex": "^2.15.0",
     "n3": "^1.16.0",
-    "rdf-validate-shacl": "^0.4.3",
+    "rdf-validate-shacl": "^0.4.4",
     "simple-image-editorjs": "^1.4.0",
     "spark-md5": "^3.0.2",
     "uhandlers": "^0.6.1",

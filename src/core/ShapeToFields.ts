@@ -21,7 +21,24 @@ const getFields = async (
     const predicate = await predicatePath['sh:path'].value
     const order = await predicatePath['sh:order'].value
     const group = await predicatePath['sh:group'].value
-    const fieldErrors = validationReport?.results.filter(error => error.path.value === predicate) ?? []
+
+    let focusNode
+    
+    if (await value?.term?.skolemized) {
+      focusNode = '_:' + value?.term?.skolemized?.value?.split(':').pop()
+    }
+    else {
+      focusNode = await value?.term.value
+    }
+
+    if (!focusNode) {
+      focusNode = await values.value
+    }
+
+    const fieldErrors = validationReport?.results
+      .filter(error => {
+        return error.path.value === predicate && error.focusNode.id === focusNode
+      }) ?? []
 
     return {
       template: html`<frm-field

@@ -4,12 +4,15 @@ import { resolveAttribute } from '../helpers/resolveAttribute'
 import { render, html } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import { rdfToLDflex } from '../helpers/rdfToLDflex'
-import { Store } from 'n3'
+import { Store, DataFactory } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
 import { ShapeToFields } from '../core/ShapeToFields'
 import SHACLValidator from 'rdf-validate-shacl'
 import { storeToTurtle } from '../helpers/storeToTurtle'
 import { icon } from '../helpers/icon'
+import { rdfType } from '../core/constants'
+
+const { namedNode } = DataFactory
 
 const primaryColor = getComputedStyle(document.documentElement)
 .getPropertyValue('--bs-primary') ??
@@ -27,7 +30,7 @@ export const init = (settings: Settings) => {
     private shapeSubject: string
     private dataText: string
     private data: LDflexPath
-    private dataSubject: string
+    private dataSubject: string | null
     private store: Store
     private engine: ComunicaEngine
     private validationReport: any
@@ -64,15 +67,32 @@ export const init = (settings: Settings) => {
       this.definition = await new ShapeDefinition(this.settings, this.shapeText, this.shapeSubject)
 
       this.dataSubject = this.getAttribute('datasubject')! ?? this.getAttribute('data')?.split('#').pop()
-      this.dataSubject = this.settings.context.expandTerm(this.dataSubject)!
+      this.dataSubject = this.dataSubject ? this.settings.context.expandTerm(this.dataSubject) : null
 
-      this.dataText = await resolveAttribute(this, 'data')
-      const { path, store, engine } = await rdfToLDflex(this.dataText, this.dataSubject)
+      this.dataText = await resolveAttribute(this, 'data') ?? ''
+      const { path, store, engine } = await rdfToLDflex(this.dataText, this.dataSubject ?? 'urn:temp')
       this.data = path
       this.store = store
+
+      // When adding a new thing we should make sure the type is set correctly.
+      // If we do not do this, SHACL will not validate.
+      if (!this.dataSubject) {
+        const targetClass = await this.definition.shape['sh:targetClass'].value
+
+        this.store.addQuad(
+          namedNode('urn:temp'),
+          namedNode(rdfType),
+          namedNode(targetClass)
+        )
+      }
+
       this.engine = engine
 
-      this.validator = new SHACLValidator(this.definition.store)
+      this.validator = new SHACLValidator(this.definition.store, {
+        // @types/rdf-validate-shacl is behind.
+        /** @ts-ignore */
+        allowNamedNodeInList: true,
+      })
 
       this.addEventListener('value-deleted', () => this.render())
       this.addEventListener('value-changed', () => this.render())
@@ -105,6 +125,18 @@ export const init = (settings: Settings) => {
      */
     validate () {
       this.validationReport = this.validator.validate(this.store)
+
+      for (const result of this.validationReport.results) {
+        // See https://www.w3.org/TR/shacl/#results-validation-result for details
+        // about each property
+        // console.log(result.message)
+        // console.log(result.path)
+        // console.log(result.focusNode)
+        // console.log(result.severity)
+        // console.log(result.sourceConstraintComponent)
+        // console.log(result.sourceShape)
+      }
+
       this.settings.logger.log('Created validation report')
     }
 
@@ -156,9 +188,7 @@ export const init = (settings: Settings) => {
                 event.preventDefault()
 
                 const presaveEvent = new CustomEvent('presave', {
-                  detail: {
-                    promises: []
-                  }
+                  detail: { promises: [] }
                 })
 
                 this.dispatchEvent(presaveEvent)

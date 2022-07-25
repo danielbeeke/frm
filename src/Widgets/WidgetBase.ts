@@ -8,6 +8,7 @@ import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
 import { Hole } from 'uhtml';
 import { lastPart } from '../helpers/lastPart'
+import { translatableString, string } from '../core/constants';
 
 export abstract class WidgetBase {
   
@@ -164,17 +165,20 @@ export abstract class WidgetBase {
     if (!oldValue) {
       this.showEmptyItem = false
       await this.values.add(newValue)
-      this.host.dispatchEvent(new CustomEvent('value-added', { detail: { newValue, oldValue }, bubbles: true }))
+      this.host.dispatchEvent(new CustomEvent('value-added', 
+        { detail: { newValue, oldValue }, bubbles: true }))
     }
     else if (oldValue) {
       if (!newValue) {
         await this.values.delete(oldValue)
-        this.host.dispatchEvent(new CustomEvent('value-deleted', { detail: { newValue, oldValue }, bubbles: true }))
+        this.host.dispatchEvent(new CustomEvent('value-deleted', 
+          { detail: { newValue, oldValue }, bubbles: true }))
       }
       else {
         await this.values.replace(oldValue, newValue)
       }
-      this.host.dispatchEvent(new CustomEvent('value-changed', { detail: { newValue, oldValue }, bubbles: true }))
+      this.host.dispatchEvent(new CustomEvent('value-changed', 
+        { detail: { newValue, oldValue }, bubbles: true }))
     }
 
     await this.render()
@@ -222,8 +226,11 @@ export abstract class WidgetBase {
     if (!filteredValues.length && valueCount === maxCount)
       renderItems.push(this.t('no-more-values-not-allowed'))
 
-    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem || valueCount === 0 && !(await this.disabled()))
+    if (!filteredValues.length && valueCount < maxCount || 
+      this.showEmptyItem || valueCount === 0 && !(await this.disabled())
+    ) {
       renderItems.push(callback(null, valueCount))
+    }
 
     const resolvedRenderItems = await Promise.all(renderItems)
 
@@ -237,7 +244,10 @@ export abstract class WidgetBase {
       onchange: async (event: InputEvent) => {
         const allowedDatatypes = [...await this.allowedDatatypes]
         const firstDatatype = this.settings.dataFactory.namedNode(allowedDatatypes[0])
-        const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
+        const newValue = this.settings.dataFactory.literal(
+          (event.target as HTMLInputElement).value, 
+          allowedDatatypes.length === 1 ? firstDatatype : undefined
+        )
         this.setValue(newValue, value)
       },
       type: 'text',
@@ -271,8 +281,8 @@ export abstract class WidgetBase {
     const types = await this.allowedDatatypes
     const l10n = this.settings.internationalization.current
     if (l10n === false && 
-      types.has('http://www.w3.org/1999/02/22-rdf-syntax-ns#langString') && 
-      !types.has('http://www.w3.org/2001/XMLSchema#string')) return true
+      types.has(translatableString) && 
+      !types.has(string)) return true
     return false
   }
 
@@ -287,12 +297,14 @@ export abstract class WidgetBase {
    
     const labels = this.settings.internationalization.languageLabels[currentLanguage]
 
-    const languageLabel = await value?.value ? this.theme('small', await value?.language ? (labels[value.language] ?? value.language) : null) : null
+    const languageLabel = await value?.value ? 
+      this.theme('small', await value?.language ? (labels[value.language] ?? value.language) : null)
+    : null
 
     const valueHasLanguage = await value?.language
 
     // We allow the language selector if there is already a language.
-    if (!valueHasLanguage && !(await this.allowedDatatypes).has('http://www.w3.org/1999/02/22-rdf-syntax-ns#langString')) return null
+    if (!valueHasLanguage && !(await this.allowedDatatypes).has(translatableString)) return null
 
     if (this.settings.internationalization.mode === 'tabs') {
 

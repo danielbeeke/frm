@@ -17,7 +17,6 @@ export const init = (settings: Settings) => {
     private settings: Settings
     private widget: WidgetBase
     public store: Store
-    private renderCallback: Function
     public engine: ComunicaEngine
     #errors: Array<any>
     
@@ -58,7 +57,7 @@ export const init = (settings: Settings) => {
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
       // TODO make the form re-render or atleast revalidate fields.
-      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values, this.store, this.engine, this.renderCallback)
+      this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values, this.store, this.engine)
 
       await this.widget.render()
       this.classList.remove('loading');

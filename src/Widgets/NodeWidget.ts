@@ -47,6 +47,10 @@ export class NodeWidget extends WidgetBase {
   }
 
   async item (value: LDflexPath) {
+    const validationReport = (this.host.closest('frm-form') as any)?.validationReport
+
+    console.log(validationReport)
+
     const fields = await ShapeToFields(
       this.settings, 
       this.nodeShapeDefinition, 
@@ -55,7 +59,7 @@ export class NodeWidget extends WidgetBase {
       value, 
       this.store, 
       this.engine, 
-      (this.host.closest('frm-form') as any)?.validationReport
+      validationReport
     )
 
     return value ? html`
