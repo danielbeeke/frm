@@ -135,9 +135,6 @@ export abstract class WidgetBase {
   }
 
   async preRender () {
-    const valueCount = (await this.values.toArray()).length
-    if (!this.showEmptyItem) this.showEmptyItem = valueCount === 0
-
     if (this.validationErrors.length === 0) this.errorsExpanded = false
   }
 
@@ -228,7 +225,7 @@ export abstract class WidgetBase {
     if (!filteredValues.length && valueCount === maxCount)
       renderItems.push(this.t('no-more-values-not-allowed'))
 
-    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem && !(await this.disabled()))
+    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem || valueCount === 0 && !(await this.disabled()))
       renderItems.push(callback(null, valueCount))
 
     const resolvedRenderItems = await Promise.all(renderItems)

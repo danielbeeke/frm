@@ -129,22 +129,23 @@ export const init = (settings: Settings) => {
       this.validate()
 
       this.settings.logger.log(`Rendering from the root`)
+      const fields = await ShapeToFields(
+        settings, 
+        this.definition, 
+        this.shapeSubject, 
+        this.data, 
+        null, 
+        this.store, 
+        this.engine, 
+        () => this.render(),
+        this.validationReport
+      )
 
       await render(this, html`
         ${!this.isReady ? this.loadingBanner() : null}
 
         <form>
-        ${ShapeToFields(
-          settings, 
-          this.definition, 
-          this.shapeSubject, 
-          this.data, 
-          null, 
-          this.store, 
-          this.engine, 
-          () => this.render(),
-          this.validationReport
-        )}
+        ${fields}
 
         ${theme('container', html`
           <div class="form-actions">

@@ -46,18 +46,20 @@ export class NodeWidget extends WidgetBase {
   }
 
   async item (value: LDflexPath) {
+    const fields = await ShapeToFields(
+      this.settings, 
+      this.nodeShapeDefinition, 
+      this.nodeShape, 
+      this.values[this.predicate], 
+      value, 
+      this.store, 
+      this.engine, 
+      () => this.render(), 
+      null
+    )
+
     return value ? html`
-      ${ShapeToFields(
-        this.settings, 
-        this.nodeShapeDefinition, 
-        this.nodeShape, 
-        this.values[this.predicate], 
-        value, 
-        this.store, 
-        this.engine, 
-        () => this.render(), 
-        null
-      )}
+      ${fields}
       ${this.removeButton(value)}
     ` : null
   }

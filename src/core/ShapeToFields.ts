@@ -115,10 +115,13 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, render
           grouperCache.set(await value.term.value, grouper)
         }
 
+        const grouperArgs = await grouper.template()
+        const template = await settings.templates.apply('grouper', grouperName, grouperArgs)
+
         grouperInstances.push({
           grouper,
           order: firstOrder!,
-          template: settings.templates.apply('grouper', grouperName, grouper.template()),
+          template: template,
           type: 'grouper',
           identifier: grouperName
         })
@@ -178,5 +181,5 @@ export const ShapeToFields = async (
   const merged: Array<RenderItem> = [...unpickedItems, ...groups, ...groupers]  
   const sortedRenderItems = stableSort(merged, (a: RenderItem, b: RenderItem) => a.order - b.order)
 
-  return html`${sortedRenderItems.map(item => item.template)}`
+  return sortedRenderItems.map(item => item.template)
 }

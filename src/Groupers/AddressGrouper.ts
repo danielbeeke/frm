@@ -17,7 +17,7 @@ export class AddressGrouper extends GrouperBase {
   public expanded: boolean = false
 
   async template () {
-    const hasValue = await this.values.streetAddress || await this.values.addressLocality
+    const hasValue = await this.values.streetAddress.getValue() || await this.values.addressLocality.getValue()
 
     const searchField = this.settings.geocoder ? this.settings.templates.apply('input', {
       onchange: (event) => this.search(event),
@@ -29,15 +29,15 @@ export class AddressGrouper extends GrouperBase {
       context: 'expand',
       cssClasses: [this.expanded ? 'active' : '', 'end'],
       inner: icon('gearFill'),
-      callback: () => {
+      callback: async () => {
         this.expanded = !this.expanded
-        this.render()
+        await this.render()
       }
     })
 
     const valueDisplay = (
-      await this.values.streetAddress || 
-      await this.values.addressLocality
+      await this.values.streetAddress.getValue() || 
+      await this.values.addressLocality.getValue()
     ) && !this.expanded ? this.settings.templates.apply('text', html`
       ${this.values.streetAddress}<br>
       ${this.values.postalCode} ${this.values.addressLocality}<br>

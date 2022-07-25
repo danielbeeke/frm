@@ -1,7 +1,3 @@
-import { Hole, html } from "../helpers/uhtml";
-
-const debug = localStorage.debug
-
 export class TemplateResolver<Templates> {
   #templates: Templates
 
@@ -22,15 +18,12 @@ export class TemplateResolver<Templates> {
     if (!variant && typeof args[0] === 'string')
       variant = args[0]
 
-    const label = this.label(templateName, variant ? [variant] : [])
-
     const output = this.#templates[`${templateName}-${variant}`] ? 
     this.#templates[`${templateName}-${variant}`](...args) :
     this.#templates[templateName](...args)
 
-    return debug ? html`
-      ${output}
-      ${new Hole('html', [`<!-- END ${label} -->`], [])}
-    ` : output
+    // console.log(templateName, args)
+
+    return output
   }
 }

@@ -10,34 +10,30 @@ export const grouperAddress = async (name: string, inner: any) => {
     fields
   } = await inner
 
-  return html`
-    <div class=${`grouper-${name} form-control pt-3 pb-3 d-flex flex-wrap`}>
-      ${!expanded ? html`
-        <div class="col">
-          ${hasValue ? valueDisplay : searchField}
-        </div>
+  console.log(expanded)
 
-        <div class="ps-2">
-            ${expandButton}
-        </div>
-      ` : null}
+  return html`<div class=${`grouper-${name} form-control pt-3 pb-3 d-flex flex-wrap ${expanded ? 'expanded' : ''}`}>
+    ${!expanded ? html`
+      <div class="col">
+        ${hasValue ? valueDisplay : searchField}
+      </div>
 
-      ${expanded ? html`
-        <div class="col pb-3">
-          ${searchField}
-        </div>
+      <div class="ps-2">
+          ${expandButton}
+      </div>
+    ` : html`
+      <div class="col pb-3">
+        ${searchField}
+      </div>
 
-        <div class="ps-2">
-            ${expandButton}
-        </div>
-        <hr class="col-12">
-        <div class="col-12">
-          ${fields}
-        </div>
+      <div class="ps-2">
+          ${expandButton}
+      </div>
+      <hr class="col-12">
+      <div class="col-12">
+        ${fields}
+      </div>
 
-      ` : null}
-
-
-    </div>
-  `
+    `}
+  </div>`
 }
