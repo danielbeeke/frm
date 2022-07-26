@@ -6,4 +6,6 @@ export type RenderItem = {
   picked?: boolean,
   template: any,
   grouper?: any
+  get?: any,
+  set?: any
 } 

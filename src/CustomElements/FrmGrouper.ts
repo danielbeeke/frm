@@ -1,13 +1,16 @@
 import { GrouperBase } from '../Groupers/GrouperBase'
 import { Settings } from '../types/Settings'
+import { LDflexPath } from '../types/LDflexPath'
 
 export const init = (settings: Settings) => {
   class FrmGrouper extends HTMLElement {
 
     private grouper: GrouperBase
-    private templates: Array<any>
     private settings: Settings
-    
+    private items: any
+    public templates: { [key: string]: any }
+    public values: LDflexPath
+
     constructor () {
       super()
       this.settings = settings
@@ -18,7 +21,7 @@ export const init = (settings: Settings) => {
      * When loading is done renders the widget.
      */
     async connectedCallback () {
-      this.grouper = await new this['grouper-type'](this.settings, this.templates, this)
+      this.grouper = await new this['grouper-type'](this.settings, this)
       this.grouper.render()
     }
 

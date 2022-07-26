@@ -18,7 +18,7 @@ export const init = (settings: Settings) => {
     private widget: WidgetBase
     public store: Store
     public engine: ComunicaEngine
-    #errors: Array<any>
+    public errors: Array<any>
     
     constructor () {
       super()
@@ -56,7 +56,6 @@ export const init = (settings: Settings) => {
       this.setAttribute('widget', widgetName)
 
       if (!this.settings.widgets[widgetName]) throw new Error(`Missing widget type: ${widgetName}`)
-      // TODO make the form re-render or atleast revalidate fields.
       this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values, this.store, this.engine)
 
       await this.widget.render()
@@ -75,7 +74,6 @@ export const init = (settings: Settings) => {
       }
 
       return new Promise(async (resolve) => {
-        await this.widget.render()
         resolve(null)
       })
     }
@@ -104,21 +102,8 @@ export const init = (settings: Settings) => {
       }
     }
 
-    set errors (errors) {
-      this.#errors = errors
-      this.widget?.render()
-    }
-
-    get errors () {
-      return this.#errors
-    }
-
     getValue () {
       return this.widget.values
-    }
-
-    then (resolve) {
-      resolve(this.getValue())
     }
 
   }

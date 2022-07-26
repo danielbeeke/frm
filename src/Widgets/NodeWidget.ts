@@ -21,6 +21,10 @@ export class NodeWidget extends WidgetBase {
     this.predicate = await this.definition['sh:path'].value
     const shapeText = this.host.closest('frm-form')!['shapeText']
     this.nodeShapeDefinition = await new ShapeDefinition(this.settings, shapeText, this.nodeShape)
+
+    this.host.addEventListener('value-deleted', () => this.render())
+    this.host.addEventListener('value-changed', () => this.render())
+    this.host.addEventListener('value-added', () => this.render())
   }
 
   async preRender () {}
@@ -48,8 +52,6 @@ export class NodeWidget extends WidgetBase {
 
   async item (value: LDflexPath) {
     const validationReport = (this.host.closest('frm-form') as any)?.validationReport
-
-    console.log(validationReport)
 
     const fields = await ShapeToFields(
       this.settings, 

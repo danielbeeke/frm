@@ -17,7 +17,7 @@ export class AddressGrouper extends GrouperBase {
   public expanded: boolean = false
 
   async template () {
-    const hasValue = await this.values.streetAddress.getValue() || await this.values.addressLocality.getValue()
+    const hasValue = await this.values['schema:streetAddress'] || await this.values['schema:addressLocality']
 
     const searchField = this.settings.geocoder ? this.settings.templates.apply('input', {
       onchange: (event) => this.search(event),
@@ -35,18 +35,15 @@ export class AddressGrouper extends GrouperBase {
       }
     })
 
-    const valueDisplay = (
-      await this.values.streetAddress.getValue() || 
-      await this.values.addressLocality.getValue()
-    ) && !this.expanded ? this.settings.templates.apply('text', html`
-      ${this.values.streetAddress}<br>
-      ${this.values.postalCode} ${this.values.addressLocality}<br>
-      ${this.values.addressRegion} ${this.values.addressCountry}
+    const valueDisplay = hasValue && !this.expanded ? this.settings.templates.apply('text', html`
+      ${this.values['schema:streetAddress']}<br>
+      ${this.values['schema:postalCode']} ${this.values['schema:addressLocality']}<br>
+      ${this.values['schema:addressRegion']} ${this.values['schema:addressCountry']}
     `) : null
 
     const fields = html`
       <div>
-        ${Object.values(this.templates)}
+        ${this.fieldTemplates()}
       </div>
     `
 
@@ -65,11 +62,11 @@ export class AddressGrouper extends GrouperBase {
     if (!result) return
 
     await Promise.all([
-      this.values.streetAddress.setValue(`${result.street} ${result.number}`),
-      this.values.postalCode.setValue(result.postalCode),
-      this.values.addressLocality.setValue(result.locality),
-      this.values.addressRegion.setValue(result.region),
-      this.values.addressCountry.setValue(result.country),
+      this.fields['schema:streetAddress'].setValue(`${result.street} ${result.number}`),
+      this.fields['schema:postalCode'].setValue(result.postalCode),
+      this.fields['schema:addressLocality'].setValue(result.locality),
+      this.fields['schema:addressRegion'].setValue(result.region),
+      this.fields['schema:addressCountry'].setValue(result.country),
     ])
 
     await this.render()

@@ -1,64 +1,62 @@
 import { html, Hole, render } from '../helpers/uhtml'
+import { LDflexPath } from '../types/LDflexPath'
 import { Settings } from '../types/Settings'
 import { WidgetHtmlElement } from '../types/WidgetHtmlElement'
-import { lastPart } from '../helpers/lastPart'
 
 export abstract class GrouperBase {
-  
-  public values: { [key: string]: WidgetHtmlElement } = {}
-  static aliasses = {}
+
   public settings: Settings
-  public templates: Array<Hole> = []
+  public templates: { [key: string]: any }
+  public values: LDflexPath
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
   public theme: (templateName: string, ...args: any[]) => Hole
-  private host: HTMLElement
+  public host: HTMLElement
+  public fields: { [key: string]: WidgetHtmlElement }
 
   public static applicablePredicateGroups: Array<Array<string>>
 
-  constructor (settings: Settings, templates: { [key: string]: Hole }, host: HTMLElement) {
+  constructor (settings: Settings, host: HTMLElement) {
     this.settings = settings
     this.theme = settings.templates.apply.bind(settings.templates)
     this.t = settings.translator.t.bind(settings.translator)
     this.host = host
-
     /** @ts-ignore */
-    const aliasses = this.constructor.aliasses
-
-    const promise = Object.entries(templates).map(async ([expandedPredicate, template]) => {
-      const compactedPredicate = settings.context.compactIri(expandedPredicate)
-      let name = lastPart(compactedPredicate)
-      if (aliasses[name]) name = aliasses[name]
-
-      const temporaryElement = document.createElement('div')
-      await render(temporaryElement, template)
-      if (!temporaryElement.children[0]['widget']) {
-        await (temporaryElement.children[0] as WidgetHtmlElement).connectedCallback()
-      }
-
-      this.values[name] = (temporaryElement.children[0] as WidgetHtmlElement)
-      this.templates[name] = template
-    })
-
+    this.values = host.values()
     /** @ts-ignore */
-    return Promise.all(promise).then(() => this)
+    this.templates = host.templates
+
+    this.fields = {}
   }
 
   get name () {
-    let name = ''
     for (const [grouperName, grouper] of Object.entries(this.settings.groupers)) {
-      if (grouper === this.constructor) name = grouperName
+      if (grouper === this.constructor) return grouperName
     }
-
-    return name
+    return ''
   }
 
   async render () {
-    const template = await this.settings.templates.apply('grouper', this.name, this.template())
-    return render(this.host, template)
+    const rawTemplate = await this.template()
+    const template = await this.settings.templates.apply('grouper', this.name, rawTemplate)
+    await render(this.host, template)
+
+    if (Object.keys(this.fields).length === 0) {
+      const wrapper = document.createElement('div')
+      render(wrapper, html`${this.fieldTemplates()}`)
+    }
   }
 
   async template () {
     return html`Please implement`
+  }
+
+  fieldTemplates () {
+    return Object.entries(this.templates).map(([name, item]) => item.templateCreator(async (element) => {
+      this.fields[name] = element
+      setTimeout(() => {
+        if (!element.widget) element.connectedCallback()
+      }, 100)
+    }))
   }
 
 }

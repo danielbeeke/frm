@@ -4,7 +4,6 @@ import { ShapeDefinition } from './ShapeDefinition'
 import { html } from '../helpers/uhtml'
 import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
-import { lastPart } from '../helpers/lastPart'
 import { stableSort } from '../helpers/stableSort'
 import { RenderItem } from '../types/RenderItem'
 
@@ -27,36 +26,44 @@ const getFields = async (
     if (await value?.term?.skolemized) {
       focusNode = '_:' + value?.term?.skolemized?.value?.split(':').pop()
     }
-    else {
+    else if (await value?.term.value) {
       focusNode = await value?.term.value
     }
-
-    if (!focusNode) {
+    else {
       focusNode = await values.value
     }
 
     const fieldErrors = validationReport?.results
-      .filter(error => {
-        return error.path.value === predicate && error.focusNode.id === focusNode
-      }) ?? []
+    .filter(error => {
+      return error.path.value === predicate && error.focusNode.id === focusNode
+    }) ?? []
+
+    const valueFetcher = () => {
+      if (value?.[predicate]) return value?.[predicate]
+      return values?.[predicate] ? values[predicate] : values
+    }
+
+    // We make a template creator because we need to be apply to fetch the element inside a grouper.
+    const templateCreator = (ref = null) => html`<frm-field
+      ref=${ref ? ref : (field) => {
+        field.widget?.render()
+      }}
+      .shape=${shapeDefinition}
+      .shapesubject=${shapeSubject}
+      .predicate=${predicate}
+      .store=${store}
+      .errors=${fieldErrors}
+      .engine=${engine}
+      .values=${async () => valueFetcher}
+    />`
 
     return {
-      template: html`<frm-field
-        .shape=${shapeDefinition}
-        .shapesubject=${shapeSubject}
-        .predicate=${predicate}
-        .store=${store}
-        .errors=${fieldErrors}
-        .engine=${engine}
-        .values=${async () => () => {
-          if (value?.[predicate]) return value?.[predicate]
-          return values?.[predicate] ? values[predicate] : values
-        }}
-      />`,
+      template: templateCreator(),
+      templateCreator,
       type: 'field',
       identifier: predicate,
       order: order !== undefined ? parseInt(order) : 1000,
-      group
+      group,
     }
   })
 }
@@ -82,6 +89,7 @@ const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, f
           renderItem.picked = true
           return true
         }
+        return false
       })
 
       return {
@@ -91,18 +99,19 @@ const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, f
         order: order !== undefined ? parseInt(order) : 1000,
       }
     }
+    return false
   })
 
   return groups.filter(Boolean)
 }
 
-const getGroupers = async (settings: Settings, fields: Array<RenderItem>) => {
+const getGroupers = async (settings: Settings, fields: Array<RenderItem>, values: LDflexPath) => {
   const grouperInstances: Array<RenderItem> = []
 
   for (const [grouperName, Grouper] of Object.entries(settings.groupers)) {
     for (const predicateGroup of Grouper.applicablePredicateGroups) {
       if (predicateGroup.every(predicate => fields.find(item => item.identifier === predicate))) {
-        const grouperTemplates = {}
+        const templates = {}
         
         let firstOrder: number | null = null
 
@@ -111,13 +120,8 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>) => {
           if (firstOrder === null) firstOrder = renderItem?.order ?? 1000
           if (renderItem?.template) {
             renderItem.picked = true
-            grouperTemplates[predicate] = renderItem.template
-
-            const compactedPredicate = settings.context.compactIri(predicate)
-            let name = lastPart(compactedPredicate)
-            const aliasses = Grouper.aliasses
-  
-            if (aliasses[name]) name = aliasses[name]
+            const name = settings.context.compactIri(predicate)
+            templates[name] = renderItem
           }
         }
 
@@ -125,7 +129,14 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>) => {
           order: firstOrder!,
           template: html`<frm-grouper
             .grouper-type=${Grouper}
-            .templates=${grouperTemplates}
+            ref=${(element) => {
+              if (!element.grouper) return
+              element.grouper.values = values
+              element.grouper.templates = templates
+              element.grouper.render()
+            }}
+            .values=${() => values}
+            .templates=${templates}
           />`,
           type: 'grouper',
           identifier: grouperName
@@ -175,12 +186,11 @@ export const ShapeToFields = async (
   engine: ComunicaEngine,
   validationReport: any
 ) => {
-
   const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport)
   const elements = await getElements(shapeDefinition)
   const mergedItems = [...fields, ...elements]
   const groups = await getGroups(settings, shapeDefinition, mergedItems)
-  const groupers = await getGroupers(settings, fields)
+  const groupers = await getGroupers(settings, fields, value ?? values)
   const unpickedItems = mergedItems.filter(field => !field.picked)
   const merged: Array<RenderItem> = [...unpickedItems, ...groups, ...groupers]  
   const sortedRenderItems = stableSort(merged, (a: RenderItem, b: RenderItem) => a.order - b.order)

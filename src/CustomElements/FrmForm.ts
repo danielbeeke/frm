@@ -11,6 +11,7 @@ import SHACLValidator from 'rdf-validate-shacl'
 import { storeToTurtle } from '../helpers/storeToTurtle'
 import { icon } from '../helpers/icon'
 import { rdfType } from '../core/constants'
+import { debounce } from '../helpers/debounce'
 
 const { namedNode } = DataFactory
 
@@ -94,10 +95,12 @@ export const init = (settings: Settings) => {
         allowNamedNodeInList: true,
       })
 
-      this.addEventListener('value-deleted', () => this.render())
-      this.addEventListener('value-changed', () => this.render())
-      this.addEventListener('value-added', () => this.render())
-      this.settings.internationalization.addEventListener('language-changed', () => this.render())
+      const debouncedRenderForEvents = debounce(() => this.render(), 100)
+
+      this.addEventListener('value-deleted', debouncedRenderForEvents)
+      this.addEventListener('value-changed', debouncedRenderForEvents)
+      this.addEventListener('value-added', debouncedRenderForEvents)
+      this.settings.internationalization.addEventListener('language-changed', debouncedRenderForEvents)
 
       await this.readyPromise()
       this.classList.remove('loading')
@@ -125,18 +128,6 @@ export const init = (settings: Settings) => {
      */
     validate () {
       this.validationReport = this.validator.validate(this.store)
-
-      for (const result of this.validationReport.results) {
-        // See https://www.w3.org/TR/shacl/#results-validation-result for details
-        // about each property
-        // console.log(result.message)
-        // console.log(result.path)
-        // console.log(result.focusNode)
-        // console.log(result.severity)
-        // console.log(result.sourceConstraintComponent)
-        // console.log(result.sourceShape)
-      }
-
       this.settings.logger.log('Created validation report')
     }
 
