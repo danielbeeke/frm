@@ -6,6 +6,7 @@ export class AddressGrouper extends GrouperBase {
 
   static applicablePredicateGroups = [
     [
+      'rdf:type',
       'schema:streetAddress',
       'schema:addressRegion',
       'schema:addressLocality',

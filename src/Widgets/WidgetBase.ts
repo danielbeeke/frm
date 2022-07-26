@@ -9,6 +9,7 @@ import { attributesDiff } from '../helpers/attributesDiff'
 import { Hole } from 'uhtml';
 import { lastPart } from '../helpers/lastPart'
 import { translatableString, string } from '../core/constants';
+import { WidgetHtmlElement } from '../types/WidgetHtmlElement';
 
 export abstract class WidgetBase {
   
@@ -35,7 +36,7 @@ export abstract class WidgetBase {
    */
 
   public settings: Settings
-  public host: HTMLElement
+  public host: WidgetHtmlElement
   public definition: LDflexPath
   public values: LDflexPath
   public predicate: string
@@ -58,7 +59,7 @@ export abstract class WidgetBase {
 
   constructor (
     settings: Settings, 
-    host: HTMLElement, 
+    host: WidgetHtmlElement, 
     predicate: string, 
     definition: LDflexPath, 
     values: Promise<() => LDflexPath>,

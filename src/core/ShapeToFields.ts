@@ -121,7 +121,7 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, values
           if (renderItem?.template) {
             renderItem.picked = true
             const name = settings.context.compactIri(predicate)
-            templates[name] = renderItem
+            templates[name] = renderItem // THis includes the templateCreator from the field.
           }
         }
 

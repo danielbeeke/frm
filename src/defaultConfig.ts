@@ -27,6 +27,7 @@ import { DropdownWidget } from './Widgets/DropdownWidget'
 import { DateWidget } from './Widgets/DateWidget'
 import { NodeWidget } from './Widgets/NodeWidget'
 import { EditorJsWidget } from './Widgets/EditorJsWidget'
+import { TypeWidget } from './Widgets/TypeWidget'
 
 import { Logger } from './core/Logger'
 
@@ -100,7 +101,8 @@ export default {
     'dropdown': DropdownWidget,
     'date': DateWidget,
     'node': NodeWidget,
-    'editor': EditorJsWidget
+    'editor': EditorJsWidget,
+    'type': TypeWidget
   },
   editorJs: {
       tools: rootEditorJsPlugins

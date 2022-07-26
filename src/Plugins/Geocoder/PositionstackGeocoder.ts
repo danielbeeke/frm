@@ -1,5 +1,6 @@
 import { UnifiedGeoSearch } from '../../types/UnifiedGeoSearch'
 import { GeocoderBase } from './GeocoderBase'
+import {iso31661} from 'iso-3166'
 
 export class PositionstackGeocoder extends GeocoderBase {
 
@@ -21,13 +22,15 @@ export class PositionstackGeocoder extends GeocoderBase {
   
       const { locality, latitude, longitude, number, country_code: country, region, postal_code: postalCode, street } = item
 
+      const countryObject = iso31661.find(item => item.alpha3 === country)
+
       return {
         locality,
         latitude,
         longitude,
         number,
         region,
-        country,
+        country: countryObject?.alpha2 ?? countryObject?.alpha3 ?? country,
         postalCode,
         street
       }

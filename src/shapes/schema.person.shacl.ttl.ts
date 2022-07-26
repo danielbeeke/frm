@@ -95,7 +95,15 @@ schema:NameGroup
 schema:AddressShape
     a sh:NodeShape ;
     sh:targetClass schema:PostalAddress ;
+    frm:widget "unknown" ;
     sh:closed true ;
+
+    sh:property [
+        sh:path rdf:type ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+
     sh:property [
         sh:path schema:streetAddress ;
         sh:datatype xsd:string ;
