@@ -22,6 +22,7 @@ export const init = async (settings: Settings | null = null) => {
   initFrmField(settings)
   initFrmGrouper(settings)
   await settings.internationalization.init(settings)
+  await settings.referenceResolver.init(settings)
 
   for (const [name, elementInit] of Object.entries(settings.elements)) {
     customElements.define(name, elementInit(settings))

@@ -2,6 +2,7 @@ import { WidgetsMatcherInterface } from '../core/WidgetsMatcherInterface'
 import { JsonLdContextNormalized } from 'jsonld-context-parser'
 import { DefinitionEnhancer } from '../core/DefinitionEnhancer'
 import { Translator } from '../core/Translator'
+import { ReferenceResolver } from '../core/ReferenceResolver'
 import { DataFactory } from 'n3'
 import { GeocoderBase } from '../Plugins/Geocoder/GeocoderBase'
 import { Internationalization } from '../core/Internationalization'
@@ -30,6 +31,7 @@ export type Settings = {
   },
   afterRender?: () => void
   logger: Logger,
+  referenceResolver: ReferenceResolver,
   templates: TemplateResolver<typeof templates>,
   internationalization: Internationalization
 }

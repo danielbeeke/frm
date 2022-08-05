@@ -16,6 +16,7 @@ import { messages } from './messages'
 import { textarea } from './textarea'
 import { tooltip } from './tooltip'
 import { container } from './container'
+import { referenceLabel } from './referenceLabel'
 
 export default {
   addLanguageTab,
@@ -35,5 +36,6 @@ export default {
   textarea,
   tooltip,
   container,
+  referenceLabel,
   'grouper-address': grouperAddress,
 }

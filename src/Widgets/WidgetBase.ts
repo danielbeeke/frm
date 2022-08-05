@@ -2,7 +2,7 @@ import { intersectionCount } from '../helpers/intersectionCount'
 import { html, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import ComunicaEngine from '@ldflex/comunica'
-import { Literal, Store } from 'n3';
+import { Literal, NamedNode, Store } from 'n3';
 import { Settings } from '../types/Settings'
 import { icon } from '../helpers/icon'
 import { attributesDiff } from '../helpers/attributesDiff'
@@ -160,7 +160,7 @@ export abstract class WidgetBase {
     return item
   }
 
-  async setValue (newValue: Literal, value: LDflexPath = null) {
+  async setValue (newValue: Literal | NamedNode, value: LDflexPath = null) {
     const oldValue = await value?.term
 
     if (!oldValue) {

@@ -47,6 +47,20 @@ schema:PersonShape
         sh:minCount 1 ;
     ] ;
 
+    sh:property [
+        sh:path schema:colleague ;
+        sh:order 2 ;
+        frm:source "https://query.wikidata.org/" ;
+        frm:query """
+            SELECT DISTINCT ?uri ?label
+            WHERE 
+            {
+            ?uri wdt:P31 wd:Q146.
+            ?uri rdfs:label ?label.
+            FILTER (strstarts(?label, SEARCH_TERM))
+            }
+        """ ;
+    ] ;
 
     sh:property [
         sh:path schema:description ;

@@ -5,6 +5,8 @@ import translate from 'bundle-text:bootstrap-icons/icons/translate.svg'
 import exclamationTriangleFill from 'bundle-text:bootstrap-icons/icons/exclamation-triangle-fill.svg'
 import gearFill from 'bundle-text:bootstrap-icons/icons/gear-fill.svg'
 import search from 'bundle-text:bootstrap-icons/icons/search.svg'
+import pencilFill from 'bundle-text:bootstrap-icons/icons/pencil-fill.svg'
+import check from 'bundle-text:bootstrap-icons/icons/check-lg.svg'
 
 import { Hole } from 'uhtml'
 
@@ -16,6 +18,8 @@ const iconMap = {
   exclamationTriangleFill,
   gearFill,
   search,
+  pencilFill,
+  check,
   loading: (color: string) => `<svg width="38" height="38" class="" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
       <defs>
           <linearGradient x1="8.042%" y1="0%" x2="65.682%" y2="23.865%" id="a">

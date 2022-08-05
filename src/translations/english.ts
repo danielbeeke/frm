@@ -12,4 +12,5 @@ address-autocomplete-placeholder = Search for an address
 language = Language
 loading-form = Loading form…
 language-neutral = No language
+reference-search-title = Search for a reference
 `

@@ -28,6 +28,7 @@ import { DateWidget } from './Widgets/DateWidget'
 import { NodeWidget } from './Widgets/NodeWidget'
 import { EditorJsWidget } from './Widgets/EditorJsWidget'
 import { TypeWidget } from './Widgets/TypeWidget'
+import { ReferenceWidget } from './Widgets/ReferenceWidget'
 
 import { Logger } from './core/Logger'
 
@@ -73,6 +74,8 @@ rootEditorJsPlugins.columns = {
   }
 }
 
+import { ReferenceResolver } from './core/ReferenceResolver'
+
 export default {
   context: new JsonLdContextNormalized({
     '@language': 'en',
@@ -102,7 +105,8 @@ export default {
     'date': DateWidget,
     'node': NodeWidget,
     'editor': EditorJsWidget,
-    'type': TypeWidget
+    'type': TypeWidget,
+    'reference': ReferenceWidget
   },
   editorJs: {
       tools: rootEditorJsPlugins
@@ -120,6 +124,7 @@ export default {
   translator: new Translator({
     'en': english
   }),
+  referenceResolver: new ReferenceResolver(),
   afterRender: afterRender,
   templates: new TemplateResolver(templates)
 } as Settings

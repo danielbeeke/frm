@@ -28,6 +28,10 @@ const forms = {
   person2: {
     data: '/shapes/ttl/schema.person.ttl#schema:examplePerson',
     shape: '/shapes/ttl/schema.person2.shacl.ttl#ex:PersonShape'
+  },
+  reference: {
+    data: '/shapes/ttl/schema.person.ttl#schema:examplePerson',
+    shape: '/shapes/ttl/reference.shacl.ttl#schema:PersonShape'
   }
 }
 
