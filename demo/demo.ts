@@ -32,7 +32,11 @@ const forms = {
   reference: {
     data: '/shapes/ttl/schema.person.ttl#schema:examplePerson',
     shape: '/shapes/ttl/reference.shacl.ttl#schema:PersonShape'
-  }
+  },
+  sidebar: {
+    data: '/shapes/ttl/schema.person.ttl#schema:examplePerson',
+    shape: '/shapes/ttl/sidebar.shacl.ttl#schema:PersonShape'
+  },
 }
 
 if (forms[formId]) {
@@ -40,7 +44,7 @@ if (forms[formId]) {
 
   render(document.body, html`
   <frm-form 
-    class="container-sm d-block col-8"
+    class=${`container-sm d-block col-8 ${formId}`}
     data="${data}" 
     shape="${shape}" debug />
   `)

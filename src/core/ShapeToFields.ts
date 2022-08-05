@@ -68,41 +68,61 @@ const getFields = async (
   })
 }
 
+const getShapeGroups = async (shapeDefinition, parentUri = undefined) => {
+  const groups = shapeDefinition.getShaclGroup('sh:PropertyGroup')
+
+  const filteredGroups: Array<any> = []
+
+  for await (const group of groups['^rdf:type']) {
+    const parentGroup = await group['sh:group'].value
+    if (parentGroup === parentUri) filteredGroups.push(group)
+  }
+
+  return filteredGroups
+}
+
 /**
  * Enables sh:group
  * 
- * TODO check if nested groups work and if te order of the turtle text makes a difference.
+ * Nested groups work
  */
-const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, fields: Array<RenderItem>) => {
-  const groupIRIs = new Set()
+const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, fields: Array<RenderItem>, parentIri = undefined) => {
+  const parentlessGroups = await getShapeGroups(shapeDefinition, parentIri)
 
-  const groups = await shapeDefinition.shape['sh:property|frm:element'].map(async predicatePath => {
-    const groupIRI = await predicatePath['sh:group'].value
+  const groups = await Promise.all(parentlessGroups.map(async group => {
+    const groupIRI = await group.term.value
+    const childGroups = await getGroups(settings, shapeDefinition, fields, groupIRI)
 
-    if (groupIRI && !groupIRIs.has(groupIRI)) {
-      groupIRIs.add(groupIRI)
-      const definition = shapeDefinition.getShaclGroup(groupIRI)
-      const order = await definition['sh:order'].value
-      const extraCssClasses = await definition['html:class'].map(item => item.value)
-      const groupFields = fields.filter(renderItem => {
-        if (renderItem.group === groupIRI) {
-          renderItem.picked = true
-          return true
-        }
-        return false
-      })
-
-      return {
-        template: settings.templates.apply('group', await definition['rdfs:label'], await definition['rdfs:label'], groupFields.map(field => field.template), extraCssClasses),
-        type: 'group',
-        identifier: groupIRI,
-        order: order !== undefined ? parseInt(order) : 1000,
+    const order = await group['sh:order'].value
+    const extraCssClasses = await group['html:class'].map(item => item.value)
+    const groupFields = fields.filter(renderItem => {
+      if (renderItem.group === groupIRI) {
+        renderItem.picked = true
+        return true
       }
-    }
-    return false
-  })
+      return false
+    })
 
-  return groups.filter(Boolean)
+    const sortedChildren = [
+      ...childGroups.map(field => field.template), 
+      ...groupFields.map(field => field.template)
+    ].sort((a, b) => a.order - b.order)
+
+    return {
+      template: settings.templates.apply(
+          'group', 
+          await group['rdfs:label'], 
+          await group['rdfs:label'], 
+          sortedChildren,
+          extraCssClasses
+        ),
+      type: 'group',
+      identifier: groupIRI,
+      order: order !== undefined ? parseInt(order) : 1000,
+    }
+  }))
+
+  return groups
 }
 
 const getGroupers = async (settings: Settings, fields: Array<RenderItem>, values: LDflexPath) => {

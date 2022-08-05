@@ -1,0 +1,22 @@
+frm-form.sidebar form {
+  display: grid !important;
+  grid-template-columns: 1fr 400px;
+  grid-template-rows: auto auto auto;
+  gap: 50px;
+  grid-template-areas: "top top"
+  "left right"
+  "bottom bottom"
+  ;
+
+  .form-actions {
+    grid-area: bottom;
+  }
+
+  .main-container {
+    grid-area: left;
+  }
+
+  .top-container {
+    grid-area: top;
+  }
+}

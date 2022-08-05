@@ -10,8 +10,8 @@ const buttonMapping = {
   'form-submit': 'btn-primary btn btn-lg',
   'expand': 'btn btn-light',
   'remove-item': 'btn btn-outline-secondary btn-sm remove-item-button',
-  'toggle-reference-label-edit': 'btn-outline-secondary btn',
-  'apply-reference-label-edit': 'btn-outline-secondary btn'
+  'toggle-reference-label-edit': 'btn-outline-secondary btn p-2',
+  'apply-reference-label-edit': 'btn-outline-secondary btn p-2'
 }
 
 export const button = ({ inner, callback, cssClasses, context, isSubmit }: { 

@@ -1,6 +1,7 @@
 import { html } from '../../helpers/uhtml'
 import { Meta } from '../../types/Meta'
 import { Settings } from '../../types/Settings'
+import { icon } from '../../helpers/icon'
 
 export const referenceLabel = async ({
   meta, 
@@ -13,7 +14,8 @@ export const referenceLabel = async ({
   closeCallback, 
   searchField, 
   searchResults,
-  applySearchResult
+  applySearchResult,
+  loading
 }: {
   meta: Meta, 
   suffix: any, 
@@ -25,7 +27,8 @@ export const referenceLabel = async ({
   closeCallback: Function,
   searchField: any,
   searchResults: Array<Meta>,
-  applySearchResult: (uri: string) => void
+  applySearchResult: (uri: string) => void,
+  loading: boolean
 }) => {
 
   const awaitedResults = await searchResults
@@ -63,14 +66,14 @@ export const referenceLabel = async ({
   return html`
     ${modal}
     ${expanded ? field : html`
-      <div class=${`input-group ${expanded ? 'expanded' : ''}`}>
+      <div class=${`input-group text-nowrap ${expanded ? 'expanded' : ''}`}>
         ${meta ? html`
           ${meta.image ? html`<img onerror=${event => {
             event.target?.remove()
-          }} src=${`//images.weserv.nl/?url=${meta.image}&h=38&w=38&fit=cover`} class="input-group-text p-0" />` : null}
-          <a href=${meta.uri} target="_blank" class="form-control">${meta.label ?? meta.uri}</a>        
+          }} src=${`//images.weserv.nl/?url=${meta.image}&h=40&w=40&fit=cover`} class="input-group-text p-0" />` : null}
+          <a href=${meta.uri} target="_blank" class="form-control d-flex align-items-center text-nowrap">${meta.label ?? meta.uri}</a>        
         ` : html`
-          <div class="form-control">${settings.translator.t('reference-empty-title')}</div>
+          <div class="form-control text-nowrap">${loading ? icon('loading') : settings.translator.t('reference-empty-title')}</div>
         `}
         ${toggleButton}      
         ${suffix}

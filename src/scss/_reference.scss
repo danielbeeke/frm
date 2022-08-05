@@ -1,0 +1,35 @@
+[widget="reference"] .input-group {
+  &:not(.expanded):not(:hover) > .btn {
+    max-width: 0px;
+    padding-inline: 0 !important;
+    border-inline: 1px solid transparent;
+    overflow: hidden;
+    opacity: 0;
+  }
+
+  .form-control.text-nowrap {
+    transition: border-radius .3s 0s ease-in-out;
+  }
+
+  &.expanded {
+    .form-control.text-nowrap {
+      transition: border-radius .3s .5s ease-in-out;
+    }  
+  }
+
+  .btn {
+    transition: 
+      max-width .3s ease-in-out, 
+      padding .3s ease-in-out,
+      border .3s ease-in-out,
+      opacity .3s ease-in-out
+    ;
+    max-width: 40px;
+    opacity: 1;
+  }
+
+  &:not(:hover) > .form-control.text-nowrap {
+    border-top-right-radius: 0.375rem !important;
+    border-bottom-right-radius: 0.375rem !important;
+  }
+}

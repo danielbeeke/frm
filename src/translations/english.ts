@@ -14,4 +14,5 @@ loading-form = Loading form…
 language-neutral = No language
 reference-search-title = Search for a reference
 reference-empty-title = - No value yet -
+reference-search-placeholder = Search
 `

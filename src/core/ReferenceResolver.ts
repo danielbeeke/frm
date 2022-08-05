@@ -56,10 +56,7 @@ export class ReferenceResolver {
     const langCode = this.#settings.internationalization.current
     query = query.replaceAll('SEARCH_TERM', searchTerm)
     query = query.replaceAll('LANGUAGE', langCode ? langCode : 'en')
-
     query = this.prefixes + '\n' + query
-
-    console.log(searchTerm, query)
 
     const bindingsStream = await comunica.queryBindings(query, {
       httpProxyHandler: this.#settings.proxy ? new ProxyHandlerStatic(this.#settings.proxy) : undefined,

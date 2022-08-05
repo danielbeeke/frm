@@ -10,6 +10,7 @@ import { Hole } from 'uhtml';
 import { lastPart } from '../helpers/lastPart'
 import { translatableString, string } from '../core/constants';
 import { WidgetHtmlElement } from '../types/WidgetHtmlElement';
+import { debounce } from '../helpers/debounce';
 
 export abstract class WidgetBase {
   
@@ -56,6 +57,8 @@ export abstract class WidgetBase {
   public store: Store
   public valuesFetcher: () => LDflexPath
   public theme: (templateName: string, ...args: any[]) => Hole
+  public name: string
+  public debouncedRender: Function
 
   constructor (
     settings: Settings, 
@@ -65,9 +68,11 @@ export abstract class WidgetBase {
     values: Promise<() => LDflexPath>,
     store: Store,
     engine: ComunicaEngine,
+    name: string
   ) {
     this.theme = settings.templates.apply.bind(settings.templates)
 
+    this.name = name
     this.predicate = predicate
     this.settings = settings
     this.host = host
@@ -75,6 +80,8 @@ export abstract class WidgetBase {
     this.t = settings.translator.t.bind(settings.translator)
     this.engine = engine
     this.store = store
+
+    this.debouncedRender = debounce(() => this.render(), 300)
 
     /** @ts-ignore */
     return values().then((valuesCallback) => {
@@ -235,7 +242,14 @@ export abstract class WidgetBase {
 
     const resolvedRenderItems = await Promise.all(renderItems)
 
-    return this.theme('items', resolvedRenderItems, after)
+    return this.theme('items', {
+      items: resolvedRenderItems, 
+      after,
+      contexts: [
+        `items-${lastPart(this.predicate).toLowerCase()}`,
+        `items-${this.name}`,
+      ]
+    })
   }
 
   async item (value: LDflexPath, index: number) {

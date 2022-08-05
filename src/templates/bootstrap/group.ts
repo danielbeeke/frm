@@ -6,7 +6,7 @@ export const group = async (name: string | LDflexPath, label: any, inner: any, e
 
   return html`
     <div class=${`group${resolvedName ? '-' + resolvedName : ''} ${extraCssClasses?.join()}`}>
-      <h3 class="group-label">${label}</h3>
+      ${label ? html`<h3 class="group-label">${label}</h3>` : null}
       ${inner}
     </div>
   `

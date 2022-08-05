@@ -8,6 +8,7 @@ const expandedState = new Map()
 const searchState = new Map()
 const resultState = new Map()
 const searchWordState = new Map()
+const metaMap = new Map()
 
 export class ReferenceWidget extends WidgetBase {
 
@@ -20,7 +21,15 @@ export class ReferenceWidget extends WidgetBase {
     const source = await this.definition['frm:source'].value
 
     const uri = await value?.term?.value
-    const meta = uri ? await this.settings.referenceResolver.resolve(uri) : null
+    const meta = uri ? metaMap.get(uri) : null
+
+    if (uri && !meta) {
+      this.settings.referenceResolver.resolve(uri).then(resolvedMeta => {
+        metaMap.set(uri, resolvedMeta)
+        this.debouncedRender()
+      })
+      
+    }
 
     const expanded = expandedState.get(uri)
     const searching = searchState.get(uri)
@@ -67,6 +76,7 @@ export class ReferenceWidget extends WidgetBase {
       onchange: async (event: InputEvent) => {
         tempValue = (event.target as HTMLInputElement).value
       },
+      context: `expanded`,
       suffix: html`
         ${applyButton}
         ${this.removeButton(value)}
@@ -77,13 +87,15 @@ export class ReferenceWidget extends WidgetBase {
 
     const searchField = this.theme('input', {
       type: 'search',
+      disableForce: true,
+      placeholder: this.settings.translator.t('reference-search-placeholder'),
       value: searchWordState.get(this.predicate + index),
-      onchange: async (event: InputEvent) => {
+      onkeyup: async (event: InputEvent) => {
         const searchTerm = (event.target as HTMLInputElement).value
         searchWordState.set(this.predicate + index, searchTerm)
         const searchPromise = this.settings.referenceResolver.search(source, query, searchTerm)
         resultState.set(this.predicate + index, searchPromise)
-        await this.render()
+        setTimeout(() => this.render(), 100)
       }
     })
 
@@ -103,9 +115,11 @@ export class ReferenceWidget extends WidgetBase {
 
         await this.render()
       },
+      loading: uri && !meta,
       searchResults,
       searchField,
       expanded,
+      render: () => this.render(),
       field,
       searching,
       suffix: html`

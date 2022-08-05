@@ -3,6 +3,7 @@ import { button } from './button'
 import { label } from './label'
 import { list } from './list'
 import { items } from './items'
+import { itemsReference } from './itemsReference'
 import { grouper } from './grouper'
 import { grouperAddress } from './grouper-address'
 import { input } from './input'
@@ -38,4 +39,5 @@ export default {
   container,
   referenceLabel,
   'grouper-address': grouperAddress,
+  'items-reference': itemsReference
 }

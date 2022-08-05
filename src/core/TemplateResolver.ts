@@ -1,3 +1,5 @@
+import { html } from "../helpers/uhtml"
+
 export class TemplateResolver<Templates> {
   #templates: Templates
 
@@ -15,14 +17,22 @@ export class TemplateResolver<Templates> {
 
     let variant = typeof args[0]?.context === 'string' ? args[0]?.context : ''
 
-    if (!variant && typeof args[0] === 'string')
+    if (!variant && typeof args?.[0] === 'string')
       variant = args[0]
 
-    const output = this.#templates[`${templateName}-${variant}`] ? 
-    this.#templates[`${templateName}-${variant}`](...args) :
-    this.#templates[templateName](...args)
+    const variants = [
+      ...(!args?.[0]?.isProxy ? args?.[0]?.contexts ?? [] : []),
+      `${templateName}-${variant}`,
+      templateName,
+    ]
 
-    // console.log(templateName, args)
+    let output = null
+
+    for (const variant of variants) {
+      if (!output && this.#templates[variant]) output = this.#templates[variant](...args)
+    }
+
+    if (!output) output = html`Please implement ${templateName}`
 
     return output
   }
