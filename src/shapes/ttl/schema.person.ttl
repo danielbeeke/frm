@@ -14,7 +14,7 @@ schema:examplePerson
   schema:alumniOf "Dartmouth"^^xsd:string ;
   schema:birthDate "1979-10-12"^^xsd:date ;
   schema:birthPlace "Philadelphia, PA"^^xsd:string ;
-  schema:colleague <https://dbpedia.org/resource/S%C3%B8ren_Kierkegaard>, <https://danielbeeke.nl/#me> ;
+  schema:colleague <https://dbpedia.org/resource/S%C3%B8ren_Kierkegaard>, <https://danielbeeke.nl>, <https://dbpedia.org/resource/Friedrich_Nietzsche> ;
   schema:email "info@example.com"^^xsd:string ;
   schema:gender "female"^^xsd:string ;
   schema:gender "female2"^^xsd:string ;

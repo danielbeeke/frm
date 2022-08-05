@@ -22,11 +22,15 @@ schema:PersonShape
             PREFIX dbo:  <http://dbpedia.org/ontology/>
             PREFIX bif: <bif:>
 
-            SELECT DISTINCT ?uri ?label ?image {
+            SELECT DISTINCT ?uri (SAMPLE(?label) AS ?label) (SAMPLE(?image) AS ?image) {
                 ?uri rdfs:label ?label .
-                ?uri dbo:thumbnail ?image .
                 ?label bif:contains "'SEARCH_TERM'" .
+                ?uri rdf:type dbo:Person .
+                OPTIONAL { 
+                    ?uri dbo:thumbnail ?image .
+                }
             }
+            GROUP BY ?uri
             LIMIT 10
         """ ;
     ] .

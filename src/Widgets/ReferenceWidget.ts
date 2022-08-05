@@ -79,9 +79,9 @@ export class ReferenceWidget extends WidgetBase {
       type: 'search',
       value: searchWordState.get(this.predicate + index),
       onchange: async (event: InputEvent) => {
-        const value = (event.target as HTMLInputElement).value
-        searchWordState.set(this.predicate + index, value)
-        const searchPromise = this.settings.referenceResolver.search(source, query, value)
+        const searchTerm = (event.target as HTMLInputElement).value
+        searchWordState.set(this.predicate + index, searchTerm)
+        const searchPromise = this.settings.referenceResolver.search(source, query, searchTerm)
         resultState.set(this.predicate + index, searchPromise)
         await this.render()
       }

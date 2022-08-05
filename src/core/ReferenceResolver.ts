@@ -22,7 +22,7 @@ export class ReferenceResolver {
         ${this.prefixes}
 
         SELECT ?label ?image {
-          ?uri schema:name | foaf:name ?label .
+          ?uri schema:name | foaf:name | rdfs:label ?label .
           OPTIONAL {
             ?uri foaf:img | dbo:thumbnail ?image .
           }
@@ -58,6 +58,8 @@ export class ReferenceResolver {
     query = query.replaceAll('LANGUAGE', langCode ? langCode : 'en')
 
     query = this.prefixes + '\n' + query
+
+    console.log(searchTerm, query)
 
     const bindingsStream = await comunica.queryBindings(query, {
       httpProxyHandler: this.#settings.proxy ? new ProxyHandlerStatic(this.#settings.proxy) : undefined,

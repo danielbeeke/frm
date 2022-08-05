@@ -46,7 +46,9 @@ export const referenceLabel = async ({
               <ul class="list-group mt-3">
                 ${awaitedResults.map((searchResult: Meta) => html`
                 <button onclick=${() => applySearchResult(searchResult.uri)} type="button" class="list-group-item p-0 list-group-item-action d-flex">
-                  ${searchResult.image ? html`<img src=${`//images.weserv.nl/?url=${searchResult.image}&h=38&w=38&fit=cover`} class="p-0" />` : null}
+                  ${searchResult.image ? html`<img onerror=${event => {
+                    event.target?.remove()
+                  }} src=${`//images.weserv.nl/?url=${searchResult.image}&h=38&w=38&fit=cover`} class="p-0" />` : null}
                   <div class="p-2">${searchResult.label ?? searchResult.uri}</div>
                 </button>            
                 `)}
@@ -62,8 +64,14 @@ export const referenceLabel = async ({
     ${modal}
     ${expanded ? field : html`
       <div class=${`input-group ${expanded ? 'expanded' : ''}`}>
-        ${meta.image ? html`<img src=${`//images.weserv.nl/?url=${meta.image}&h=38&w=38&fit=cover`} class="input-group-text p-0" />` : null}
-        <a href=${meta.uri} target="_blank" class="form-control">${meta.label ?? meta.uri}</a>
+        ${meta ? html`
+          ${meta.image ? html`<img onerror=${event => {
+            event.target?.remove()
+          }} src=${`//images.weserv.nl/?url=${meta.image}&h=38&w=38&fit=cover`} class="input-group-text p-0" />` : null}
+          <a href=${meta.uri} target="_blank" class="form-control">${meta.label ?? meta.uri}</a>        
+        ` : html`
+          <div class="form-control">${settings.translator.t('reference-empty-title')}</div>
+        `}
         ${toggleButton}      
         ${suffix}
       </div>
