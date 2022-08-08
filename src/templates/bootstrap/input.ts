@@ -11,7 +11,8 @@ export const input = async ({
   suffix,
   placeholder,
   context,
-  disableForce
+  disableForce,
+  prefix
 }: {
   value: string | number | boolean, 
   ref: Promise<(element: HTMLElement) => void> | null, 
@@ -22,7 +23,8 @@ export const input = async ({
   suffix: Hole | null,
   placeholder: string,
   context?: string,
-  disableForce?: boolean
+  disableForce?: boolean,
+  prefix: any
 }) => {
   const resolvedSuffix = await suffix
   const suffixIsSvg = resolvedSuffix?.['template']?.[0]?.includes('svg')
@@ -31,6 +33,8 @@ export const input = async ({
 
   return html`
     <div class=${`input-group ${context === 'expanded' ? 'expanded' : ''}`}>
+      ${prefix ? html`<span class="input-group-text">${prefix}</span>` : null}
+
       ${disableForce ? html`
         <input class="form-control" placeholder=${placeholder} onkeyup=${debounce(onkeyup, 500)} type=${type} value=${value ?? ''} onchange=${onchange} onblur=${onblur} ref=${ref ? ref : () => null} />
       ` : html`

@@ -28,7 +28,7 @@ schema:PersonShape
         sh:name "given name"@en ;
         sh:name "Gegeven name"@nl ;
         sh:minCount 1 ;
-        sh:maxCount 3 ;
+        sh:maxCount 1 ;
     ] ;
 
     sh:property [
@@ -36,15 +36,6 @@ schema:PersonShape
         sh:path schema:familyName ;
         sh:order 2 ;
         sh:datatype xsd:string ;
-        sh:minCount 1 ;
-    ] ;
-
-
-    sh:property [
-        sh:group schema:Main ;
-        sh:path schema:callSign ;
-        sh:order 2 ;
-        sh:datatype rdf:langString ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
     ] ;

@@ -14,7 +14,8 @@ const getFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
-  validationReport: any
+  validationReport: any,
+  isRoot: boolean
 ) => {
   return shapeDefinition.shape['sh:property'].map(async predicatePath => {
     const predicate = await predicatePath['sh:path'].value
@@ -35,7 +36,8 @@ const getFields = async (
 
     const fieldErrors = validationReport?.results
     .filter(error => {
-      return error.path.value === predicate && error.focusNode.id === focusNode
+      return error.path?.value === predicate && error.focusNode.id === focusNode ||
+      error.path == null && isRoot
     }) ?? []
 
     const valueFetcher = () => {
@@ -174,6 +176,7 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, values
 const elementCache = new WeakMap()
 const getElements = async (
   shapeDefinition: ShapeDefinition, 
+  store: Store
 ) => {
   if (!elementCache.has(shapeDefinition)) {
     const elements = shapeDefinition.shape['frm:element'].map(async predicatePath => {
@@ -183,6 +186,8 @@ const getElements = async (
       const element = document.createElement(elementName)
   
       element.definition = predicatePath
+      element.shapeDefinition = shapeDefinition
+      element.store = store
   
       return {
         template: element,
@@ -210,8 +215,8 @@ export const ShapeToFields = async (
   validationReport: any,
   isRoot: boolean = false
 ) => {
-  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport)
-  const elements = await getElements(shapeDefinition)
+  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport, isRoot)
+  const elements = await getElements(shapeDefinition, store)
   const mergedItems = [...fields, ...elements]
   const groups = await getGroups(settings, shapeDefinition, mergedItems, undefined, isRoot)
   const groupers = await getGroupers(settings, fields, value ?? values)

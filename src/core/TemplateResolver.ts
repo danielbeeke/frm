@@ -7,10 +7,6 @@ export class TemplateResolver<Templates> {
     this.#templates = templates
   }
 
-  label (templateName, variants) {
-    return `${templateName} ${variants.map(variant => `${templateName}-${variant}`)}`
-  }
-
   apply (templateName: string, ...args: Array<any>) {
     if (!this.#templates[templateName])
       console.log(this.#templates, templateName)

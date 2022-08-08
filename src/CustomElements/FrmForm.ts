@@ -12,6 +12,10 @@ import { storeToTurtle } from '../helpers/storeToTurtle'
 import { icon } from '../helpers/icon'
 import { rdfType } from '../core/constants'
 import { debounce } from '../helpers/debounce'
+import { NamedNode } from 'n3'
+import basePrefixes from '../helpers/basePrefixes'
+import { PathFactory } from 'ldflex'
+import handlers from '../helpers/ldFlexSettings'
 
 const { namedNode } = DataFactory
 
@@ -68,7 +72,7 @@ export const init = (settings: Settings) => {
       this.definition = await new ShapeDefinition(this.settings, this.shapeText, this.shapeSubject)
 
       this.dataSubject = this.getAttribute('datasubject')! ?? this.getAttribute('data')?.split('#').pop()
-      this.dataSubject = this.dataSubject ? this.settings.context.expandTerm(this.dataSubject) : null
+      this.dataSubject = this.dataSubject ? this.settings.context.expandTerm(this.dataSubject) : 'urn:temp'
 
       this.dataText = await resolveAttribute(this, 'data') ?? ''
       const { path, store, engine } = await rdfToLDflex(this.dataText, this.dataSubject ?? 'urn:temp')
@@ -107,6 +111,27 @@ export const init = (settings: Settings) => {
       this.settings.logger.removeEventListener('message', loadingMessages)
       this.dispatchEvent(new CustomEvent('ready'))
       this.settings.logger.log(`FRM is ready`)
+    }
+
+    async setDataSubject (uri: string) {
+      console.log(this.dataSubject)
+      for (const quad of this.store.match(namedNode(this.dataSubject!), null, null)) {
+        this.store.removeQuad(quad)
+        this.store.addQuad(
+          namedNode(uri),
+          quad.predicate,
+          quad.object
+        );
+      }
+
+      const queryEngine = new ComunicaEngine([this.store])
+      const context = { '@context': basePrefixes}
+      const path = new PathFactory({ context, queryEngine, handlers })
+      const subject = new NamedNode(uri)
+    
+      this.data = path.create({ subject })
+
+      this.dataSubject = uri
     }
 
     /**
@@ -165,6 +190,11 @@ export const init = (settings: Settings) => {
         true
       )
 
+      const formErrors = this.validationReport?.results
+      .filter(error =>  error.path == null) ?? []
+
+      // console.log(formErrors)
+
       await render(this, html`
         ${!this.isReady ? this.loadingBanner() : null}
 
@@ -188,14 +218,18 @@ export const init = (settings: Settings) => {
 
                 const turtle = await storeToTurtle(this.store)
 
-                this.dispatchEvent(new CustomEvent('submit', {
+                const details = {
                   detail: {
                     validated: this.validationReport.conforms,
                     turtle,
                     store: this.store,
                     validationReport: this.validationReport
                   }
-                }))  
+                }
+
+                console.log(details)
+
+                this.dispatchEvent(new CustomEvent('submit', details))  
               },
               inner: settings.translator.t('submit')
             })}

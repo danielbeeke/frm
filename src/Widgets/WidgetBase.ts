@@ -220,22 +220,22 @@ export abstract class WidgetBase {
   }
 
   async items (after: any) {
+    const langCode = this.settings.internationalization.current
     const callback = ((value = null, index: number = -1) => this.item(value, index))
 
     const filteredValues = await this.values.filter(async value => {
       const valueLanguage = await value.language
-      return valueLanguage === this.settings.internationalization.current || !valueLanguage
+      return valueLanguage === langCode || langCode === false && !valueLanguage
     })
 
     const valueCount = (await this.values.toArray()).length
     let maxCount = parseInt(await this.definition['sh:maxCount'].value)
 
     const renderItems = [...filteredValues.map(callback)]
-    if (!filteredValues.length && valueCount === maxCount)
-      renderItems.push(this.t('no-more-values-not-allowed'))
+    // if (!filteredValues.length && valueCount === maxCount)
+    //   renderItems.push(this.t('no-more-values-not-allowed'))
 
-    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem
-    ) {
+    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem) {
       renderItems.push(callback(null, valueCount))
     }
 
@@ -298,51 +298,6 @@ export abstract class WidgetBase {
       types.has(translatableString) && 
       !types.has(string)) return true
     return false
-  }
-
-  /**
-   * The language selector
-   */
-  async l10nSelector (value: LDflexPath) {
-    const currentLanguage = this.settings.translator.current
-    const l10n = this.settings.internationalization.current
-
-    if (l10n === false) return null
-   
-    const labels = this.settings.internationalization.languageLabels[currentLanguage]
-
-    const languageLabel = await value?.value ? 
-      this.theme('small', await value?.language ? (labels[value.language] ?? value.language) : null)
-    : null
-
-    const valueHasLanguage = await value?.language
-
-    // We allow the language selector if there is already a language.
-    if (!valueHasLanguage && !(await this.allowedDatatypes).has(translatableString)) return null
-
-    const disabledToSwitch = true
-
-    return html`
-    ${await value?.value ? html`
-    ${this.theme('button', {
-      callback: async () => {
-        const hadLanguage = await value?.language
-        const rawValue = await value?.term?.value ?? ''
-        const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : l10n)
-        await this.setValue(newTerm, value)
-      },
-      cssClasses: [disabledToSwitch ? 'disabled' : ''],
-      context: 'language-toggle',
-      inner: html`
-        ${icon('translate')}
-        ${languageLabel}
-        ${!disabledToSwitch ? (
-          await value?.language ? icon('x') : icon('plus')
-        ) : null}
-      `
-    })}
-    ` : null}`
-  
   }
 
   async errorTooltip () {
