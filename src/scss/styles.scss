@@ -24,14 +24,14 @@ input[type="time"]::-webkit-clear-button {
 }
 
 input[type="date"] {
-  --bw: 2px;
---a: calc(100% - var(--bw));
---b: calc(var(--a) - 26px);
-clip-path: polygon(0% 0%, 0% 100%,
-                 var(--b) 100%, var(--b) var(--bw),
-                 var(--a) var(--bw), var(--a) var(--a),
-                 var(--b) var(--a), var(--b) 100%,
-                 100% 100%, 100% 0%);
+  margin-right: -30px;  
+}
+
+.input-group {
+  input[type="date"] + .btn {
+    position: relative;
+    z-index: 10;
+  }
 }
 
 .is-invalid + .remove-item-button {

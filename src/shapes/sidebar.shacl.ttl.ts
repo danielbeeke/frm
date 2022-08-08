@@ -52,15 +52,22 @@ schema:PersonShape
         sh:group schema:Main ;
         sh:path schema:colleague ;
         sh:order 2 ;
-        frm:source "https://query.wikidata.org/" ;
+        frm:source "https://dbpedia.org/sparql" ;
         frm:query """
-            SELECT DISTINCT ?uri ?label
-            WHERE 
-            {
-            ?uri wdt:P31 wd:Q146.
-            ?uri rdfs:label ?label.
-            FILTER (strstarts(?label, SEARCH_TERM))
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX dbo:  <http://dbpedia.org/ontology/>
+            PREFIX bif: <bif:>
+
+            SELECT DISTINCT ?uri (SAMPLE(?label) AS ?label) (SAMPLE(?image) AS ?image) {
+                ?uri rdfs:label ?label .
+                ?label bif:contains "'SEARCH_TERM'" .
+                ?uri rdf:type dbo:Person .
+                OPTIONAL { 
+                    ?uri dbo:thumbnail ?image .
+                }
             }
+            GROUP BY ?uri
+            LIMIT 10
         """ ;
     ] ;
 

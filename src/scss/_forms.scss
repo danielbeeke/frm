@@ -2,19 +2,32 @@ frm-form.sidebar form {
   display: grid !important;
   grid-template-columns: 1fr 400px;
   grid-template-rows: auto auto auto;
-  gap: 50px;
   grid-template-areas: "top top"
   "left right"
   "bottom bottom"
   ;
 
   .form-actions {
+    margin-top: 20px;
     grid-area: bottom;
   }
 
   .main-container {
     grid-area: left;
+    padding-right: 80px;
   }
+
+  .sidebar-container {
+    grid-area: right;
+    padding: 20px;
+    background-color: rgba(235, 243, 245, 0.322);
+    border-radius: 0.375rem !important;
+
+    .btn-outline-secondary:not(:hover):not(:focus) {
+      background-color: white;
+    }
+  }
+
 
   .top-container {
     grid-area: top;

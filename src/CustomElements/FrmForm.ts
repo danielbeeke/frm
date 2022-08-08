@@ -161,7 +161,8 @@ export const init = (settings: Settings) => {
         null, 
         this.store, 
         this.engine, 
-        this.validationReport
+        this.validationReport,
+        true
       )
 
       await render(this, html`

@@ -85,8 +85,11 @@ const getShapeGroups = async (shapeDefinition, parentUri = undefined) => {
  * Enables sh:group
  * 
  * Nested groups work
+ * TODO How to get groups into the first level of a second shape?
  */
-const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, fields: Array<RenderItem>, parentIri = undefined) => {
+const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, fields: Array<RenderItem>, parentIri: any = undefined, isRoot = false) => {
+  if (parentIri === undefined && !isRoot) parentIri = false
+
   const parentlessGroups = await getShapeGroups(shapeDefinition, parentIri)
 
   const groups = await Promise.all(parentlessGroups.map(async group => {
@@ -204,12 +207,13 @@ export const ShapeToFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
-  validationReport: any
+  validationReport: any,
+  isRoot: boolean = false
 ) => {
   const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport)
   const elements = await getElements(shapeDefinition)
   const mergedItems = [...fields, ...elements]
-  const groups = await getGroups(settings, shapeDefinition, mergedItems)
+  const groups = await getGroups(settings, shapeDefinition, mergedItems, undefined, isRoot)
   const groupers = await getGroupers(settings, fields, value ?? values)
   const unpickedItems = mergedItems.filter(field => !field.picked)
   const merged: Array<RenderItem> = [...unpickedItems, ...groups, ...groupers]  
