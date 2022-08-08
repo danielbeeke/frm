@@ -7,7 +7,6 @@ import { Internationalization } from '../src/core/Internationalization'
 
 defaultConfig.geocoder = new PositionstackGeocoder(process.env.POSITIONSTACK)
 defaultConfig.internationalization = new Internationalization({
-  mode: 'tabs',
   allowCreation: true
 }),
 defaultConfig.proxy = 'http://localhost:1234/cors/'
@@ -44,6 +43,9 @@ if (forms[formId]) {
 
   render(document.body, html`
   <frm-form 
+    onsubmit=${(event) => {
+      console.log(event.detail)
+    }}
     class=${`container-sm d-block col-8 ${formId}`}
     data="${data}" 
     shape="${shape}" debug />

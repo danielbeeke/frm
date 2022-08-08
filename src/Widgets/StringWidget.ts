@@ -2,6 +2,7 @@ import { WidgetBase } from './WidgetBase'
 import { StringBasedConstraints } from '../core/shaclProperties'
 import { LDflexPath } from '../types/LDflexPath'
 import { html } from '../helpers/uhtml'
+import { lastPart } from '../helpers/lastPart'
 
 export class StringWidget extends WidgetBase {
 
@@ -26,10 +27,18 @@ export class StringWidget extends WidgetBase {
         this.setValue(newValue, value)
       },
       suffix: html`
-        ${this.l10nSelector(value)}
         ${this.removeButton(value)}
       `
     })
+  }
+  
+  async label () {
+    return this.theme('label', html`
+      ${await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate)}
+    `, [
+      await this.descriptionTooltip(),
+      await this.errorTooltip(),
+    ])
   }
 
 }

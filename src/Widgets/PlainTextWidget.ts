@@ -23,7 +23,6 @@ export class PlainTextWidget extends WidgetBase {
       const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, languageOrDataType)
       this.setValue(newValue, value)
     }, html`
-      ${this.l10nSelector(value)}
       ${this.removeButton(value)}
     `)
   }

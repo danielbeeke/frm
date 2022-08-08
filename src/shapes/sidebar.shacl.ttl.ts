@@ -46,6 +46,7 @@ schema:PersonShape
         sh:order 2 ;
         sh:datatype rdf:langString ;
         sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] ;
 
     sh:property [

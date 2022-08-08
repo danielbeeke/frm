@@ -186,14 +186,16 @@ export const init = (settings: Settings) => {
                 this.dispatchEvent(presaveEvent)
                 await Promise.all(presaveEvent.detail.promises)
 
-                console.log(this.validationReport)
-
-                if (this.validationReport.results.length) {
-                  event.preventDefault()
-                }
-                
                 const turtle = await storeToTurtle(this.store)
-                console.log(turtle)
+
+                this.dispatchEvent(new CustomEvent('submit', {
+                  detail: {
+                    validated: this.validationReport.conforms,
+                    turtle,
+                    store: this.store,
+                    validationReport: this.validationReport
+                  }
+                }))  
               },
               inner: settings.translator.t('submit')
             })}

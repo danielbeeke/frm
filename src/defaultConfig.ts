@@ -85,7 +85,6 @@ export default {
   // TODO inject translator some how.
   internationalization: new Internationalization({
     langCodes: ['en', 'nl'], 
-    mode: 'mixed',
     allowCreation: true
   }),
   definitionEnhancer: new DefinitionEnhancer(),

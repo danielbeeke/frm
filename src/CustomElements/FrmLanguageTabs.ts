@@ -36,8 +36,6 @@ export const FrmLanguageTabs = (settings: Settings) => {
     }
 
     async render () {
-      if (this.settings.internationalization.mode === 'mixed') return
-      
       const currentLangCode = this.settings.internationalization.current
       const currentUILangCode = this.settings.translator.current
       const labels = this.settings.internationalization.languageLabels[currentUILangCode] ?? []
@@ -95,8 +93,6 @@ export const FrmLanguageTabs = (settings: Settings) => {
               const parsed = parse(this.picker.value)
 
               const formUri = (this.closest('frm-form') as any)?.shapeSubject
-
-              console.log(formUri)
 
               /** @ts-ignore */
               await settings.internationalization.addLanguage(this.picker.value, this.picker.getLabel(parsed), 'en', formUri)

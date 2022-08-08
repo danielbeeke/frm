@@ -66,7 +66,7 @@ export const referenceLabel = async ({
   return html`
     ${modal}
     ${expanded ? field : html`
-      <div class=${`input-group text-nowrap ${expanded ? 'expanded' : ''}`}>
+      <div class=${`input-group text-nowrap reference-label ${expanded ? 'expanded' : ''}`}>
         ${meta ? html`
           ${meta.image ? html`<img onerror=${event => {
             event.target?.remove()
@@ -75,8 +75,10 @@ export const referenceLabel = async ({
         ` : html`
           <div class="form-control text-nowrap">${loading ? icon('loading') : settings.translator.t('reference-empty-title')}</div>
         `}
-        ${toggleButton}      
-        ${suffix}
+        <div class="input-group actions">
+          ${toggleButton}      
+          ${suffix}
+        </div>
       </div>
     `}
   `

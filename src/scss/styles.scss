@@ -95,3 +95,12 @@ frm-field {
     z-index: 1000;
   }
 }
+
+.ce-popover__item--focused {
+  background-color: var(--bs-primary) !important;
+  
+
+  .ce-popover__item-label {
+    color: var(--bs-white) !important;
+  }
+}

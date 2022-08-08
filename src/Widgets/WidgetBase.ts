@@ -56,7 +56,7 @@ export abstract class WidgetBase {
   public engine: ComunicaEngine
   public store: Store
   public valuesFetcher: () => LDflexPath
-  public theme: (templateName: string, ...args: any[]) => Hole
+  public theme: (templateName: string, ...args: any[]) => Hole | null
   public name: string
   public debouncedRender: Function
 
@@ -141,7 +141,9 @@ export abstract class WidgetBase {
   }
 
   async preRender () {
+    const valueCount = (await this.values.toArray()).length
     if (this.validationErrors.length === 0) this.errorsExpanded = false
+    if (!this.showEmptyItem) this.showEmptyItem = valueCount === 0
   }
 
   /**
@@ -221,8 +223,6 @@ export abstract class WidgetBase {
     const callback = ((value = null, index: number = -1) => this.item(value, index))
 
     const filteredValues = await this.values.filter(async value => {
-      if (this.settings.internationalization.mode === 'mixed') return value
-
       const valueLanguage = await value.language
       return valueLanguage === this.settings.internationalization.current || !valueLanguage
     })
@@ -234,8 +234,7 @@ export abstract class WidgetBase {
     if (!filteredValues.length && valueCount === maxCount)
       renderItems.push(this.t('no-more-values-not-allowed'))
 
-    if (!filteredValues.length && valueCount < maxCount || 
-      this.showEmptyItem || valueCount === 0 && !(await this.disabled())
+    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem
     ) {
       renderItems.push(callback(null, valueCount))
     }
@@ -302,7 +301,7 @@ export abstract class WidgetBase {
   }
 
   /**
-   * The language selector, used in 'mixed' internationalization mode.
+   * The language selector
    */
   async l10nSelector (value: LDflexPath) {
     const currentLanguage = this.settings.translator.current
@@ -321,60 +320,29 @@ export abstract class WidgetBase {
     // We allow the language selector if there is already a language.
     if (!valueHasLanguage && !(await this.allowedDatatypes).has(translatableString)) return null
 
-    if (this.settings.internationalization.mode === 'tabs') {
-
-      const disabledToSwitch = true
-
-      return html`
-      ${await value?.value ? html`
-      ${this.theme('button', {
-        callback: async () => {
-          const hadLanguage = await value?.language
-          const rawValue = await value?.term?.value ?? ''
-          const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : l10n)
-          await this.setValue(newTerm, value)
-        },
-        cssClasses: [disabledToSwitch ? 'disabled' : ''],
-        context: 'language-toggle',
-        inner: html`
-          ${icon('translate')}
-          ${languageLabel}
-          ${!disabledToSwitch ? (
-            await value?.language ? icon('x') : icon('plus')
-          ) : null}
-        `
-      })}
-      ` : null}`
-    }
-
-    const settingsHasLanguages = Object.keys(this.settings.internationalization.languageLabels).length > 0
-    if (!settingsHasLanguages) return null
-
-    const optionLabels = this.settings.internationalization.languageLabels[l10n]
-
-    const options = Object.assign({
-      '': await this.t('translation-language-none')
-    }, optionLabels)
+    const disabledToSwitch = true
 
     return html`
-      ${this.theme('dropdown', {
-        options,
-        selectedValue: value ? value.language : '',
-        placeholder: await this.t('translation-language-placeholder') ?? '',
-        callback: async (dropdownValue) => {
-          if (value) {
-            const rawValue = await value.term.value
-            const newTerm = this.settings.dataFactory.literal(rawValue, dropdownValue ? dropdownValue : null)
-            await this.setValue(newTerm, value)
-          }
-          else {
-            const newTerm = this.settings.dataFactory.literal('', dropdownValue ? dropdownValue : null)
-            await this.setValue(newTerm)
-          }
-          this.render()
-        }
-      })}
-    `
+    ${await value?.value ? html`
+    ${this.theme('button', {
+      callback: async () => {
+        const hadLanguage = await value?.language
+        const rawValue = await value?.term?.value ?? ''
+        const newTerm = this.settings.dataFactory.literal(rawValue, hadLanguage ? undefined : l10n)
+        await this.setValue(newTerm, value)
+      },
+      cssClasses: [disabledToSwitch ? 'disabled' : ''],
+      context: 'language-toggle',
+      inner: html`
+        ${icon('translate')}
+        ${languageLabel}
+        ${!disabledToSwitch ? (
+          await value?.language ? icon('x') : icon('plus')
+        ) : null}
+      `
+    })}
+    ` : null}`
+  
   }
 
   async errorTooltip () {
@@ -397,6 +365,15 @@ export abstract class WidgetBase {
     }) : null
   }
 
+  async label () {
+    return this.theme('label', html`
+      ${await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate)}
+    `, [
+      await this.descriptionTooltip(),
+      await this.errorTooltip(),
+    ])
+  }
+
   async errors () {
     const errors = this.validationErrors.flatMap(error => error.message.map(message => message.value))
     return this.validationErrors?.length && this.errorsExpanded ? 
@@ -407,11 +384,17 @@ export abstract class WidgetBase {
   public async render () {
     await this.preRender()
 
+    /**
+     * We hide fields that are not allowed to have no translation.
+     */
+    const allowedDatatypes = await this.allowedDatatypes
+    const mustBeLanguage = allowedDatatypes.has(translatableString) && allowedDatatypes.size === 1
+    if (!this.settings.internationalization.current && mustBeLanguage) {
+      return render(this.host, html``)
+    }
+
     return render(this.host, html`
-      ${this.theme('label', await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate), [
-        await this.descriptionTooltip(),
-        await this.errorTooltip(),
-      ])}
+      ${this.label()}
       ${this.items(await this.allowMultiple && !this.showEmptyItem ? this.addButton() : null)}
     `)
   }
