@@ -6,6 +6,7 @@ import { Store } from 'n3'
 import ComunicaEngine from '@ldflex/comunica'
 import { stableSort } from '../helpers/stableSort'
 import { RenderItem } from '../types/RenderItem'
+import { asStatic, asParams, asTag } from 'static-params'
 
 const getFields = async (
   shapeDefinition: ShapeDefinition, 
@@ -173,35 +174,33 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, values
   return grouperInstances
 }
 
-const elementCache = new WeakMap()
 const getElements = async (
   shapeDefinition: ShapeDefinition, 
   store: Store
 ) => {
-  if (!elementCache.has(shapeDefinition)) {
-    const elements = shapeDefinition.shape['frm:element'].map(async predicatePath => {
-      const order = await predicatePath['sh:order'].value
-      const group = await predicatePath['sh:group'].value
-      const elementName = await predicatePath['frm:widget'].value
-      const element = document.createElement(elementName)
-  
+  const elements = shapeDefinition.shape['frm:element'].map(async predicatePath => {
+    const order = await predicatePath['sh:order'].value
+    const group = await predicatePath['sh:group'].value
+    const elementName = await predicatePath['frm:widget'].value
+
+    const name = asStatic(elementName)
+    const params = asParams`<${name} ref=${(element) => {
       element.definition = predicatePath
       element.shapeDefinition = shapeDefinition
       element.store = store
-  
-      return {
-        template: element,
-        type: 'field',
-        identifier: elementName,
-        order: order !== undefined ? parseInt(order) : 0,
-        group
-      }
-    })
+      element.render()
+    }}></${name}>`
 
-    elementCache.set(shapeDefinition, elements)
-  }
+    return {
+      template: html(...params),
+      type: 'field',
+      identifier: elementName,
+      order: order !== undefined ? parseInt(order) : 0,
+      group
+    }
+  })
 
-  return elementCache.get(shapeDefinition)
+  return elements
 }
 
 export const ShapeToFields = async (

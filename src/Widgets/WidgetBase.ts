@@ -141,9 +141,14 @@ export abstract class WidgetBase {
   }
 
   async preRender () {
-    const valueCount = (await this.values.toArray()).length
+    const langCode = this.settings.internationalization.current
+
+    const filteredValues = await this.values.filter(async value => {
+      const valueLanguage = await value.language
+      return valueLanguage === langCode || langCode === false && !valueLanguage
+    })
     if (this.validationErrors.length === 0) this.errorsExpanded = false
-    if (!this.showEmptyItem) this.showEmptyItem = valueCount === 0
+    this.showEmptyItem = await this.allowedToAddEmpty() && filteredValues.length === 0
   }
 
   /**
@@ -171,25 +176,35 @@ export abstract class WidgetBase {
 
   async setValue (newValue: Literal | NamedNode, value: LDflexPath = null) {
     const oldValue = await value?.term
+    const predicate = this.predicate
+    const compactedPredicate = this.settings.context.compactIri(predicate)
 
     if (!oldValue) {
       this.showEmptyItem = false
       await this.values.add(newValue)
       this.host.dispatchEvent(new CustomEvent('value-added', 
-        { detail: { newValue, oldValue }, bubbles: true }))
+        { detail: { newValue, oldValue, predicate }, bubbles: true }))
     }
     else if (oldValue) {
       if (!newValue) {
         await this.values.delete(oldValue)
         this.host.dispatchEvent(new CustomEvent('value-deleted', 
-          { detail: { newValue, oldValue }, bubbles: true }))
+          { detail: { newValue, oldValue, predicate }, bubbles: true }))
       }
       else {
         await this.values.replace(oldValue, newValue)
       }
       this.host.dispatchEvent(new CustomEvent('value-changed', 
-        { detail: { newValue, oldValue }, bubbles: true }))
+        { detail: { newValue, oldValue, predicate }, bubbles: true }))
     }
+
+    this.host.dispatchEvent(new CustomEvent('value', 
+    { detail: { newValue, oldValue, predicate }, bubbles: true }))
+    
+
+    this.host.dispatchEvent(new CustomEvent(`value:${compactedPredicate}`, 
+    { detail: { newValue, oldValue, predicate }, bubbles: true }))
+    
 
     await this.render()
   }
@@ -223,19 +238,18 @@ export abstract class WidgetBase {
     const langCode = this.settings.internationalization.current
     const callback = ((value = null, index: number = -1) => this.item(value, index))
 
+    const allowedDatatypes = [...await this.allowedDatatypes]
+
     const filteredValues = await this.values.filter(async value => {
       const valueLanguage = await value.language
-      return valueLanguage === langCode || langCode === false && !valueLanguage
+      return allowedDatatypes.includes(translatableString) && valueLanguage === langCode || 
+      !valueLanguage && !allowedDatatypes.includes(translatableString)
     })
 
     const valueCount = (await this.values.toArray()).length
-    let maxCount = parseInt(await this.definition['sh:maxCount'].value)
-
     const renderItems = [...filteredValues.map(callback)]
-    // if (!filteredValues.length && valueCount === maxCount)
-    //   renderItems.push(this.t('no-more-values-not-allowed'))
 
-    if (!filteredValues.length && valueCount < maxCount || this.showEmptyItem) {
+    if (this.showEmptyItem) {
       renderItems.push(callback(null, valueCount))
     }
 
@@ -342,16 +356,36 @@ export abstract class WidgetBase {
     /**
      * We hide fields that are not allowed to have no translation.
      */
-    const allowedDatatypes = await this.allowedDatatypes
-    const mustBeLanguage = allowedDatatypes.has(translatableString) && allowedDatatypes.size === 1
-    if (!this.settings.internationalization.current && mustBeLanguage) {
-      return render(this.host, html``)
-    }
+    // const allowedDatatypes = await this.allowedDatatypes
+    // const mustBeLanguage = allowedDatatypes.has(translatableString) && allowedDatatypes.size === 1
+    // if (!await this.allowedToAddEmpty()) {
+    //   return render(this.host, html``)
+    // }
 
     return render(this.host, html`
       ${this.label()}
-      ${this.items(await this.allowMultiple && !this.showEmptyItem ? this.addButton() : null)}
+      ${this.items(await this.allowedToAddEmpty() && !this.showEmptyItem ? this.addButton() : null)}
     `)
+  }
+
+  async allowedToAddEmpty () {
+    const uniqueLang = await this.definition['sh:uniqueLang'].value
+    const langCode = this.settings.internationalization.current
+
+    const filteredValues = await this.values.filter(async value => {
+      const valueLanguage = await value.language
+      return valueLanguage === langCode || langCode === false && !valueLanguage
+    })
+
+    const totalValueCount = (await this.values.toArray()).length
+    const maxCount = parseInt(await this.definition['sh:maxCount'].value)
+    const filteredValueCount = filteredValues.length
+
+    if (maxCount === totalValueCount) return false
+    if (uniqueLang && filteredValueCount) return false
+    if (!(await this.allowMultiple)) return false
+
+    return true
   }
 
 }

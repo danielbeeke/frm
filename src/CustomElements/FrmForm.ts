@@ -42,6 +42,7 @@ export const init = (settings: Settings) => {
     private validator: SHACLValidator
     public isReady: boolean
     private latestMessage: string = 'Loading'
+    private context : any
 
     constructor () {
       super()
@@ -75,9 +76,10 @@ export const init = (settings: Settings) => {
       this.dataSubject = this.dataSubject ? this.settings.context.expandTerm(this.dataSubject) : 'urn:temp'
 
       this.dataText = await resolveAttribute(this, 'data') ?? ''
-      const { path, store, engine } = await rdfToLDflex(this.dataText, this.dataSubject ?? 'urn:temp')
+      const { path, store, engine, context } = await rdfToLDflex(this.dataText, this.dataSubject ?? 'urn:temp')
       this.data = path
       this.store = store
+      this.context = context
 
       // When adding a new thing we should make sure the type is set correctly.
       // If we do not do this, SHACL will not validate.
@@ -113,8 +115,11 @@ export const init = (settings: Settings) => {
       this.settings.logger.log(`FRM is ready`)
     }
 
+    /**
+     * Change of the URI of the main subject.
+     * @param uri 
+     */
     async setDataSubject (uri: string) {
-      console.log(this.dataSubject)
       for (const quad of this.store.match(namedNode(this.dataSubject!), null, null)) {
         this.store.removeQuad(quad)
         this.store.addQuad(
@@ -124,13 +129,9 @@ export const init = (settings: Settings) => {
         );
       }
 
-      const queryEngine = new ComunicaEngine([this.store])
-      const context = { '@context': basePrefixes}
-      const path = new PathFactory({ context, queryEngine, handlers })
+      const path = new PathFactory({ context: this.context, queryEngine: this.engine, handlers })
       const subject = new NamedNode(uri)
-    
       this.data = path.create({ subject })
-
       this.dataSubject = uri
     }
 

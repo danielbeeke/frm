@@ -28,7 +28,6 @@ export const FrmLanguageTabs = (settings: Settings) => {
      */
     async connectedCallback () {
       this.classList.add('language-picker')
-      this.render()
     }
 
     get isReady () {

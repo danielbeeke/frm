@@ -22,6 +22,7 @@ frm:Ebook
 
     frm:element [
         frm:widget "frm-uri" ;
+        frm:populateFrom schema:name ;
     ] ;
 
     sh:property [
@@ -34,5 +35,17 @@ frm:Ebook
             sh:languageIn ( "en" )
         ] ;
         sh:uniqueLang true ;
+    ] ;
+
+    sh:property [
+        sh:path schema:abstract ;
+        sh:datatype rdf:langString ;
+        sh:uniqueLang true ;
+    ] ;
+
+    sh:property [
+        sh:path schema:isbn ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
     ] .
 `

@@ -15,6 +15,7 @@ export const rdfToLDflex = async (turtleShaclText, subjectUri: string) => {
   return {
     path: path.create({ subject }),
     store,
-    engine: queryEngine
+    engine: queryEngine,
+    context
   }
 }

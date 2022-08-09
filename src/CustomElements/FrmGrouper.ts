@@ -9,7 +9,7 @@ export const init = (settings: Settings) => {
     private settings: Settings
     private items: any
     public templates: { [key: string]: any }
-    public values: LDflexPath
+    #values: LDflexPath
 
     constructor () {
       super()
@@ -23,6 +23,17 @@ export const init = (settings: Settings) => {
     async connectedCallback () {
       this.grouper = await new this['grouper-type'](this.settings, this)
       this.grouper.render()
+    }
+
+    set values (values) {
+      this.#values = values
+      if (this.grouper) {
+        this.grouper.values = values()
+      }
+    }
+
+    get values () {
+      return this.#values
     }
 
     get isReady () {

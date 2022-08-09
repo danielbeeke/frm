@@ -13,7 +13,7 @@ export const init = (settings: Settings) => {
     private shapesubject: string
     private shape: ShapeDefinition
     private definition: LDflexPath
-    private values: LDflexPath
+    #values: LDflexPath
     private settings: Settings
     private widget: WidgetBase
     public store: Store
@@ -61,6 +61,19 @@ export const init = (settings: Settings) => {
       await this.widget.render()
       this.classList.remove('loading');
       if (this.settings.afterRender) this.settings.afterRender()
+    }
+
+    set values (values) {
+      this.#values = values
+      if (this.widget) {
+        values().then((valuesFetcher) => {
+          this.widget.values = valuesFetcher()
+        })
+      }
+    }
+
+    get values () {
+      return this.#values
     }
 
     get isReady () {
