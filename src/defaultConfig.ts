@@ -45,6 +45,7 @@ import { FrmLanguageTabs } from './CustomElements/FrmLanguageTabs'
 import { TemplateResolver } from './core/TemplateResolver'
 import templates from './templates/bootstrap/All'
 import afterRender from './templates/bootstrap/afterRender'
+import './scss/bootstrap/styles.scss'
 
 // EditorJS
 import Header from '@editorjs/header'; 

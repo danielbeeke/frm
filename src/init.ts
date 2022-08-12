@@ -5,7 +5,6 @@ import { init as initFrmUri } from './CustomElements/FrmUri'
 
 import defaultConfig from './defaultConfig'
 import { Settings } from './types/Settings'
-import './scss/styles.scss'
 
 export const init = async (settings: Settings | null = null) => {
   if (settings === null) settings = defaultConfig

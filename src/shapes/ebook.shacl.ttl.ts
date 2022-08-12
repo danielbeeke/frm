@@ -44,6 +44,12 @@ frm:Ebook
     ] ;
 
     sh:property [
+        sh:group schema:Main ;
+        sh:path schema:genre ;
+        sh:order 2 ;
+    ] ;
+
+    sh:property [
         sh:path schema:isbn ;
         sh:datatype xsd:string ;
         sh:maxCount 1 ;
