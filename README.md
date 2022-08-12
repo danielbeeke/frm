@@ -17,3 +17,5 @@ To see it for yourself:
 
 - `npm install`
 - `npm run demo`
+
+![screenshot of a form made with FRM](https://github.com/danielbeeke/frm/blob/main/assets/frm.png?raw=true)
