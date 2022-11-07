@@ -1,7 +1,8 @@
 import { html, Hole, render } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import { Settings } from '../types/Settings'
-import { WidgetHtmlElement } from '../types/WidgetHtmlElement'
+import { FrmGrouper } from '../CustomElements/FrmGrouper'
+import { FrmField } from '../CustomElements/FrmField'
 
 export abstract class GrouperBase {
 
@@ -10,19 +11,17 @@ export abstract class GrouperBase {
   public values: LDflexPath
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
   public theme: (templateName: string, ...args: any[]) => Hole
-  public host: HTMLElement
-  public fields: { [key: string]: WidgetHtmlElement }
+  public host: FrmGrouper
+  public fields: { [key: string]: FrmField }
 
   public static applicablePredicateGroups: Array<Array<string>>
 
-  constructor (settings: Settings, host: HTMLElement) {
+  constructor (settings: Settings, host: FrmGrouper) {
     this.settings = settings
     this.theme = settings.templates.apply.bind(settings.templates)
     this.t = settings.translator.t.bind(settings.translator)
     this.host = host
-    /** @ts-ignore */
     this.values = host.values()
-    /** @ts-ignore */
     this.templates = host.templates
 
     this.fields = {}
@@ -38,7 +37,7 @@ export abstract class GrouperBase {
   async render () {
     const rawTemplate = await this.template()
     const template = await this.settings.templates.apply('grouper', {
-      name: this.name, 
+      context: this.name, 
       inner: rawTemplate
     })
     await render(this.host, template)

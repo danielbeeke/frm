@@ -28,7 +28,8 @@ const getFields = async (
     if (await value?.term?.skolemized) {
       focusNode = '_:' + value?.term?.skolemized?.value?.split(':').pop()
     }
-    else if (await value?.term.value) {
+    else 
+    if (await value?.term.value) {
       focusNode = await value?.term.value
     }
     else {

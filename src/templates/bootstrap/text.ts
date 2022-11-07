@@ -1,7 +1,7 @@
 import { html } from '../../helpers/uhtml'
 
-export const text = ({ inner }: { inner: any }) => {
+export const text = ({ text }: { text: any }) => {
   return html`<div>
-    ${inner}
+    ${text}
   </div>`
 }

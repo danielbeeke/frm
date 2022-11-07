@@ -17,13 +17,10 @@ frm:Ebook
         frm:widget "frm-language-tabs" ;
     ] ;
 
-    frm:element [
-        frm:widget "frm-uri" ;
-        frm:populateFrom schema:name ;
-    ] ;
-
     sh:property [
         sh:path schema:name ;
+        sh:name "Title"@en ;
+        sh:name "Titel"@nl ;
         sh:datatype rdf:langString ;
         sh:minCount 1 ;
         sh:qualifiedMinCount 1 ;
@@ -34,7 +31,16 @@ frm:Ebook
         sh:uniqueLang true ;
     ] ;
 
+    frm:element [
+        sh:name "Identifier"@en ;
+        sh:name "Identificatie"@nl ;
+        frm:widget "frm-uri" ;
+        frm:populateFrom schema:name ;
+    ] ;
+
     sh:property [
+        sh:name "Abstract"@en ;
+        sh:name "Korte beschrijving"@nl ;
         sh:path schema:abstract ;
         sh:datatype rdf:langString ;
         sh:uniqueLang true ;
@@ -43,10 +49,10 @@ frm:Ebook
     sh:property [
         sh:group schema:Main ;
         sh:path schema:genre ;
-        sh:order 2 ;
     ] ;
 
     sh:property [
+        sh:name "ISBN" ;
         sh:path schema:isbn ;
         sh:datatype xsd:string ;
         sh:maxCount 1 ;

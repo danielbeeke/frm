@@ -52,7 +52,6 @@ export abstract class WidgetBase {
   }
 
   public showDescription: boolean = false
-  public showEmptyItem: boolean = false
   public engine: ComunicaEngine
   public store: Store
   public valuesFetcher: () => LDflexPath
@@ -141,14 +140,7 @@ export abstract class WidgetBase {
   }
 
   async preRender () {
-    const langCode = this.settings.internationalization.current
-
-    const filteredValues = await this.values.filter(async value => {
-      const valueLanguage = await value.language
-      return valueLanguage === langCode || langCode === false && !valueLanguage
-    })
     if (this.validationErrors.length === 0) this.errorsExpanded = false
-    this.showEmptyItem = await this.allowedToAddEmpty() && filteredValues.length === 0
   }
 
   /**
@@ -180,7 +172,6 @@ export abstract class WidgetBase {
     const compactedPredicate = this.settings.context.compactIri(predicate)
 
     if (!oldValue) {
-      this.showEmptyItem = false
       await this.values.add(newValue)
       this.host.dispatchEvent(new CustomEvent('value-added', 
         { detail: { newValue, oldValue, predicate }, bubbles: true }))
@@ -210,13 +201,11 @@ export abstract class WidgetBase {
   }
 
   async addItem () {
-    this.showEmptyItem = true
     await this.render()
   }
 
   async removeItem (value: LDflexPath | null = null) {
-    if (!value) this.showEmptyItem = false
-    else {
+    if (value) {
       const term = await value.term
       await this.values.delete(term)
       this.host.dispatchEvent(new CustomEvent('value-deleted', { detail: { oldValue: term }, bubbles: true }))
@@ -246,11 +235,10 @@ export abstract class WidgetBase {
       !valueLanguage && !allowedDatatypes.includes(translatableString)
     })
 
-    const valueCount = (await this.values.toArray()).length
     const renderItems = [...filteredValues.map(callback)]
 
-    if (this.showEmptyItem) {
-      renderItems.push(callback(null, valueCount))
+    if (filteredValues.length === 0) {
+      renderItems.push(callback(null, 0))
     }
 
     const resolvedRenderItems = await Promise.all(renderItems)
@@ -356,11 +344,11 @@ export abstract class WidgetBase {
 
     return render(this.host, html`
       ${this.label()}
-      ${this.items(await this.allowedToAddEmpty() && !this.showEmptyItem ? this.addButton() : null)}
+      ${this.items(await this.allowedToAddNew() ? this.addButton() : null)}
     `)
   }
 
-  async allowedToAddEmpty () {
+  async allowedToAddNew () {
     const uniqueLang = await this.definition['sh:uniqueLang'].value
     const langCode = this.settings.internationalization.current
 
@@ -374,7 +362,7 @@ export abstract class WidgetBase {
     const filteredValueCount = filteredValues.length
 
     if (maxCount === totalValueCount) return false
-    if (uniqueLang && filteredValueCount) return false
+    if (uniqueLang && filteredValueCount <= 1) return false
     if (!(await this.allowMultiple)) return false
 
     return true

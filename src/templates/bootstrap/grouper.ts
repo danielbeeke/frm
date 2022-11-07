@@ -1,9 +1,9 @@
 import { html } from '../../helpers/uhtml'
 import { LDflexPath } from '../../types/LDflexPath'
 
-export const grouper = ({ name, inner }: { name: string | LDflexPath, inner: any }) => {
+export const grouper = ({ context, inner }: { context: string | LDflexPath, inner: any }) => {
   return html`
-    <div class=${`grouper-${name} form-control pt-3`}>
+    <div class=${`grouper-${context} form-control pt-3`}>
       ${inner}
     </div>
   `

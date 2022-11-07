@@ -11,6 +11,8 @@ import handlers from '../helpers/ldFlexSettings'
 import { hash } from 'spark-md5'
 import { storeToTurtle } from '../helpers/storeToTurtle'
 
+const engines: any = new Map()
+
 export class ShapeDefinition {
 
   public loading: Promise<any>
@@ -32,6 +34,7 @@ export class ShapeDefinition {
    * Inits this shape definition, delegates enhancing it to the widgetsMatcher.
    */
   async init (turtleShaclShape: string, subjectUri: string) {
+
     const turtleId = `${hash(turtleShaclShape)}-${this.settings.context.compactIri(subjectUri)}`
     this.settings.logger.log(`Loading shape ${this.settings.context.compactIri(subjectUri)}`)
     const cacheEnhancedTurtleShaclShape = localStorage.getItem(turtleId)
@@ -86,16 +89,21 @@ export class ShapeDefinition {
    * Creates a LDflex path with a N3 store as source.
    */
   createLDflexPath (store, subjectUri) {
-    const queryEngine = new ComunicaEngine([store], {
-      options: { 
-        httpProxyHandler: this.settings.proxy ? new ProxyHandlerStatic(this.settings.proxy) : undefined,
-      }
-    })
-    const path = new PathFactory({ context: this.settings.context.getContextRaw(), queryEngine, handlers })
+    if (!engines.get(store)) {
+      const queryEngine = new ComunicaEngine([store], {
+        options: { 
+          httpProxyHandler: this.settings.proxy ? new ProxyHandlerStatic(this.settings.proxy) : undefined,
+        }
+      })
+
+      const path = new PathFactory({ context: this.settings.context.getContextRaw(), queryEngine, handlers })
+      engines.set(store, path)
+    }
+
     const expandedSubject = this.settings.context.expandTerm(subjectUri)
     if (!expandedSubject) throw new Error(`Failed to expand the term: ${subjectUri}`)
     const subject = new NamedNode(expandedSubject)
-    return path.create({ subject })
+    return engines.get(store).create({ subject })
   }
 
   /**

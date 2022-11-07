@@ -3,6 +3,7 @@ import { ShapeDefinition } from '../core/ShapeDefinition'
 import { render, html } from '../helpers/uhtml'
 import { LDflexPath } from '../types/LDflexPath'
 import slug from 'limax';
+import { FrmForm } from './FrmForm';
 
 export const init = (settings: Settings) => {
   class FrmUri extends HTMLElement {
@@ -91,7 +92,7 @@ export const init = (settings: Settings) => {
 
       const value = hasStarter ? cleanedPattern + input : input
 
-      const form = (this.closest('frm-form') as any)
+      const form: FrmForm = (this.closest('frm-form') as any)
 
       await form.setDataSubject(value)
       await form.render()

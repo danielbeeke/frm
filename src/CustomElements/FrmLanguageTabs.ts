@@ -47,12 +47,10 @@ export const FrmLanguageTabs = (settings: Settings) => {
         },
         context: 'language-tab',
         cssClasses: [currentLangCode === false ? 'active' : ''],
-        inner: html`
-          ${settings.translator.t('language-neutral')} ${icon('x')}
-        `
+        inner: html`${settings.translator.t('language-neutral')} ${icon('x')}`
       }), [currentLangCode === false ? 'active' : '']]
 
-      const tabs: Array<Hole> = [languageNeutral]
+      const tabs: Array<Hole> = []
 
       const languageTabs = Object.entries(labels).map(([langCode, label]) => [theme('button', {
         callback: () => {
@@ -67,7 +65,7 @@ export const FrmLanguageTabs = (settings: Settings) => {
         `
       }), [currentLangCode === langCode ? 'active' : '']])
 
-      tabs.push(...languageTabs)
+      tabs.push(...languageTabs) // languageNeutral
 
       tabs.push([theme('addLanguageTab', {
         inner: html`${icon('plus')} ${this.t('add-language')}`, 
@@ -78,7 +76,7 @@ export const FrmLanguageTabs = (settings: Settings) => {
           setTimeout(() => {
             const searchField = this.picker.querySelector('.bcp47-search') as HTMLInputElement
             // TODO Improve bcp47-picker so that we can call focus on the whole element.
-            searchField.focus()  
+            searchField?.focus()  
           }, 100)
         }
       }), ['add-language-button']])
