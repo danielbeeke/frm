@@ -116,11 +116,12 @@ const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, f
 
     return {
       template: settings.templates.apply(
-          'group', 
-          await group['rdfs:label'], 
-          await group['rdfs:label'], 
-          sortedChildren,
-          extraCssClasses
+          'group', {
+            name: await group['rdfs:label'], 
+            label: await group['rdfs:label'], 
+            inner: sortedChildren, 
+            extraCssClasses
+          }
         ),
       type: 'group',
       identifier: groupIRI,

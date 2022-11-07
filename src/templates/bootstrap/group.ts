@@ -1,7 +1,7 @@
 import { html } from '../../helpers/uhtml'
 import { LDflexPath } from '../../types/LDflexPath'
 
-export const group = async (name: string | LDflexPath, label: any, inner: any, extraCssClasses: Array<string> = []) => {
+export const group = async ({ name, label, inner, extraCssClasses }: { name: string | LDflexPath, label: any, inner: any, extraCssClasses?: Array<string> }) => {
   const resolvedName = name ? (await name.value ?? name).toLowerCase() : ''
 
   return html`

@@ -69,21 +69,28 @@ export const FrmLanguageTabs = (settings: Settings) => {
 
       tabs.push(...languageTabs)
 
-      tabs.push([theme('addLanguageTab', html`${icon('plus')} ${this.t('add-language')}`, async () => {
-        this.expandedCreationForm = !this.expandedCreationForm
-        await this.render()
-
-        setTimeout(() => {
-          const searchField = this.picker.querySelector('.bcp47-search') as HTMLInputElement
-          // TODO Improve bcp47-picker so that we can call focus on the whole element.
-          searchField.focus()  
-        }, 100)
+      tabs.push([theme('addLanguageTab', {
+        inner: html`${icon('plus')} ${this.t('add-language')}`, 
+        callback: async () => {
+          this.expandedCreationForm = !this.expandedCreationForm
+          await this.render()
+  
+          setTimeout(() => {
+            const searchField = this.picker.querySelector('.bcp47-search') as HTMLInputElement
+            // TODO Improve bcp47-picker so that we can call focus on the whole element.
+            searchField.focus()  
+          }, 100)
+        }
       }), ['add-language-button']])
 
       await render(this, html`
-        ${theme('label', this.definition['rdfs:label'])}
-        ${theme('tabs', tabs, ['language-tabs'])}
-        ${this.expandedCreationForm ? theme('addLanguagePopup', html`
+        ${theme('label', { text: this.definition['rdfs:label'] })}
+        ${theme('tabs', {
+          items: tabs, 
+          extraCssClasses: ['language-tabs']
+        })}
+        ${this.expandedCreationForm ? theme('addLanguagePopup', {
+          inner: html`
           <bcp47-picker ref=${(element: HTMLInputElement) => this.picker = element} />
           ${theme('button', {
             inner: this.t('add-language'),
@@ -101,7 +108,8 @@ export const FrmLanguageTabs = (settings: Settings) => {
             },
             context: 'add-language-submit'
           })}
-        `) : null}
+        `
+        }) : null}
       `)
     }
 

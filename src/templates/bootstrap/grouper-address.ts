@@ -1,6 +1,7 @@
 import { html } from '../../helpers/uhtml'
+import { LDflexPath } from '../../types/LDflexPath'
 
-export const grouperAddress = async (name: string, inner: any) => {
+export const grouperAddress = async ({ name, inner }: { name: string | LDflexPath, inner: any }) => {
   const {
     expanded,
     hasValue,

@@ -37,7 +37,10 @@ export abstract class GrouperBase {
 
   async render () {
     const rawTemplate = await this.template()
-    const template = await this.settings.templates.apply('grouper', this.name, rawTemplate)
+    const template = await this.settings.templates.apply('grouper', {
+      name: this.name, 
+      inner: rawTemplate
+    })
     await render(this.host, template)
 
     if (Object.keys(this.fields).length === 0) {

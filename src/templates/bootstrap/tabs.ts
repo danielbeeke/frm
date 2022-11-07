@@ -1,11 +1,11 @@
 import { html } from '../../helpers/uhtml'
 
-export const tabs = (items: Array<[any, Array<string>]>, extraCssClasses: Array<string> = []) => {
+export const tabs = ({ items, extraCssClasses }: { items: Array<[any, Array<string>]>, extraCssClasses?: Array<string> }) => {
 
-  if (extraCssClasses.includes('language-tabs'))
+  if (extraCssClasses?.includes('language-tabs'))
     extraCssClasses.push('mb-4')
 
-  return html`<div class=${`nav nav-tabs ${extraCssClasses.join(' ')}`}>
+  return html`<div class=${`nav nav-tabs ${extraCssClasses?.join(' ')}`}>
     ${items.map(async (itemData) => {
       const item = itemData[0]
       const itemCssClasses = itemData[1]

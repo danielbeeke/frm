@@ -335,32 +335,24 @@ export abstract class WidgetBase {
   }
 
   async label () {
-    return this.theme('label', html`
-      ${await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate)}
-    `, [
-      await this.descriptionTooltip(),
-      await this.errorTooltip(),
-    ])
+    return this.theme('label', {
+      text: html`${await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate)}`,
+      inner: [
+        await this.descriptionTooltip(),
+        await this.errorTooltip(),
+      ]
+    })
   }
 
   async errors () {
     const errors = this.validationErrors.flatMap(error => error.message.map(message => message.value))
     return this.validationErrors?.length && this.errorsExpanded ? 
-    this.theme('messages', errors, 'error')
+    this.theme('messages', { inner: errors, type: 'error' })
      : null
   }
 
   public async render () {
     await this.preRender()
-
-    /**
-     * We hide fields that are not allowed to have no translation.
-     */
-    // const allowedDatatypes = await this.allowedDatatypes
-    // const mustBeLanguage = allowedDatatypes.has(translatableString) && allowedDatatypes.size === 1
-    // if (!await this.allowedToAddEmpty()) {
-    //   return render(this.host, html``)
-    // }
 
     return render(this.host, html`
       ${this.label()}

@@ -53,12 +53,13 @@ export class StringWidget extends WidgetBase {
   }
   
   async label () {
-    return this.theme('label', html`
-      ${await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate)}
-    `, [
-      await this.descriptionTooltip(),
-      await this.errorTooltip(),
-    ])
+    return this.theme('label', {
+      text: html`${await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate)}`,
+      inner: [
+        await this.descriptionTooltip(),
+        await this.errorTooltip(),
+      ]
+    })
   }
 
 }

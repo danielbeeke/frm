@@ -61,7 +61,7 @@ export const init = (settings: Settings) => {
         },
       })
 
-      const label = this.settings.templates.apply('label', this.settings.translator.t('uri-label'))
+      const label = this.settings.templates.apply('label', { text: this.settings.translator.t('uri-label') })
 
       render(this, html`
         ${label}

@@ -1,7 +1,7 @@
 import { html, Hole } from '../../helpers/uhtml'
 import { LDflexPath } from '../../types/LDflexPath'
 
-export const label = async (text: LDflexPath, inner: Array<Hole> = []) => {
+export const label = async ({ text, inner }: { text: LDflexPath, inner: Array<Hole> }) => {
   return await text ? html`
   <div class="label-wrapper d-flex align-items-end">
     <label class="form-label text-capitalize">

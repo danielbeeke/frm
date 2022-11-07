@@ -202,40 +202,43 @@ export const init = (settings: Settings) => {
         <form>
         ${fields}
 
-        ${theme('container', html`
-          <div class="form-actions">
-            ${theme('button', {
-              isSubmit: true,
-              context: 'form-submit',
-              callback: async (event: InputEvent) => {
-                event.preventDefault()
+        ${theme('container', {
+          inner: html`
+            <div class="form-actions">
+              ${theme('button', {
+                isSubmit: true,
+                context: 'form-submit',
+                callback: async (event: InputEvent) => {
+                  event.preventDefault()
 
-                const presaveEvent = new CustomEvent('presave', {
-                  detail: { promises: [] }
-                })
+                  const presaveEvent = new CustomEvent('presave', {
+                    detail: { promises: [] }
+                  })
 
-                this.dispatchEvent(presaveEvent)
-                await Promise.all(presaveEvent.detail.promises)
+                  this.dispatchEvent(presaveEvent)
+                  await Promise.all(presaveEvent.detail.promises)
 
-                const turtle = await storeToTurtle(this.store)
+                  const turtle = await storeToTurtle(this.store)
 
-                const details = {
-                  detail: {
-                    validated: this.validationReport.conforms,
-                    turtle,
-                    store: this.store,
-                    validationReport: this.validationReport
+                  const details = {
+                    detail: {
+                      validated: this.validationReport.conforms,
+                      turtle,
+                      store: this.store,
+                      validationReport: this.validationReport
+                    }
                   }
-                }
 
-                console.log(details)
+                  console.log(details)
 
-                this.dispatchEvent(new CustomEvent('submit', details))  
-              },
-              inner: settings.translator.t('submit')
-            })}
-          </div>
-        `, 'form-actions')}
+                  this.dispatchEvent(new CustomEvent('submit', details))  
+                },
+                inner: settings.translator.t('submit')
+              })}
+            </div>
+          `,
+          context: 'form-actions'
+        })}
       `)
     }
 

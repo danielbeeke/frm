@@ -36,11 +36,13 @@ export class AddressGrouper extends GrouperBase {
       }
     })
 
-    const valueDisplay = hasValue && !this.expanded ? this.settings.templates.apply('text', html`
-      ${this.values['schema:streetAddress']}<br>
-      ${this.values['schema:postalCode']} ${this.values['schema:addressLocality']}<br>
-      ${this.values['schema:addressRegion']} ${this.values['schema:addressCountry']}
-    `) : null
+    const valueDisplay = hasValue && !this.expanded ? this.settings.templates.apply('text', {
+      text: html`
+        ${this.values['schema:streetAddress']}<br>
+        ${this.values['schema:postalCode']} ${this.values['schema:addressLocality']}<br>
+        ${this.values['schema:addressRegion']} ${this.values['schema:addressCountry']}
+      `
+    }) : null
 
     const fields = html`
       <div>

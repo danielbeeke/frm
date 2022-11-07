@@ -5,7 +5,7 @@ const typeMapping = {
   'info': 'alert-primary'
 }
 
-export const messages = (inner: any, type: 'error' | 'info') => {
+export const messages = ({ inner, type }: { inner: any, type: 'error' | 'info' }) => {
   return html`
   <div class=${`alert ${typeMapping[type]}`}>
     ${inner}
