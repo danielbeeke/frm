@@ -43,6 +43,9 @@ export abstract class WidgetBase {
   public predicate: string
   public t: (key: string, tokens?: {[key: string]: any}) => Promise<string | undefined>
 
+  public showEmptyItem: boolean = false
+  public showAddButton: boolean = false
+  public showRemoveButton: boolean = false
   public errorsExpanded: boolean = false
 
   public inputAttributes: {
@@ -51,7 +54,7 @@ export abstract class WidgetBase {
     type: 'text',
   }
 
-  public showDescription: boolean = false
+  public showComment: boolean = false
   public engine: ComunicaEngine
   public store: Store
   public valuesFetcher: () => LDflexPath
@@ -139,10 +142,6 @@ export abstract class WidgetBase {
     }
   }
 
-  async preRender () {
-    if (this.validationErrors.length === 0) this.errorsExpanded = false
-  }
-
   /**
    * Getters
    */
@@ -170,6 +169,7 @@ export abstract class WidgetBase {
     const oldValue = await value?.term
     const predicate = this.predicate
     const compactedPredicate = this.settings.context.compactIri(predicate)
+    this.showEmptyItem = false
 
     if (!oldValue) {
       await this.values.add(newValue)
@@ -201,6 +201,7 @@ export abstract class WidgetBase {
   }
 
   async addItem () {
+    this.showEmptyItem = true
     await this.render()
   }
 
@@ -213,13 +214,13 @@ export abstract class WidgetBase {
     await this.render()
   }
 
-  async descriptionToggle () {
+  async commentToggle () {
     if (!await this.definition['sh:comment|rdfs:comment']) return null
 
     return this.theme('button', {
       inner: icon('info'),
       context: 'toggle-description',
-      callback: () => { this.showDescription = !this.showDescription; this.render() },
+      callback: () => { this.showComment = !this.showComment; this.render() },
     })
   }
 
@@ -229,7 +230,7 @@ export abstract class WidgetBase {
 
     const allowedDatatypes = [...await this.allowedDatatypes]
 
-    const filteredValues = await this.values.filter(async value => {
+    const filteredValues = (await this.values.toArray()).filter(async value => {
       const valueLanguage = await value.language
       return allowedDatatypes.includes(translatableString) && valueLanguage === langCode || 
       !valueLanguage && !allowedDatatypes.includes(translatableString)
@@ -237,7 +238,7 @@ export abstract class WidgetBase {
 
     const renderItems = [...filteredValues.map(callback)]
 
-    if (filteredValues.length === 0) {
+    if (this.showEmptyItem) {
       renderItems.push(callback(null, 0))
     }
 
@@ -275,11 +276,11 @@ export abstract class WidgetBase {
    * The button to remove one item
    */
    removeButton (value: LDflexPath) {
-    return this.theme('button', {
+    return this.showRemoveButton ? this.theme('button', {
       inner: icon('x'),
       callback: () => this.removeItem(value),
       context: 'remove-item'
-    })
+    }) : null
   }
 
   /**
@@ -312,8 +313,8 @@ export abstract class WidgetBase {
     }) : null
   }
 
-  async descriptionTooltip () {
-    const description = await this.definition['sh:comment|rdfs:comment']
+  async commentTooltip () {
+    const description = await this.definition['rdfs:comment']
 
     return description ? this.theme('tooltip', {
       icon: icon('info'),
@@ -322,11 +323,19 @@ export abstract class WidgetBase {
     }) : null
   }
 
+  async description () {
+    const description = await this.definition['sh:description']
+
+    return description ? this.theme('small', {
+      inner: description
+    }) : null
+  }
+
   async label () {
     return this.theme('label', {
       text: html`${await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate)}`,
       inner: [
-        await this.descriptionTooltip(),
+        await this.commentTooltip(),
         await this.errorTooltip(),
       ]
     })
@@ -339,33 +348,54 @@ export abstract class WidgetBase {
      : null
   }
 
-  public async render () {
-    await this.preRender()
 
-    return render(this.host, html`
-      ${this.label()}
-      ${this.items(await this.allowedToAddNew() ? this.addButton() : null)}
-    `)
-  }
-
-  async allowedToAddNew () {
+  async preRender () {
     const uniqueLang = await this.definition['sh:uniqueLang'].value
     const langCode = this.settings.internationalization.current
 
-    const filteredValues = await this.values.filter(async value => {
+    const filteredValues = (await this.values.toArray()).filter(async value => {
       const valueLanguage = await value.language
       return valueLanguage === langCode || langCode === false && !valueLanguage
     })
 
     const totalValueCount = (await this.values.toArray()).length
-    const maxCount = parseInt(await this.definition['sh:maxCount'].value)
+    const maxCountSetting = await this.definition['sh:maxCount'].value
+    const maxCount = maxCountSetting ? parseInt(maxCountSetting) : Infinity
     const filteredValueCount = filteredValues.length
+    if (filteredValueCount === 0) this.showEmptyItem = true
 
-    if (maxCount === totalValueCount) return false
-    if (uniqueLang && filteredValueCount <= 1) return false
-    if (!(await this.allowMultiple)) return false
+    this.showRemoveButton = filteredValueCount !== 0
 
-    return true
+    this.showAddButton = !(
+      totalValueCount >= maxCount
+      || uniqueLang && filteredValueCount
+      || this.showEmptyItem
+    )
+
+    // console.log(this.predicate, {
+    //   globalLangCode: langCode,
+    //   totalValueCount,
+    //   maxCount,
+    //   uniqueLang,
+    //   filteredValues,
+    //   filteredValueCount,
+    //   showEmptyItem: this.showEmptyItem,
+    //   showAddButton: this.showAddButton
+    // })
+
+    if (this.validationErrors.length === 0) this.errorsExpanded = false
+  }
+
+  public async render () {
+    await this.preRender()
+
+    return render(this.host, html`
+      ${this.label()}
+      ${this.items(html`
+      ${this.description()}
+      ${await this.showAddButton ? this.addButton() : null}
+      `)}
+    `)
   }
 
 }

@@ -21,14 +21,51 @@ frm-grouper {
   }
 }
 
+.input-group.type-date {
+  position: relative;
+
+  &:before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 36px;
+    right: 40px;
+    top: 1px;
+    z-index: 5;
+    display: block;
+    border-radius: var(--bs-border-radius);
+    position: absolute;
+    background-color: white;
+  }
+
+  &:after {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 36px;
+    right: 1px;
+    z-index: 5;
+    border-radius: var(--bs-border-radius);
+    top: 1px;
+    display: block;
+    position: absolute;
+    background-color: white;
+  }
+
+  .btn {
+    position: relative;
+    z-index: 6;
+  }
+}
+
 input[type="date"]::-webkit-clear-button,
 input[type="time"]::-webkit-clear-button {
     display: none;
 }
 
-input[type="date"] {
-  margin-right: -30px;  
-}
+// input[type="date"] {
+//   margin-right: -30px;  
+// }
 
 .input-group {
   input[type="date"] + .btn {

@@ -14,8 +14,8 @@ export class Internationalization extends EventTarget {
     allowCreation: boolean
   }) {
     super()
-    this.langCodes = langCodes ?? []
-    this.#current = langCodes ? langCodes[0] : false
+    this.langCodes = langCodes ?? ['en']
+    this.#current = this.langCodes[0]
     this.allowCreation = allowCreation
   }
 

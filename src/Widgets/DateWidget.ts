@@ -22,7 +22,7 @@ export class DateWidget extends WidgetBase {
         const newValue = this.settings.dataFactory.literal((event.target as HTMLInputElement).value, allowedDatatypes.length === 1 ? firstDatatype : undefined)
         this.setValue(newValue, value)
       },
-      type: 'text',
+      type: 'date',
       suffix: this.removeButton(value)
     })
   }

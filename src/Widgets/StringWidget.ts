@@ -2,7 +2,6 @@ import { WidgetBase } from './WidgetBase'
 import { StringBasedConstraints } from '../core/shaclProperties'
 import { LDflexPath } from '../types/LDflexPath'
 import { html } from '../helpers/uhtml'
-import { lastPart } from '../helpers/lastPart'
 import { string, translatableString } from '../core/constants'
 
 export class StringWidget extends WidgetBase {
@@ -52,14 +51,4 @@ export class StringWidget extends WidgetBase {
     })
   }
   
-  async label () {
-    return this.theme('label', {
-      text: html`${await this.definition['sh:name|rdfs:label'] ?? lastPart(this.predicate)}`,
-      inner: [
-        await this.descriptionTooltip(),
-        await this.errorTooltip(),
-      ]
-    })
-  }
-
 }

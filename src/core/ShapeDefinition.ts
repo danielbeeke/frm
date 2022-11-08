@@ -103,7 +103,21 @@ export class ShapeDefinition {
     const expandedSubject = this.settings.context.expandTerm(subjectUri)
     if (!expandedSubject) throw new Error(`Failed to expand the term: ${subjectUri}`)
     const subject = new NamedNode(expandedSubject)
-    return engines.get(store).create({ subject })
+    const finalPath = engines.get(store).create({ subject })
+
+    // const cache = new Map()
+
+    // return new Proxy(finalPath, {
+    //   get(target, prop, receiver) {
+    //     if (!cache.has(prop)) {
+    //       cache.set(prop, Reflect.get(target, prop, receiver))
+    //     }
+
+    //     return cache.get(prop)
+    //   },
+    // })
+    
+    return finalPath
   }
 
   /**

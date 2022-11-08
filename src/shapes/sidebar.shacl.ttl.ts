@@ -27,8 +27,23 @@ schema:PersonShape
         sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString] ) ;
         sh:name "given name"@en ;
         sh:name "Gegeven name"@nl ;
+        sh:description "How do people call you?"@en ;
         sh:minCount 1 ;
-        sh:maxCount 1 ;
+        sh:qualifiedMinCount 1 ;
+        sh:qualifiedMaxCount 1 ;
+        sh:qualifiedValueShape [
+            sh:languageIn ( "en" )
+        ] ;
+        sh:uniqueLang true ;
+    ] ;
+
+    sh:property [
+        sh:group schema:NameGroup ;
+        sh:path schema:jobTitle ;
+        sh:description "What are your business roles?"@en ;
+        sh:order 3 ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
     ] ;
 
     sh:property [
@@ -70,6 +85,7 @@ schema:PersonShape
         frm:widget "editor" ;
         sh:datatype xsd:string ;
         sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] ;
 
     sh:property [

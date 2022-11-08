@@ -32,7 +32,7 @@ export const input = async ({
   if (!onkeyup) onkeyup = () => null
 
   return html`
-    <div class=${`input-group ${context === 'expanded' ? 'expanded' : ''}`}>
+    <div class=${`input-group type-${type} ${context === 'expanded' ? 'expanded' : ''}`}>
       ${prefix ? html`<span class="input-group-text">${prefix}</span>` : null}
 
       ${disableForce ? html`

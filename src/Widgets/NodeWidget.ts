@@ -27,8 +27,6 @@ export class NodeWidget extends WidgetBase {
     this.host.addEventListener('value-added', () => this.render())
   }
 
-  async preRender () {}
-
   async addItem() {
     const node = this.settings.dataFactory.blankNode()
     const skolemizedNode = skolemize(node, 'urn:comunica_skolem:source_0')

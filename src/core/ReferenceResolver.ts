@@ -53,6 +53,7 @@ export class ReferenceResolver {
   }
 
   async search (source: string, query: string, searchTerm: string) {
+    if (searchTerm !== undefined && !searchTerm) return []
     const langCode = this.#settings.internationalization.current
     query = query.replaceAll('SEARCH_TERM', searchTerm)
     query = query.replaceAll('LANGUAGE', langCode ? langCode : 'en')

@@ -8,7 +8,9 @@ export const itemsReference = ({
   after: any
 }) => {
 
-  return html`<div class="items mb-3 d-flex align-items-start flex-wrap gap-3">
+  return html`
+  <div class="mb-3">
+  <div class="items mb-2 d-flex align-items-start flex-wrap gap-3">
     ${items.map(item => html`
       <div class="d-flex">
         <div class="input-group">
@@ -20,7 +22,7 @@ export const itemsReference = ({
         </div>
       </div>
     `)}
-
+    </div>
     ${after}
   </div>`
 }

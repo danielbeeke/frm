@@ -5,7 +5,7 @@ const buttonMapping = {
   'add-language-submit': 'btn btn-primary ms-3',
   'toggle-description': 'btn btn- btn-sm  text-muted',
   'toggle-errors': 'btn btn- btn-sm text-muted',
-  'add-item': 'btn btn-light btn-sm ms-auto add-item',
+  'add-item': 'btn btn-light btn-sm me-auto add-item',
   'language-toggle': 'btn-outline-secondary btn',
   'form-submit': 'btn-primary btn btn-lg',
   'expand': 'btn btn-light',
