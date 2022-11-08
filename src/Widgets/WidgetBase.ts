@@ -9,8 +9,9 @@ import { attributesDiff } from '../helpers/attributesDiff'
 import { Hole } from 'uhtml';
 import { lastPart } from '../helpers/lastPart'
 import { translatableString, string } from '../core/constants';
-import { WidgetHtmlElement } from '../types/WidgetHtmlElement';
 import { debounce } from '../helpers/debounce';
+import { FrmField } from '../CustomElements/FrmField';
+import { FrmForm } from '../CustomElements/FrmForm';
 
 export abstract class WidgetBase {
   
@@ -37,7 +38,7 @@ export abstract class WidgetBase {
    */
 
   public settings: Settings
-  public host: WidgetHtmlElement
+  public host: FrmField
   public definition: LDflexPath
   public values: LDflexPath
   public predicate: string
@@ -64,7 +65,7 @@ export abstract class WidgetBase {
 
   constructor (
     settings: Settings, 
-    host: WidgetHtmlElement, 
+    host: FrmField, 
     predicate: string, 
     definition: LDflexPath, 
     values: Promise<() => LDflexPath>,
@@ -94,7 +95,13 @@ export abstract class WidgetBase {
   }
 
   get validationErrors () {
-    return this.host?.['errors'] ?? []
+    const validationReport = (this.host.closest('frm-form') as FrmForm)?.validationReport
+    const fieldErrors = validationReport?.results
+    .filter(error => {
+      return error.path?.value === this.predicate
+    }) ?? []
+
+    return fieldErrors
   }
 
   get allowedDatatypes () {

@@ -15,48 +15,29 @@ const getFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
-  validationReport: any,
-  isRoot: boolean
 ) => {
   return shapeDefinition.shape['sh:property'].map(async predicatePath => {
     const predicate = await predicatePath['sh:path'].value
     const order = await predicatePath['sh:order'].value
     const group = await predicatePath['sh:group'].value
 
-    let focusNode
-    
-    if (await value?.term?.skolemized) {
-      focusNode = '_:' + value?.term?.skolemized?.value?.split(':').pop()
-    }
-    else 
-    if (await value?.term.value) {
-      focusNode = await value?.term.value
-    }
-    else {
-      focusNode = await values.value
-    }
-
-    const fieldErrors = validationReport?.results
-    .filter(error => {
-      return error.path?.value === predicate && error.focusNode.id === focusNode ||
-      error.path == null && isRoot
-    }) ?? []
-
     const valueFetcher = () => {
       if (value?.[predicate]) return value?.[predicate]
       return values?.[predicate] ? values[predicate] : values
     }
 
+    let fieldElement
+
     // We make a template creator because we need to be apply to fetch the element inside a grouper.
     const templateCreator = (ref = null) => html`<frm-field
       ref=${ref ? ref : (field) => {
+        fieldElement = field
         field.widget?.render()
       }}
       .shape=${shapeDefinition}
       .shapesubject=${shapeSubject}
       .predicate=${predicate}
       .store=${store}
-      .errors=${fieldErrors}
       .engine=${engine}
       .values=${async () => valueFetcher}
     />`
@@ -68,6 +49,14 @@ const getFields = async (
       identifier: predicate,
       order: order !== undefined ? parseInt(order) : 1000,
       group,
+      ready: new Promise((resolve) => {
+        const interval = setInterval(() => {
+          if (fieldElement && fieldElement) {
+            resolve(fieldElement.isReady)
+            clearInterval(interval)
+          }
+        }, 100)
+      })
     }
   })
 }
@@ -111,19 +100,20 @@ const getGroups = async (settings: Settings, shapeDefinition: ShapeDefinition, f
     })
 
     const sortedChildren = [
-      ...childGroups.map(field => field.template), 
-      ...groupFields.map(field => field.template)
+      ...childGroups, 
+      ...groupFields
     ].sort((a, b) => a.order - b.order)
 
     return {
       template: settings.templates.apply(
-          'group', {
-            name: await group['rdfs:label'], 
-            label: await group['rdfs:label'], 
-            inner: sortedChildren, 
-            extraCssClasses
-          }
-        ),
+        'group', {
+          name: await group['rdfs:label'], 
+          label: await group['rdfs:label'], 
+          inner: sortedChildren.map(field => field.template), 
+          extraCssClasses
+        }
+      ),
+      ready: Promise.all(sortedChildren.map(item => item.ready)),
       type: 'group',
       identifier: groupIRI,
       order: order !== undefined ? parseInt(order) : 1000,
@@ -166,6 +156,7 @@ const getGroupers = async (settings: Settings, fields: Array<RenderItem>, values
             .values=${() => values}
             .templates=${templates}
           />`,
+          ready: Promise.all(Object.values(templates).map((item: any) => item.ready)),
           type: 'grouper',
           identifier: grouperName
         })
@@ -198,7 +189,8 @@ const getElements = async (
       type: 'field',
       identifier: elementName,
       order: order !== undefined ? parseInt(order) : 0,
-      group
+      group,
+      ready: Promise.resolve()
     }
   })
 
@@ -213,10 +205,9 @@ export const ShapeToFields = async (
   value: LDflexPath = null,
   store: Store,
   engine: ComunicaEngine,
-  validationReport: any,
   isRoot: boolean = false
 ) => {
-  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine, validationReport, isRoot)
+  const fields = await getFields(shapeDefinition, shapeSubject, values, value, store, engine)
   const elements = await getElements(shapeDefinition, store)
   const mergedItems = [...fields, ...elements]
   const groups = await getGroups(settings, shapeDefinition, mergedItems, undefined, isRoot)
@@ -225,5 +216,8 @@ export const ShapeToFields = async (
   const merged: Array<RenderItem> = [...unpickedItems, ...groups, ...groupers]  
   const sortedRenderItems = stableSort(merged, (a: RenderItem, b: RenderItem) => a.order - b.order)
 
-  return sortedRenderItems.map(item => item.template)
+  return {
+    fields: sortedRenderItems.map(item => item.template),
+    ready: Promise.all(sortedRenderItems.map((item: any) => item.ready)),
+  }
 }

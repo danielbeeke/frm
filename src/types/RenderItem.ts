@@ -8,4 +8,5 @@ export type RenderItem = {
   grouper?: any
   get?: any,
   set?: any
+  ready: Promise<any>
 } 

@@ -36,7 +36,7 @@ export class FrmForm extends HTMLElement {
   private dataSubject: string | null
   private store: Store
   private engine: ComunicaEngine
-  private validationReport: any
+  public validationReport: any
   private validator: SHACLValidator
   public isReady: boolean
   private latestMessage: string = 'Loading'
@@ -54,13 +54,6 @@ export class FrmForm extends HTMLElement {
    */
   async connectedCallback () {
     this.latestMessage = await this.settings.translator.t('loading-form') ?? ''
-
-    const loadingMessages = (event) => {
-      this.latestMessage = (event as CustomEvent).detail.message
-      render(this, this.loadingBanner())
-    }
-
-    this.settings.logger.addEventListener('message', loadingMessages)
 
     this.classList.add('loading')
     render(this, this.loadingBanner())
@@ -101,18 +94,15 @@ export class FrmForm extends HTMLElement {
       allowNamedNodeInList: true,
     })
 
-    const debouncedRenderForEvents = debounce(() => this.render(), 100)
+    const debouncedRenderForEvents = debounce(() => {
+      this.render()
+    }, 100)
 
     this.addEventListener('value-deleted', debouncedRenderForEvents)
     this.addEventListener('value-changed', debouncedRenderForEvents)
     this.addEventListener('value-added', debouncedRenderForEvents)
     this.settings.internationalization.addEventListener('language-changed', debouncedRenderForEvents)
-
-    await this.readyPromise()
-    this.classList.remove('loading')
-    this.settings.logger.removeEventListener('message', loadingMessages)
-    this.dispatchEvent(new CustomEvent('ready'))
-    this.settings.logger.log(`FRM is ready`)
+    return this.render()
   }
 
   /**
@@ -135,19 +125,6 @@ export class FrmForm extends HTMLElement {
     this.dataSubject = uri
   }
 
-  /**
-   * Usefull for knowing when the whole for is loaded.
-   */
-  readyPromise () {
-    const allFrmElements = [...this.getElementsByTagName("*")]
-    .filter(node => node.nodeName.startsWith('FRM'))
-    .map((element) => (element as  Element & { isReady: Promise<void>}).isReady)
-
-    return Promise.all(allFrmElements).then(() => {
-      this.isReady = true
-      this.render()
-    })
-  }
 
   /**
    * Validates the whole form input data
@@ -163,9 +140,6 @@ export class FrmForm extends HTMLElement {
   loadingBanner () {
     return html`
     <div class="loading-banner">
-      <span class="me-3">
-        ${this.latestMessage}
-      </span>
       ${icon('loading', primaryColor)}
     </div>
     `
@@ -179,7 +153,7 @@ export class FrmForm extends HTMLElement {
     this.validate()
 
     this.settings.logger.log(`Rendering from the root`)
-    const fields = await ShapeToFields(
+    const { fields, ready } = await ShapeToFields(
       this.settings, 
       this.definition, 
       this.shapeSubject, 
@@ -187,14 +161,22 @@ export class FrmForm extends HTMLElement {
       null, 
       this.store, 
       this.engine, 
-      this.validationReport,
       true
     )
 
+    if (!this.isReady) {
+      ready.then(async () => {
+        if (!this.isReady) {
+          this.dispatchEvent(new CustomEvent('ready'))
+          this.settings.logger.log(`FRM is ready`)
+          this.isReady = true
+          this.classList.remove('loading')
+        }
+      })  
+    }
+
     const formErrors = this.validationReport?.results
     .filter(error =>  error.path == null) ?? []
-
-    // console.log(formErrors)
 
     await render(this, html`
       ${!this.isReady ? this.loadingBanner() : null}

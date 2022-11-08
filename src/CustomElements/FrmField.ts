@@ -18,18 +18,23 @@ export class FrmField extends HTMLElement {
   private widget: WidgetBase
   public store: Store
   public engine: ComunicaEngine
-  public errors: Array<any>
-  
+  public isReadyPromise: Promise<void>
+  public errors: any
+
   constructor () {
     super()
     this.settings = FrmField.settings
+  }
+
+  connectedCallback () {
+    this.isReadyPromise = this.connectedCallbackAction()
   }
 
   /**
    * Loads the shape definition and the 'field' definition.
    * When loading is done renders the widget.
    */
-  async connectedCallback () {
+  async connectedCallbackAction () {
     this.classList.add('loading')
     this.dataset.subject = this.settings.context.compactIri(this.shapesubject)
     this.dataset.predicate = this.settings.context.compactIri(this.predicate)
@@ -59,7 +64,8 @@ export class FrmField extends HTMLElement {
     this.widget = await new this.settings.widgets[widgetName](this.settings, this, this.predicate, this.definition, this.values, this.store, this.engine, widgetName)
 
     await this.widget.render()
-    this.classList.remove('loading');
+    this.classList.remove('loading')
+
     if (this.settings.afterRender) this.settings.afterRender()
   }
 
@@ -81,14 +87,12 @@ export class FrmField extends HTMLElement {
       return new Promise((resolve) => {
         setTimeout(async () => {
           await this.isReady
-          resolve(null)
+          resolve(this.widget)
         }, 100)
       })
     }
 
-    return new Promise(async (resolve) => {
-      resolve(null)
-    })
+    return this.isReadyPromise
   }
 
   async setValue (newValue: Array<Literal> | Literal) {
